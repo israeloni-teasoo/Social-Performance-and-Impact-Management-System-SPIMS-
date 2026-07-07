@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+</style>
+</helmet>
+
+<x-import component-from-global-scope="deck-stage" from="./deck-stage.js" width="1920" height="1080" hint-size="100%,100%">
+
+<!-- ═══════════ SLIDE 1 — COVER ═══════════ -->
+<section data-label="Cover" data-screen-label="01 Cover" data-speaker-notes="Framework document for internal review by Sarah before the Seplat demo. This is the methodology — not the finished dashboard." style="width:100%;height:100%;background:#10203f;color:#faf9f7;font-family:'Archivo',sans-serif;padding:96px 110px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;position:relative;">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+    <div style="display:flex;align-items:center;gap:16px;font-size:18px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:#faf9f7;">
+      <span style="width:14px;height:14px;background:#e01f3d;border-radius:50%;display:inline-block;"></span>
+      Tissot Consulting
+    </div>
+    <div style="font-size:16px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:#8b9aa1;">Social Performance Advisory</div>
+  </div>
+
+  <div style="max-width:1400px;">
+    <div style="display:flex;align-items:center;gap:16px;font-size:19px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#e01f3d;margin-bottom:34px;">
+      <span style="width:46px;height:3px;background:#e01f3d;"></span>Framework &amp; Approach
+    </div>
+    <h1 style="font-size:104px;font-weight:800;line-height:0.98;letter-spacing:-0.03em;margin:0;">Seplat Social<br>Performance Platform</h1>
+    <p style="font-family:'Source Serif 4',serif;font-size:34px;line-height:1.35;color:#c9d1dc;margin:38px 0 0;max-width:1080px;">A framework for measuring, managing and telling the story of social impact — from activity counted to lives changed.</p>
+  </div>
+
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;border-top:1px solid rgba(255,255,255,0.16);padding-top:26px;font-size:17px;letter-spacing:0.06em;color:#8b9aa1;">
+    <span>Prepared for <span style="color:#faf9f7;font-weight:600;">Seplat Energy Plc</span></span>
+    <span>Internal Review Draft</span>
+    <span>July 2026</span>
+  </div>
+</section>
+
+<!-- ═══════════ SLIDE 2 — THE BRIEF ═══════════ -->
+<section data-label="The Brief" data-screen-label="02 The Brief" data-speaker-notes="Seplat is dual-listed. The same social data must satisfy Nigerian regulators AND London investors. Today's reporting counts activity, not impact." style="width:100%;height:100%;background:#faf9f7;color:#10203f;font-family:'Archivo',sans-serif;padding:80px 96px;display:flex;flex-direction:column;">
+  <div style="display:flex;align-items:center;gap:14px;font-size:17px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:#e01f3d;"><span style="width:32px;height:3px;background:#e01f3d;"></span>The Brief</div>
+  <h2 style="font-size:66px;font-weight:800;line-height:1.02;letter-spacing:-0.02em;margin:16px 0 8px;">Two audiences, one social story</h2>
+  <p style="font-size:27px;line-height:1.4;color:#4a5563;max-width:1400px;margin:0 0 44px;">Seplat is listed on both the Nigerian Exchange and the London Stock Exchange. Its social performance has to speak to Nigerian regulators <em>and</em> international investors — from a single, credible set of data.</p>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:28px;flex:1;">
+    <div style="background:#ffffff;border:1px solid #e7e6e2;border-top:4px solid #0b4f8a;border-radius:6px;padding:38px 34px;display:flex;flex-direction:column;">
+      <div style="font-size:16px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#0b4f8a;">The Local Lens</div>
+      <div style="font-size:30px;font-weight:800;margin:14px 0 18px;">License to operate</div>
+      <p style="font-size:22px;line-height:1.45;color:#4a5563;margin:0;">PIA 2021 &amp; Host Community Trusts, NCDMB local content, NUPRC and NEITI. What Nigeria requires to keep the social license in the Niger Delta.</p>
+    </div>
+    <div style="background:#ffffff;border:1px solid #e7e6e2;border-top:4px solid #10203f;border-radius:6px;padding:38px 34px;display:flex;flex-direction:column;">
+      <div style="font-size:16px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#10203f;">The Global Lens</div>
+      <div style="font-size:30px;font-weight:800;margin:14px 0 18px;">Access to capital</div>
+      <p style="font-size:22px;line-height:1.45;color:#4a5563;margin:0;">GRI, IFRS / ISSB, IPIECA and the UN SDGs. The frameworks London investors and lenders use to price ESG risk and allocate capital.</p>
+    </div>
+    <div style="background:#10203f;color:#faf9f7;border-radius:6px;border-top:4px solid #e01f3d;padding:38px 34px;display:flex;flex-direction:column;">
+      <div style="font-size:16px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#e01f3d;">The Gap</div>
+      <div style="font-size:30px;font-weight:800;margin:14px 0 18px;">Activity, not impact</div>
+      <p style="font-size:22px;line-height:1.45;color:#c9d1dc;margin:0;">Reporting today counts what was spent and how many were trained. It rarely shows the lives changed — or the risk reduced.</p>
+    </div>
+  </div>
+
+  <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #d8d6d0;padding-top:18px;margin-top:34px;font-size:15px;letter-spacing:0.12em;text-transform:uppercase;color:#8b9aa1;"><span>Tissot Consulting</span><span>Seplat Social Performance Platform</span><span>Internal Review Draft</span></div>
+</section>
+
+<!-- ═══════════ SLIDE 3 — THE IDEA ═══════════ -->
+<section data-label="The Idea" data-screen-label="03 The Idea" data-speaker-notes="The concept in one line: ESG Horizon, focused on the S. The core shift is from outputs to impact — this is exactly what Madame asked for." style="width:100%;height:100%;background:#10203f;color:#faf9f7;font-family:'Archivo',sans-serif;padding:80px 96px;display:flex;flex-direction:column;justify-content:center;">
+  <div style="display:flex;align-items:center;gap:14px;font-size:17px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:#e01f3d;"><span style="width:32px;height:3px;background:#e01f3d;"></span>The Idea</div>
+  <h2 style="font-family:'Source Serif 4',serif;font-size:88px;font-weight:600;line-height:1.05;letter-spacing:-0.01em;margin:26px 0 20px;max-width:1500px;">A social performance engine — <span style="color:#e01f3d;">focused on the “S”.</span></h2>
+  <p style="font-size:28px;line-height:1.4;color:#c9d1dc;max-width:1300px;margin:0 0 56px;">One platform to plan, measure and communicate social performance — moving Seplat from reporting <strong style="color:#faf9f7;">outputs</strong> to demonstrating <strong style="color:#faf9f7;">impact</strong>.</p>
+
+  <div style="display:flex;align-items:stretch;gap:28px;max-width:1560px;">
+    <div style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.14);border-radius:8px;padding:34px 36px;">
+      <div style="font-size:15px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:#8b9aa1;margin-bottom:14px;">From — what we count</div>
+      <div style="font-size:32px;font-weight:700;line-height:1.25;">“We trained 1,000 teachers.”</div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:center;font-size:44px;color:#e01f3d;font-weight:800;">→</div>
+    <div style="flex:1.4;background:#e01f3d;border-radius:8px;padding:34px 36px;">
+      <div style="font-size:15px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:#ffd2d9;margin-bottom:14px;">To — what changed</div>
+      <div style="font-size:32px;font-weight:700;line-height:1.25;">“1,000 teachers now reach 50,000 children — lifting learning, reducing poverty and youth restiveness.”</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ SLIDE 4 — IMPACT CHAIN ═══════════ -->
+<section data-label="Impact Chain" data-screen-label="04 Impact Chain" data-speaker-notes="The methodological heart. Five linked stages. Outputs are what Seplat reports today; outcomes and impact are what the platform adds. Example runs on the STEP teachers programme." style="width:100%;height:100%;background:#faf9f7;color:#10203f;font-family:'Archivo',sans-serif;padding:80px 96px;display:flex;flex-direction:column;">
+  <div style="display:flex;align-items:center;gap:14px;font-size:17px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:#e01f3d;"><span style="width:32px;height:3px;background:#e01f3d;"></span>Methodology 01 — The Impact Chain</div>
+  <h2 style="font-size:60px;font-weight:800;line-height:1.02;letter-spacing:-0.02em;margin:16px 0 6px;">Proving not just what was done, but what changed</h2>
+  <p style="font-size:24px;line-height:1.4;color:#4a5563;max-width:1500px;margin:0 0 34px;">Every programme is traced through five linked stages. The example follows <strong>STEP</strong> — the Seplat Teachers Empowerment Programme.</p>
+
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px;flex:1;">
+    <!-- helper: each stage -->
+    <div style="background:#ffffff;border:1px solid #e7e6e2;border-radius:6px;padding:26px 22px;display:flex;flex-direction:column;">
+      <div style="font-size:15px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:#8b9aa1;">01 · Inputs</div>
+      <div style="font-size:25px;font-weight:700;margin:12px 0 16px;line-height:1.2;">What we invest</div>
+      <div style="font-size:19px;line-height:1.4;color:#4a5563;border-top:1px solid #eceae5;padding-top:14px;">Funding, staff &amp; partners — C4C, state ministries of education.</div>
+    </div>
+    <div style="background:#ffffff;border:1px solid #e7e6e2;border-radius:6px;padding:26px 22px;display:flex;flex-direction:column;">
+      <div style="font-size:15px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:#8b9aa1;">02 · Activities</div>
+      <div style="font-size:25px;font-weight:700;margin:12px 0 16px;line-height:1.2;">What we do</div>
+      <div style="font-size:19px;line-height:1.4;color:#4a5563;border-top:1px solid #eceae5;padding-top:14px;">Train &amp; certify teachers and education inspectors in Edo &amp; Delta.</div>
+    </div>
+    <div style="background:#0b4f8a;color:#faf9f7;border-radius:6px;padding:26px 22px;display:flex;flex-direction:column;position:relative;">
+      <div style="position:absolute;top:-11px;left:22px;background:#0b4f8a;color:#fff;font-size:12px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:4px 10px;border-radius:20px;">Reported today</div>
+      <div style="font-size:15px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:#9fc4e6;">03 · Outputs</div>
+      <div style="font-size:25px;font-weight:700;margin:12px 0 16px;line-height:1.2;">What we deliver</div>
+      <div style="font-size:19px;line-height:1.4;color:#dbe7f4;border-top:1px solid rgba(255,255,255,0.2);padding-top:14px;"><strong style="color:#fff;">623 teachers</strong> certified in 2026.</div>
+    </div>
+    <div style="background:#ffffff;border:1px solid #e01f3d;border-radius:6px;padding:26px 22px;display:flex;flex-direction:column;">
+      <div style="font-size:15px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:#e01f3d;">04 · Outcomes</div>
+      <div style="font-size:25px;font-weight:700;margin:12px 0 16px;line-height:1.2;">What changes</div>
+      <div style="font-size:19px;line-height:1.4;color:#4a5563;border-top:1px solid #f3d3d9;padding-top:14px;">Better teaching quality &amp; classroom practice across host communities.</div>
+    </div>
+    <div style="background:#e01f3d;color:#fff;border-radius:6px;padding:26px 22px;display:flex;flex-direction:column;position:relative;">
+      <div style="position:absolute;top:-11px;left:22px;background:#10203f;color:#fff;font-size:12px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:4px 10px;border-radius:20px;">Platform adds</div>
+      <div style="font-size:15px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:#ffd2d9;">05 · Impact</div>
+      <div style="font-size:25px;font-weight:700;margin:12px 0 16px;line-height:1.2;">What it means</div>
+      <div style="font-size:19px;line-height:1.4;color:#ffe4e8;border-top:1px solid rgba(255,255,255,0.28);padding-top:14px;"><strong style="color:#fff;">50,000+ children</strong> better educated → poverty &amp; restiveness reduced.</div>
+    </div>
+  </div>
+
+  <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #d8d6d0;padding-top:18px;margin-top:26px;font-size:15px;letter-spacing:0.12em;text-transform:uppercase;color:#8b9aa1;"><span>Tissot Consulting</span><span>Seplat Social Performance Platform</span><span>Internal Review Draft</span></div>
+</section>
+
+<!-- ═══════════ SLIDE 5 — DUAL LENS ═══════════ -->
+<section data-label="Dual-Lens Library" data-screen-label="05 Dual-Lens Library" data-speaker-notes="Capture data once, report it two ways — local and global. Universal indicators mapped to both mandates." style="width:100%;height:100%;background:#faf9f7;color:#10203f;font-family:'Archivo',sans-serif;padding:80px 96px;display:flex;flex-direction:column;">
+  <div style="display:flex;align-items:center;gap:14px;font-size:17px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:#e01f3d;"><span style="width:32px;height:3px;background:#e01f3d;"></span>Methodology 02 — Indicator Architecture</div>
+  <h2 style="font-size:60px;font-weight:800;line-height:1.02;letter-spacing:-0.02em;margin:16px 0 6px;">One data point, reported two ways</h2>
+  <p style="font-size:24px;line-height:1.4;color:#4a5563;max-width:1500px;margin:0 0 34px;">A shared indicator engine captures each metric once, then maps it to both the local mandate and the global capital-market frameworks.</p>
+
+  <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:0;flex:1;align-items:stretch;">
+    <div style="background:#ffffff;border:1px solid #e7e6e2;border-top:5px solid #0b4f8a;border-radius:6px;padding:34px 38px;display:flex;flex-direction:column;">
+      <div style="font-size:17px;font-weight:800;letter-spacing:0.14em;text-transform:uppercase;color:#0b4f8a;">Local — Nigeria</div>
+      <div style="font-size:20px;color:#8b9aa1;margin:6px 0 22px;font-weight:600;">License to operate</div>
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div style="border-left:3px solid #0b4f8a;padding-left:16px;"><div style="font-size:23px;font-weight:700;">PIA 2021 — HCDTs</div><div style="font-size:19px;color:#4a5563;">Host Community Development Trusts · 3% of annual OpEx</div></div>
+        <div style="border-left:3px solid #0b4f8a;padding-left:16px;"><div style="font-size:23px;font-weight:700;">NOGICD Act / NCDMB</div><div style="font-size:19px;color:#4a5563;">Community content: jobs, procurement, enterprise</div></div>
+        <div style="border-left:3px solid #0b4f8a;padding-left:16px;"><div style="font-size:23px;font-weight:700;">NUPRC HC Regs 2022</div><div style="font-size:19px;color:#4a5563;">Host community engagement &amp; grievance</div></div>
+        <div style="border-left:3px solid #0b4f8a;padding-left:16px;"><div style="font-size:23px;font-weight:700;">NEITI</div><div style="font-size:19px;color:#4a5563;">Extractive transparency &amp; disclosure</div></div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 26px;">
+      <div style="writing-mode:vertical-rl;transform:rotate(180deg);font-size:15px;font-weight:800;letter-spacing:0.2em;text-transform:uppercase;color:#8b9aa1;margin-bottom:18px;">Shared indicator engine</div>
+      <div style="width:56px;height:56px;border-radius:50%;background:#e01f3d;color:#fff;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;">⇄</div>
+    </div>
+
+    <div style="background:#10203f;color:#faf9f7;border-top:5px solid #e01f3d;border-radius:6px;padding:34px 38px;display:flex;flex-direction:column;">
+      <div style="font-size:17px;font-weight:800;letter-spacing:0.14em;text-transform:uppercase;color:#e01f3d;">Global — Capital Markets</div>
+      <div style="font-size:20px;color:#8b9aa1;margin:6px 0 22px;font-weight:600;">Access to capital (LSE)</div>
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div style="border-left:3px solid #e01f3d;padding-left:16px;"><div style="font-size:23px;font-weight:700;">GRI 400 Series</div><div style="font-size:19px;color:#c9d1dc;">Social standards — the global baseline</div></div>
+        <div style="border-left:3px solid #e01f3d;padding-left:16px;"><div style="font-size:23px;font-weight:700;">IFRS S1 / ISSB</div><div style="font-size:19px;color:#c9d1dc;">Investor-grade sustainability disclosure</div></div>
+        <div style="border-left:3px solid #e01f3d;padding-left:16px;"><div style="font-size:23px;font-weight:700;">IPIECA</div><div style="font-size:19px;color:#c9d1dc;">Oil &amp; gas sector social indicators</div></div>
+        <div style="border-left:3px solid #e01f3d;padding-left:16px;"><div style="font-size:23px;font-weight:700;">UN SDGs</div><div style="font-size:19px;color:#c9d1dc;">The shared language of impact</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #d8d6d0;padding-top:18px;margin-top:26px;font-size:15px;letter-spacing:0.12em;text-transform:uppercase;color:#8b9aa1;"><span>Tissot Consulting</span><span>Seplat Social Performance Platform</span><span>Internal Review Draft</span></div>
+</section>
+
+<!-- ═══════════ SLIDE 6 — MAPPING TABLE ═══════════ -->
+<section data-label="Indicator Mapping" data-screen-label="06 Indicator Mapping" data-speaker-notes="Concrete proof the dual-lens works. Each metric maps to a local requirement, a global standard, and an SDG." style="width:100%;height:100%;background:#faf9f7;color:#10203f;font-family:'Archivo',sans-serif;padding:80px 96px;display:flex;flex-direction:column;">
+  <div style="display:flex;align-items:center;gap:14px;font-size:17px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:#e01f3d;"><span style="width:32px;height:3px;background:#e01f3d;"></span>Methodology 03 — Indicator Mapping</div>
+  <h2 style="font-size:60px;font-weight:800;line-height:1.02;letter-spacing:-0.02em;margin:16px 0 30px;">How one metric maps across standards</h2>
+
+  <div style="flex:1;display:flex;flex-direction:column;border:1px solid #e7e6e2;border-radius:8px;overflow:hidden;">
+    <div style="display:grid;grid-template-columns:1.5fr 1.5fr 1.6fr 0.7fr;background:#10203f;color:#faf9f7;font-size:16px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;">
+      <div style="padding:20px 26px;">Social metric</div>
+      <div style="padding:20px 26px;border-left:1px solid rgba(255,255,255,0.14);">Local — Nigeria</div>
+      <div style="padding:20px 26px;border-left:1px solid rgba(255,255,255,0.14);">Global standard</div>
+      <div style="padding:20px 26px;border-left:1px solid rgba(255,255,255,0.14);">SDG</div>
+    </div>
+    <!-- rows -->
+    <div style="display:grid;grid-template-columns:1.5fr 1.5fr 1.6fr 0.7fr;flex:1;font-size:20px;line-height:1.35;">
+      <div style="padding:18px 26px;font-weight:700;background:#ffffff;">Local employment &amp; content</div>
+      <div style="padding:18px 26px;color:#4a5563;background:#ffffff;border-left:1px solid #eceae5;">NCDMB Nigerian Content %</div>
+      <div style="padding:18px 26px;color:#4a5563;background:#ffffff;border-left:1px solid #eceae5;">GRI 202 / 401 · IPIECA SOC-5</div>
+      <div style="padding:18px 26px;font-weight:700;color:#0b4f8a;background:#ffffff;border-left:1px solid #eceae5;">8</div>
+
+      <div style="padding:18px 26px;font-weight:700;background:#f6f5f2;">Community investment (₦)</div>
+      <div style="padding:18px 26px;color:#4a5563;background:#f6f5f2;border-left:1px solid #eceae5;">PIA HCDT — 3% OpEx</div>
+      <div style="padding:18px 26px;color:#4a5563;background:#f6f5f2;border-left:1px solid #eceae5;">GRI 203 / 413 · IPIECA SOC-9</div>
+      <div style="padding:18px 26px;font-weight:700;color:#0b4f8a;background:#f6f5f2;border-left:1px solid #eceae5;">1 · 11</div>
+
+      <div style="padding:18px 26px;font-weight:700;background:#ffffff;">Skills &amp; training</div>
+      <div style="padding:18px 26px;color:#4a5563;background:#ffffff;border-left:1px solid #eceae5;">NCDMB human-capital dev.</div>
+      <div style="padding:18px 26px;color:#4a5563;background:#ffffff;border-left:1px solid #eceae5;">GRI 404 · IPIECA SOC-6</div>
+      <div style="padding:18px 26px;font-weight:700;color:#0b4f8a;background:#ffffff;border-left:1px solid #eceae5;">4 · 8</div>
+
+      <div style="padding:18px 26px;font-weight:700;background:#f6f5f2;">Health access</div>
+      <div style="padding:18px 26px;color:#4a5563;background:#f6f5f2;border-left:1px solid #eceae5;">State health partnerships</div>
+      <div style="padding:18px 26px;color:#4a5563;background:#f6f5f2;border-left:1px solid #eceae5;">GRI 203 / 403</div>
+      <div style="padding:18px 26px;font-weight:700;color:#0b4f8a;background:#f6f5f2;border-left:1px solid #eceae5;">3</div>
+
+      <div style="padding:18px 26px;font-weight:700;background:#ffffff;">Engagement &amp; grievances</div>
+      <div style="padding:18px 26px;color:#4a5563;background:#ffffff;border-left:1px solid #eceae5;">NUPRC HC Regs 2022</div>
+      <div style="padding:18px 26px;color:#4a5563;background:#ffffff;border-left:1px solid #eceae5;">GRI 413 · IPIECA SOC-13</div>
+      <div style="padding:18px 26px;font-weight:700;color:#0b4f8a;background:#ffffff;border-left:1px solid #eceae5;">16</div>
+
+      <div style="padding:18px 26px;font-weight:700;background:#f6f5f2;">Women &amp; youth inclusion</div>
+      <div style="padding:18px 26px;color:#4a5563;background:#f6f5f2;border-left:1px solid #eceae5;">Federal inclusion targets</div>
+      <div style="padding:18px 26px;color:#4a5563;background:#f6f5f2;border-left:1px solid #eceae5;">GRI 405 · IPIECA SOC-4</div>
+      <div style="padding:18px 26px;font-weight:700;color:#0b4f8a;background:#f6f5f2;border-left:1px solid #eceae5;">5 · 10</div>
+    </div>
+  </div>
+  <p style="font-size:18px;color:#8b9aa1;margin:16px 0 0;">Illustrative mapping — the full indicator library is confirmed with Seplat during Phase 1.</p>
+
+  <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #d8d6d0;padding-top:18px;margin-top:20px;font-size:15px;letter-spacing:0.12em;text-transform:uppercase;color:#8b9aa1;"><span>Tissot Consulting</span><span>Seplat Social Performance Platform</span><span>Internal Review Draft</span></div>
+</section>
+
+<!-- ═══════════ SLIDE 7 — FOUR PILLARS ═══════════ -->
+<section data-label="Four Pillars" data-screen-label="07 Four Pillars" data-speaker-notes="Seplat's existing social investment is anchored on four pillars — US$64m since 2010. These become the platform's top-level structure." style="width:100%;height:100%;background:#faf9f7;color:#10203f;font-family:'Archivo',sans-serif;padding:80px 96px;display:flex;flex-direction:column;">
+  <div style="display:flex;align-items:center;gap:14px;font-size:17px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:#e01f3d;"><span style="width:32px;height:3px;background:#e01f3d;"></span>Seplat Today 01 — Investment Pillars</div>
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;margin:16px 0 30px;">
+    <h2 style="font-size:60px;font-weight:800;line-height:1.02;letter-spacing:-0.02em;margin:0;max-width:1050px;">Four pillars of social investment</h2>
+    <div style="text-align:right;"><div style="font-size:56px;font-weight:800;color:#e01f3d;line-height:1;">US$64m</div><div style="font-size:19px;color:#8b9aa1;font-weight:600;">invested since 2010</div></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:22px;flex:1;">
+    <div style="background:#ffffff;border:1px solid #e7e6e2;border-radius:6px;padding:32px 28px;display:flex;flex-direction:column;">
+      <div style="font-size:15px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:#0b4f8a;">Pillar 01</div>
+      <div style="font-size:34px;font-weight:800;margin:10px 0 16px;">Health</div>
+      <p style="font-size:20px;line-height:1.4;color:#4a5563;flex:1;margin:0;">Access to primary care, eye health and medical outreach in host communities.</p>
+      <div style="margin-top:18px;font-size:16px;font-weight:700;color:#10203f;border-top:1px solid #eceae5;padding-top:14px;">Eye Can See · SDG 3</div>
+    </div>
+    <div style="background:#ffffff;border:1px solid #e7e6e2;border-radius:6px;padding:32px 28px;display:flex;flex-direction:column;">
+      <div style="font-size:15px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:#0b4f8a;">Pillar 02</div>
+      <div style="font-size:34px;font-weight:800;margin:10px 0 16px;">Education</div>
+      <p style="font-size:20px;line-height:1.4;color:#4a5563;flex:1;margin:0;">Teacher capacity, scholarships, STEAM labs and academic excellence.</p>
+      <div style="margin-top:18px;font-size:16px;font-weight:700;color:#10203f;border-top:1px solid #eceae5;padding-top:14px;">STEP · PEARLs · SDG 4</div>
+    </div>
+    <div style="background:#ffffff;border:1px solid #e7e6e2;border-radius:6px;padding:32px 28px;display:flex;flex-direction:column;">
+      <div style="font-size:15px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:#0b4f8a;">Pillar 03</div>
+      <div style="font-size:34px;font-weight:800;margin:10px 0 16px;">Infrastructure</div>
+      <p style="font-size:20px;line-height:1.4;color:#4a5563;flex:1;margin:0;">Community power, water schemes and facilities that raise living standards.</p>
+      <div style="margin-top:18px;font-size:16px;font-weight:700;color:#10203f;border-top:1px solid #eceae5;padding-top:14px;">Power &amp; water · SDG 6 · 9</div>
+    </div>
+    <div style="background:#10203f;color:#faf9f7;border-radius:6px;padding:32px 28px;display:flex;flex-direction:column;">
+      <div style="font-size:15px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:#e01f3d;">Pillar 04</div>
+      <div style="font-size:34px;font-weight:800;margin:10px 0 16px;">Economic Empowerment</div>
+      <p style="font-size:20px;line-height:1.4;color:#c9d1dc;flex:1;margin:0;">Youth entrepreneurship, skills and enterprise funding for the underserved.</p>
+      <div style="margin-top:18px;font-size:16px;font-weight:700;color:#faf9f7;border-top:1px solid rgba(255,255,255,0.2);padding-top:14px;">YEP · Fellowship · SDG 8</div>
+    </div>
+  </div>
+
+  <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #d8d6d0;padding-top:18px;margin-top:26px;font-size:15px;letter-spacing:0.12em;text-transform:uppercase;color:#8b9aa1;"><span>Tissot Consulting</span><span>Seplat Social Performance Platform</span><span>Internal Review Draft</span></div>
+</section>
+
+<!-- ═══════════ SLIDE 8 — PROGRAM PORTFOLIO ═══════════ -->
+<section data-label="Programme Portfolio" data-screen-label="08 Programme Portfolio" data-speaker-notes="Seplat's real flagship programmes with current output metrics. These are outputs — the platform layers outcome and impact on top." style="width:100%;height:100%;background:#faf9f7;color:#10203f;font-family:'Archivo',sans-serif;padding:80px 96px;display:flex;flex-direction:column;">
+  <div style="display:flex;align-items:center;gap:14px;font-size:17px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:#e01f3d;"><span style="width:32px;height:3px;background:#e01f3d;"></span>Seplat Today 02 — Programme Portfolio</div>
+  <h2 style="font-size:60px;font-weight:800;line-height:1.02;letter-spacing:-0.02em;margin:16px 0 6px;">The flagship programmes today</h2>
+  <p style="font-size:23px;line-height:1.4;color:#4a5563;max-width:1500px;margin:0 0 30px;">Strong outputs already exist. The platform connects them into a portfolio and adds the outcome &amp; impact layer.</p>
+
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:1fr 1fr;gap:20px;flex:1;">
+    <div style="background:#ffffff;border:1px solid #e7e6e2;border-radius:6px;padding:26px 28px;display:flex;flex-direction:column;">
+      <div style="display:flex;justify-content:space-between;align-items:center;"><div style="font-size:26px;font-weight:800;">STEP</div><div style="font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#0b4f8a;background:#eaf1f8;padding:5px 12px;border-radius:20px;">Education</div></div>
+      <div style="font-size:17px;color:#8b9aa1;margin:4px 0 14px;">Teachers Empowerment Programme</div>
+      <div style="margin-top:auto;display:flex;align-items:baseline;gap:10px;"><span style="font-size:44px;font-weight:800;color:#e01f3d;">623</span><span style="font-size:19px;color:#4a5563;">teachers certified · 2026 · Edo &amp; Delta</span></div>
+    </div>
+    <div style="background:#ffffff;border:1px solid #e7e6e2;border-radius:6px;padding:26px 28px;display:flex;flex-direction:column;">
+      <div style="display:flex;justify-content:space-between;align-items:center;"><div style="font-size:26px;font-weight:800;">PEARLs Quiz</div><div style="font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#0b4f8a;background:#eaf1f8;padding:5px 12px;border-radius:20px;">Education</div></div>
+      <div style="font-size:17px;color:#8b9aa1;margin:4px 0 14px;">Academic excellence competition</div>
+      <div style="margin-top:auto;display:flex;align-items:baseline;gap:10px;"><span style="font-size:44px;font-weight:800;color:#e01f3d;">51,955</span><span style="font-size:19px;color:#4a5563;">students · 10,391 schools</span></div>
+    </div>
+    <div style="background:#ffffff;border:1px solid #e7e6e2;border-radius:6px;padding:26px 28px;display:flex;flex-direction:column;">
+      <div style="display:flex;justify-content:space-between;align-items:center;"><div style="font-size:26px;font-weight:800;">Eye Can See</div><div style="font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#0b7a5a;background:#e6f3ee;padding:5px 12px;border-radius:20px;">Health</div></div>
+      <div style="font-size:17px;color:#8b9aa1;margin:4px 0 14px;">Eye health outreach</div>
+      <div style="margin-top:auto;display:flex;align-items:baseline;gap:10px;"><span style="font-size:44px;font-weight:800;color:#e01f3d;">23,447</span><span style="font-size:19px;color:#4a5563;">screened · 797 surgeries · 13,525 glasses</span></div>
+    </div>
+    <div style="background:#ffffff;border:1px solid #e7e6e2;border-radius:6px;padding:26px 28px;display:flex;flex-direction:column;">
+      <div style="display:flex;justify-content:space-between;align-items:center;"><div style="font-size:26px;font-weight:800;">YEP</div><div style="font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#8a5a0b;background:#f5eede;padding:5px 12px;border-radius:20px;">Economic Emp.</div></div>
+      <div style="font-size:17px;color:#8b9aa1;margin:4px 0 14px;">Youth Entrepreneurship — renewable energy</div>
+      <div style="margin-top:auto;display:flex;align-items:baseline;gap:10px;"><span style="font-size:44px;font-weight:800;color:#e01f3d;">129+</span><span style="font-size:19px;color:#4a5563;">trained since 2024 · solar &amp; mini-grid</span></div>
+    </div>
+    <div style="background:#ffffff;border:1px solid #e7e6e2;border-radius:6px;padding:26px 28px;display:flex;flex-direction:column;">
+      <div style="display:flex;justify-content:space-between;align-items:center;"><div style="font-size:26px;font-weight:800;">Fellowship</div><div style="font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#8a5a0b;background:#f5eede;padding:5px 12px;border-radius:20px;">Economic Emp.</div></div>
+      <div style="font-size:17px;color:#8b9aa1;margin:4px 0 14px;">Global Entrepreneurship Fellowship (C4C)</div>
+      <div style="margin-top:auto;display:flex;align-items:baseline;gap:10px;"><span style="font-size:44px;font-weight:800;color:#e01f3d;">55</span><span style="font-size:19px;color:#4a5563;">fellows since 2019</span></div>
+    </div>
+    <div style="background:#ffffff;border:1px solid #e7e6e2;border-radius:6px;padding:26px 28px;display:flex;flex-direction:column;">
+      <div style="display:flex;justify-content:space-between;align-items:center;"><div style="font-size:26px;font-weight:800;">Scholarships &amp; STEAM</div><div style="font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#0b4f8a;background:#eaf1f8;padding:5px 12px;border-radius:20px;">Education</div></div>
+      <div style="font-size:17px;color:#8b9aa1;margin:4px 0 14px;">Undergraduate grants &amp; STEAM labs</div>
+      <div style="margin-top:auto;display:flex;align-items:baseline;gap:10px;"><span style="font-size:44px;font-weight:800;color:#e01f3d;">2</span><span style="font-size:19px;color:#4a5563;">STEAM labs + annual national scholarships</span></div>
+    </div>
+  </div>
+
+  <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #d8d6d0;padding-top:18px;margin-top:24px;font-size:15px;letter-spacing:0.12em;text-transform:uppercase;color:#8b9aa1;"><span>Tissot Consulting</span><span>Seplat Social Performance Platform</span><span>Internal Review Draft</span></div>
+</section>
+
+<!-- ═══════════ SLIDE 9 — BENCHMARK ═══════════ -->
+<section data-label="Today vs Platform" data-screen-label="09 Today vs Platform" data-speaker-notes="The gap analysis. Left = how Seplat reports today. Right = what the platform changes. This justifies the build." style="width:100%;height:100%;background:#faf9f7;color:#10203f;font-family:'Archivo',sans-serif;padding:80px 96px;display:flex;flex-direction:column;">
+  <div style="display:flex;align-items:center;gap:14px;font-size:17px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:#e01f3d;"><span style="width:32px;height:3px;background:#e01f3d;"></span>The Gap</div>
+  <h2 style="font-size:60px;font-weight:800;line-height:1.02;letter-spacing:-0.02em;margin:16px 0 30px;">What changes with the platform</h2>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:28px;flex:1;">
+    <div style="background:#ffffff;border:1px solid #e7e6e2;border-radius:8px;padding:38px 40px;display:flex;flex-direction:column;">
+      <div style="font-size:18px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:#8b9aa1;margin-bottom:24px;">Reporting today</div>
+      <div style="display:flex;flex-direction:column;gap:22px;">
+        <div style="display:flex;gap:16px;align-items:flex-start;"><span style="color:#b9c0c7;font-size:26px;line-height:1;">—</span><div style="font-size:23px;line-height:1.4;color:#4a5563;">Counts activity: naira spent, people trained</div></div>
+        <div style="display:flex;gap:16px;align-items:flex-start;"><span style="color:#b9c0c7;font-size:26px;line-height:1;">—</span><div style="font-size:23px;line-height:1.4;color:#4a5563;">Annual, retrospective, published as a PDF</div></div>
+        <div style="display:flex;gap:16px;align-items:flex-start;"><span style="color:#b9c0c7;font-size:26px;line-height:1;">—</span><div style="font-size:23px;line-height:1.4;color:#4a5563;">Programme-by-programme, in silos</div></div>
+        <div style="display:flex;gap:16px;align-items:flex-start;"><span style="color:#b9c0c7;font-size:26px;line-height:1;">—</span><div style="font-size:23px;line-height:1.4;color:#4a5563;">Hard to tie live to SDGs or investor frameworks</div></div>
+      </div>
+    </div>
+    <div style="background:#10203f;color:#faf9f7;border-radius:8px;padding:38px 40px;display:flex;flex-direction:column;border-top:5px solid #e01f3d;">
+      <div style="font-size:18px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:#e01f3d;margin-bottom:24px;">With the platform</div>
+      <div style="display:flex;flex-direction:column;gap:22px;">
+        <div style="display:flex;gap:16px;align-items:flex-start;"><span style="color:#e01f3d;font-size:24px;line-height:1;font-weight:800;">✓</span><div style="font-size:23px;line-height:1.4;color:#e9edf3;">Models outcomes &amp; impact — lives changed, risk reduced</div></div>
+        <div style="display:flex;gap:16px;align-items:flex-start;"><span style="color:#e01f3d;font-size:24px;line-height:1;font-weight:800;">✓</span><div style="font-size:23px;line-height:1.4;color:#e9edf3;">Live, visual, always-on dashboard</div></div>
+        <div style="display:flex;gap:16px;align-items:flex-start;"><span style="color:#e01f3d;font-size:24px;line-height:1;font-weight:800;">✓</span><div style="font-size:23px;line-height:1.4;color:#e9edf3;">Portfolio view, dual-lens auto-mapped (local + global)</div></div>
+        <div style="display:flex;gap:16px;align-items:flex-start;"><span style="color:#e01f3d;font-size:24px;line-height:1;font-weight:800;">✓</span><div style="font-size:23px;line-height:1.4;color:#e9edf3;">Aspiration tracking + cost-per-outcome pointers</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #d8d6d0;padding-top:18px;margin-top:26px;font-size:15px;letter-spacing:0.12em;text-transform:uppercase;color:#8b9aa1;"><span>Tissot Consulting</span><span>Seplat Social Performance Platform</span><span>Internal Review Draft</span></div>
+</section>
+
+<!-- ═══════════ SLIDE 10 — HOW IT WORKS ═══════════ -->
+<section data-label="How It Works" data-screen-label="10 How It Works" data-speaker-notes="Four-layer architecture. Data flows from capture, through the indicator engine and impact translation, into visual outputs." style="width:100%;height:100%;background:#10203f;color:#faf9f7;font-family:'Archivo',sans-serif;padding:80px 96px;display:flex;flex-direction:column;">
+  <div style="display:flex;align-items:center;gap:14px;font-size:17px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:#e01f3d;"><span style="width:32px;height:3px;background:#e01f3d;"></span>How It Works</div>
+  <h2 style="font-size:60px;font-weight:800;line-height:1.02;letter-spacing:-0.02em;margin:16px 0 34px;">Four layers, one flow</h2>
+
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;flex:1;align-items:stretch;">
+    <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.14);border-radius:8px 0 0 8px;padding:36px 30px;display:flex;flex-direction:column;">
+      <div style="font-size:44px;font-weight:800;color:#e01f3d;">01</div>
+      <div style="font-size:30px;font-weight:800;margin:14px 0 16px;">Capture</div>
+      <p style="font-size:21px;line-height:1.45;color:#c9d1dc;margin:0;">Programme data, field surveys and partner reports — entered once, from anywhere.</p>
+    </div>
+    <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.14);border-left:none;padding:36px 30px;display:flex;flex-direction:column;">
+      <div style="font-size:44px;font-weight:800;color:#e01f3d;">02</div>
+      <div style="font-size:30px;font-weight:800;margin:14px 0 16px;">Indicator Engine</div>
+      <p style="font-size:21px;line-height:1.45;color:#c9d1dc;margin:0;">Each metric auto-maps to local (PIA, NCDMB) and global (GRI, IFRS, IPIECA) standards.</p>
+    </div>
+    <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.14);border-left:none;padding:36px 30px;display:flex;flex-direction:column;">
+      <div style="font-size:44px;font-weight:800;color:#e01f3d;">03</div>
+      <div style="font-size:30px;font-weight:800;margin:14px 0 16px;">Impact Translation</div>
+      <p style="font-size:21px;line-height:1.45;color:#c9d1dc;margin:0;">Outputs are modelled into outcomes and impact along the impact chain.</p>
+    </div>
+    <div style="background:#e01f3d;border-radius:0 8px 8px 0;padding:36px 30px;display:flex;flex-direction:column;">
+      <div style="font-size:44px;font-weight:800;color:#fff;">04</div>
+      <div style="font-size:30px;font-weight:800;margin:14px 0 16px;color:#fff;">Visualise &amp; Report</div>
+      <p style="font-size:21px;line-height:1.45;color:#ffe4e8;margin:0;">Dashboards, board packs and one-click exports for regulators and investors.</p>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:16px;margin-top:26px;color:#8b9aa1;font-size:19px;font-weight:600;"><span style="color:#e01f3d;">Data in</span><span style="flex:1;height:2px;background:linear-gradient(90deg,#0b4f8a,#e01f3d);"></span><span style="color:#e01f3d;">Story out</span></div>
+</section>
+
+<!-- ═══════════ SLIDE 11 — DASHBOARD MOCK ═══════════ -->
+<section data-label="Dashboard Mock" data-screen-label="11 Dashboard Mock" data-speaker-notes="The money slide — a visual dashboard mock. Aspiration ring, KPI tiles, programme impact bars, dual-lens toggle, cost-per-outcome. Illustrative figures." style="width:100%;height:100%;background:#eef0f3;color:#10203f;font-family:'Archivo',sans-serif;padding:64px 80px;display:flex;flex-direction:column;">
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:22px;">
+    <div>
+      <div style="display:flex;align-items:center;gap:14px;font-size:16px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:#e01f3d;"><span style="width:32px;height:3px;background:#e01f3d;"></span>The Dashboard</div>
+      <h2 style="font-size:44px;font-weight:800;line-height:1;letter-spacing:-0.02em;margin:12px 0 0;white-space:nowrap;">Mainly visual, by design</h2>
+    </div>
+    <div style="display:flex;gap:8px;background:#fff;border:1px solid #dcdfe4;border-radius:30px;padding:5px;">
+      <span style="font-size:16px;font-weight:700;padding:9px 22px;border-radius:24px;background:#10203f;color:#fff;">Local + Global</span>
+      <span style="font-size:16px;font-weight:700;padding:9px 22px;border-radius:24px;color:#8b9aa1;">Local</span>
+      <span style="font-size:16px;font-weight:700;padding:9px 22px;border-radius:24px;color:#8b9aa1;">Global</span>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:340px 1fr;gap:20px;flex:1;">
+    <!-- left: aspiration ring + pointer -->
+    <div style="display:flex;flex-direction:column;gap:20px;">
+      <div style="background:#10203f;color:#fff;border-radius:12px;padding:30px;display:flex;flex-direction:column;align-items:center;flex:1;justify-content:center;">
+        <div style="font-size:15px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#8b9aa1;margin-bottom:20px;">2030 Social Aspirations</div>
+        <div style="width:210px;height:210px;border-radius:50%;background:conic-gradient(#e01f3d 0% 52%, rgba(255,255,255,0.14) 52% 100%);display:flex;align-items:center;justify-content:center;">
+          <div style="width:158px;height:158px;border-radius:50%;background:#10203f;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+            <span style="font-size:58px;font-weight:800;line-height:1;">52%</span>
+            <span style="font-size:15px;color:#8b9aa1;margin-top:6px;">achieved</span>
+          </div>
+        </div>
+        <div style="font-size:19px;color:#c9d1dc;margin-top:20px;text-align:center;">On track across 4 pillars</div>
+      </div>
+      <div style="background:#fff;border:1px solid #dcdfe4;border-radius:12px;padding:24px 26px;">
+        <div style="font-size:14px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#8b9aa1;">Sustainability pointer</div>
+        <div style="display:flex;align-items:baseline;gap:8px;margin-top:8px;"><span style="font-size:38px;font-weight:800;color:#0b4f8a;">₦2,140</span></div>
+        <div style="font-size:17px;color:#4a5563;">cost per life meaningfully impacted</div>
+      </div>
+    </div>
+
+    <!-- right: kpis + chart -->
+    <div style="display:flex;flex-direction:column;gap:20px;">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:20px;">
+        <div style="background:#fff;border:1px solid #dcdfe4;border-radius:12px;padding:22px 24px;"><div style="font-size:15px;color:#8b9aa1;font-weight:600;">Lives impacted</div><div style="font-size:40px;font-weight:800;color:#e01f3d;margin-top:6px;">312K</div></div>
+        <div style="background:#fff;border:1px solid #dcdfe4;border-radius:12px;padding:22px 24px;"><div style="font-size:15px;color:#8b9aa1;font-weight:600;">Invested (cum.)</div><div style="font-size:40px;font-weight:800;color:#10203f;margin-top:6px;">$64M</div></div>
+        <div style="background:#fff;border:1px solid #dcdfe4;border-radius:12px;padding:22px 24px;"><div style="font-size:15px;color:#8b9aa1;font-weight:600;">Communities</div><div style="font-size:40px;font-weight:800;color:#10203f;margin-top:6px;">40+</div></div>
+        <div style="background:#fff;border:1px solid #dcdfe4;border-radius:12px;padding:22px 24px;"><div style="font-size:15px;color:#8b9aa1;font-weight:600;">Jobs enabled</div><div style="font-size:40px;font-weight:800;color:#10203f;margin-top:6px;">1,850</div></div>
+      </div>
+      <div style="background:#fff;border:1px solid #dcdfe4;border-radius:12px;padding:26px 30px;flex:1;display:flex;flex-direction:column;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;"><div style="font-size:21px;font-weight:800;">Impact by programme</div><div style="font-size:15px;color:#8b9aa1;">estimated lives reached</div></div>
+        <div style="display:flex;flex-direction:column;gap:18px;justify-content:center;flex:1;">
+          <div style="display:flex;align-items:center;gap:16px;"><span style="width:140px;font-size:18px;font-weight:600;">PEARLs Quiz</span><span style="flex:1;height:26px;background:#eef0f3;border-radius:4px;overflow:hidden;"><span style="display:block;height:100%;width:92%;background:#e01f3d;border-radius:4px;"></span></span><span style="width:70px;font-size:18px;font-weight:700;text-align:right;">52K</span></div>
+          <div style="display:flex;align-items:center;gap:16px;"><span style="width:140px;font-size:18px;font-weight:600;">STEP</span><span style="flex:1;height:26px;background:#eef0f3;border-radius:4px;overflow:hidden;"><span style="display:block;height:100%;width:78%;background:#0b4f8a;border-radius:4px;"></span></span><span style="width:70px;font-size:18px;font-weight:700;text-align:right;">50K</span></div>
+          <div style="display:flex;align-items:center;gap:16px;"><span style="width:140px;font-size:18px;font-weight:600;">Eye Can See</span><span style="flex:1;height:26px;background:#eef0f3;border-radius:4px;overflow:hidden;"><span style="display:block;height:100%;width:44%;background:#0b7a5a;border-radius:4px;"></span></span><span style="width:70px;font-size:18px;font-weight:700;text-align:right;">23K</span></div>
+          <div style="display:flex;align-items:center;gap:16px;"><span style="width:140px;font-size:18px;font-weight:600;">YEP</span><span style="flex:1;height:26px;background:#eef0f3;border-radius:4px;overflow:hidden;"><span style="display:block;height:100%;width:16%;background:#8a5a0b;border-radius:4px;"></span></span><span style="width:70px;font-size:18px;font-weight:700;text-align:right;">6K</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p style="font-size:15px;color:#8b9aa1;margin:14px 0 0;">Illustrative mock — figures shown to demonstrate the visual concept, not audited data.</p>
+</section>
+
+<!-- ═══════════ SLIDE 12 — ASPIRATION TRACKING ═══════════ -->
+<section data-label="Aspiration Tracking" data-screen-label="12 Aspiration Tracking" data-speaker-notes="Directly answers Madame's ask: 'based on your vision, you've met X% of your aspirations.' Progress per pillar against 2030 targets." style="width:100%;height:100%;background:#faf9f7;color:#10203f;font-family:'Archivo',sans-serif;padding:80px 96px;display:flex;flex-direction:column;">
+  <div style="display:flex;align-items:center;gap:14px;font-size:17px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:#e01f3d;"><span style="width:32px;height:3px;background:#e01f3d;"></span>Feature 01 — Aspiration Tracking</div>
+  <h2 style="font-size:60px;font-weight:800;line-height:1.02;letter-spacing:-0.02em;margin:16px 0 6px;">Progress against your vision</h2>
+  <p style="font-size:24px;line-height:1.4;color:#4a5563;max-width:1500px;margin:0 0 40px;">“Based on where you set out to go, here is how far you’ve come” — measured per pillar against 2030 aspiration targets.</p>
+
+  <div style="display:flex;flex-direction:column;gap:30px;flex:1;justify-content:center;">
+    <div style="display:flex;align-items:center;gap:28px;"><span style="width:280px;font-size:28px;font-weight:700;">Education</span><span style="flex:1;height:40px;background:#e7e6e2;border-radius:6px;overflow:hidden;position:relative;"><span style="display:block;height:100%;width:61%;background:#e01f3d;border-radius:6px;"></span></span><span style="width:90px;font-size:32px;font-weight:800;text-align:right;">61%</span></div>
+    <div style="display:flex;align-items:center;gap:28px;"><span style="width:280px;font-size:28px;font-weight:700;">Infrastructure</span><span style="flex:1;height:40px;background:#e7e6e2;border-radius:6px;overflow:hidden;position:relative;"><span style="display:block;height:100%;width:55%;background:#0b4f8a;border-radius:6px;"></span></span><span style="width:90px;font-size:32px;font-weight:800;text-align:right;">55%</span></div>
+    <div style="display:flex;align-items:center;gap:28px;"><span style="width:280px;font-size:28px;font-weight:700;">Health</span><span style="flex:1;height:40px;background:#e7e6e2;border-radius:6px;overflow:hidden;position:relative;"><span style="display:block;height:100%;width:48%;background:#0b7a5a;border-radius:6px;"></span></span><span style="width:90px;font-size:32px;font-weight:800;text-align:right;">48%</span></div>
+    <div style="display:flex;align-items:center;gap:28px;"><span style="width:280px;font-size:28px;font-weight:700;">Economic Empowerment</span><span style="flex:1;height:40px;background:#e7e6e2;border-radius:6px;overflow:hidden;position:relative;"><span style="display:block;height:100%;width:39%;background:#8a5a0b;border-radius:6px;"></span></span><span style="width:90px;font-size:32px;font-weight:800;text-align:right;">39%</span></div>
+  </div>
+  <div style="background:#10203f;color:#faf9f7;border-radius:8px;padding:26px 34px;display:flex;align-items:center;gap:20px;margin-top:10px;">
+    <span style="font-size:44px;font-weight:800;color:#e01f3d;">52%</span>
+    <span style="font-size:23px;line-height:1.35;color:#e9edf3;">overall progress toward Seplat’s 2030 social aspirations — with Economic Empowerment flagged as the priority gap to close.</span>
+  </div>
+
+  <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #d8d6d0;padding-top:18px;margin-top:24px;font-size:15px;letter-spacing:0.12em;text-transform:uppercase;color:#8b9aa1;"><span>Tissot Consulting</span><span>Seplat Social Performance Platform</span><span>Internal Review Draft</span></div>
+</section>
+
+<!-- ═══════════ SLIDE 13 — SUSTAINABILITY POINTERS ═══════════ -->
+<section data-label="Sustainability Pointers" data-screen-label="13 Sustainability Pointers" data-speaker-notes="Madame's 'sustainability pointers' — value and efficiency of spend, plus a recommendation for the next best investment." style="width:100%;height:100%;background:#faf9f7;color:#10203f;font-family:'Archivo',sans-serif;padding:80px 96px;display:flex;flex-direction:column;">
+  <div style="display:flex;align-items:center;gap:14px;font-size:17px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:#e01f3d;"><span style="width:32px;height:3px;background:#e01f3d;"></span>Feature 02 — Sustainability Pointers</div>
+  <h2 style="font-size:60px;font-weight:800;line-height:1.02;letter-spacing:-0.02em;margin:16px 0 6px;">The value — and cost — of impact</h2>
+  <p style="font-size:24px;line-height:1.4;color:#4a5563;max-width:1500px;margin:0 0 36px;">Beyond counting, the platform surfaces how efficiently investment converts into lasting impact — and where to invest next.</p>
+
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;flex:1;">
+    <div style="background:#ffffff;border:1px solid #e7e6e2;border-radius:8px;padding:34px 34px;display:flex;flex-direction:column;">
+      <div style="font-size:15px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#8b9aa1;">Cost per outcome</div>
+      <div style="font-size:64px;font-weight:800;color:#e01f3d;margin:16px 0 6px;line-height:1;">₦2,140</div>
+      <p style="font-size:21px;line-height:1.4;color:#4a5563;margin:0;">per life meaningfully impacted, across the portfolio.</p>
+    </div>
+    <div style="background:#ffffff;border:1px solid #e7e6e2;border-radius:8px;padding:34px 34px;display:flex;flex-direction:column;">
+      <div style="font-size:15px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#8b9aa1;">Social value ratio</div>
+      <div style="font-size:64px;font-weight:800;color:#0b4f8a;margin:16px 0 6px;line-height:1;">3.4×</div>
+      <p style="font-size:21px;line-height:1.4;color:#4a5563;margin:0;">estimated social value created per ₦1 invested.</p>
+    </div>
+    <div style="background:#10203f;color:#faf9f7;border-radius:8px;padding:34px 34px;display:flex;flex-direction:column;border-top:5px solid #e01f3d;">
+      <div style="font-size:15px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#e01f3d;">Next best investment</div>
+      <div style="font-size:34px;font-weight:800;margin:16px 0 10px;line-height:1.15;">Scale YEP in Delta</div>
+      <p style="font-size:21px;line-height:1.4;color:#c9d1dc;margin:0;">highest projected impact-per-naira to close the Economic Empowerment gap.</p>
+    </div>
+  </div>
+
+  <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #d8d6d0;padding-top:18px;margin-top:26px;font-size:15px;letter-spacing:0.12em;text-transform:uppercase;color:#8b9aa1;"><span>Tissot Consulting</span><span>Seplat Social Performance Platform</span><span>Internal Review Draft</span></div>
+</section>
+
+<!-- ═══════════ SLIDE 14 — ROADMAP ═══════════ -->
+<section data-label="Delivery" data-screen-label="14 Delivery" data-speaker-notes="Phased delivery. Phase 1 is this framework. Costing worked out jointly once scope is confirmed — as promised to the client." style="width:100%;height:100%;background:#faf9f7;color:#10203f;font-family:'Archivo',sans-serif;padding:80px 96px;display:flex;flex-direction:column;">
+  <div style="display:flex;align-items:center;gap:14px;font-size:17px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:#e01f3d;"><span style="width:32px;height:3px;background:#e01f3d;"></span>Delivery</div>
+  <h2 style="font-size:60px;font-weight:800;line-height:1.02;letter-spacing:-0.02em;margin:16px 0 34px;">How we would build it</h2>
+
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:20px;flex:1;">
+    <div style="background:#e01f3d;color:#fff;border-radius:8px;padding:32px 28px;display:flex;flex-direction:column;">
+      <div style="font-size:15px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#ffd2d9;">Phase 1 · Wk 1–2</div>
+      <div style="font-size:30px;font-weight:800;margin:14px 0 16px;line-height:1.1;">Framework &amp; indicators</div>
+      <p style="font-size:20px;line-height:1.4;color:#ffe4e8;flex:1;margin:0;">Sign off this approach and confirm the priority indicator library.</p>
+      <div style="font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;border-top:1px solid rgba(255,255,255,0.3);padding-top:14px;margin-top:14px;">You are here</div>
+    </div>
+    <div style="background:#ffffff;border:1px solid #e7e6e2;border-radius:8px;padding:32px 28px;display:flex;flex-direction:column;">
+      <div style="font-size:15px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#8b9aa1;">Phase 2 · Wk 3–6</div>
+      <div style="font-size:30px;font-weight:800;margin:14px 0 16px;line-height:1.1;">Data &amp; baseline</div>
+      <p style="font-size:20px;line-height:1.4;color:#4a5563;flex:1;margin:0;">Build the data model and baseline from existing Seplat reports.</p>
+    </div>
+    <div style="background:#ffffff;border:1px solid #e7e6e2;border-radius:8px;padding:32px 28px;display:flex;flex-direction:column;">
+      <div style="font-size:15px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#8b9aa1;">Phase 3 · Wk 7–10</div>
+      <div style="font-size:30px;font-weight:800;margin:14px 0 16px;line-height:1.1;">Dashboard build</div>
+      <p style="font-size:20px;line-height:1.4;color:#4a5563;flex:1;margin:0;">Develop the visual dashboard and the impact-translation models.</p>
+    </div>
+    <div style="background:#ffffff;border:1px solid #e7e6e2;border-radius:8px;padding:32px 28px;display:flex;flex-direction:column;">
+      <div style="font-size:15px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#8b9aa1;">Phase 4 · Wk 11–12</div>
+      <div style="font-size:30px;font-weight:800;margin:14px 0 16px;line-height:1.1;">Pilot &amp; review</div>
+      <p style="font-size:20px;line-height:1.4;color:#4a5563;flex:1;margin:0;">Pilot on two flagship programmes, then review with the board.</p>
+    </div>
+  </div>
+  <div style="background:#eef0f3;border-radius:8px;padding:22px 30px;margin-top:20px;font-size:21px;color:#4a5563;"><strong style="color:#10203f;">Costing</strong> is worked out jointly with Seplat once the scope and indicator set are confirmed.</div>
+
+  <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #d8d6d0;padding-top:18px;margin-top:22px;font-size:15px;letter-spacing:0.12em;text-transform:uppercase;color:#8b9aa1;"><span>Tissot Consulting</span><span>Seplat Social Performance Platform</span><span>Internal Review Draft</span></div>
+</section>
+
+<!-- ═══════════ SLIDE 15 — NEXT STEPS ═══════════ -->
+<section data-label="Next Steps" data-screen-label="15 Next Steps" data-speaker-notes="Close with a clear ask for Madame's feedback: confirm approach, agree indicators, pick 2 flagship programmes for the demo, align on costing." style="width:100%;height:100%;background:#10203f;color:#faf9f7;font-family:'Archivo',sans-serif;padding:88px 100px;display:flex;flex-direction:column;justify-content:space-between;">
+  <div>
+    <div style="display:flex;align-items:center;gap:14px;font-size:17px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:#e01f3d;"><span style="width:32px;height:3px;background:#e01f3d;"></span>Next Steps</div>
+    <h2 style="font-size:72px;font-weight:800;line-height:1.02;letter-spacing:-0.02em;margin:22px 0 44px;">What we need from you</h2>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px 60px;max-width:1500px;">
+      <div style="display:flex;gap:20px;align-items:flex-start;border-top:1px solid rgba(255,255,255,0.16);padding-top:22px;"><span style="font-size:26px;font-weight:800;color:#e01f3d;">01</span><span style="font-size:27px;line-height:1.35;">Confirm the framework and impact-chain approach</span></div>
+      <div style="display:flex;gap:20px;align-items:flex-start;border-top:1px solid rgba(255,255,255,0.16);padding-top:22px;"><span style="font-size:26px;font-weight:800;color:#e01f3d;">02</span><span style="font-size:27px;line-height:1.35;">Agree the priority indicators — local and global</span></div>
+      <div style="display:flex;gap:20px;align-items:flex-start;border-top:1px solid rgba(255,255,255,0.16);padding-top:22px;"><span style="font-size:26px;font-weight:800;color:#e01f3d;">03</span><span style="font-size:27px;line-height:1.35;">Nominate two flagship programmes for the demo</span></div>
+      <div style="display:flex;gap:20px;align-items:flex-start;border-top:1px solid rgba(255,255,255,0.16);padding-top:22px;"><span style="font-size:26px;font-weight:800;color:#e01f3d;">04</span><span style="font-size:27px;line-height:1.35;">Align on the costing model together</span></div>
+    </div>
+  </div>
+
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;border-top:1px solid rgba(255,255,255,0.16);padding-top:26px;">
+    <div style="display:flex;align-items:center;gap:16px;font-size:20px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;"><span style="width:14px;height:14px;background:#e01f3d;border-radius:50%;"></span>Tissot Consulting</div>
+    <div style="font-size:18px;color:#8b9aa1;">Seplat Social Performance Platform · Framework · July 2026</div>
+  </div>
+</section>
+
+</x-import>
+
+<template id="__bundler_thumbnail">
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" fill="#10203f"/><circle cx="50" cy="42" r="20" fill="none" stroke="#e01f3d" stroke-width="7" stroke-dasharray="78 48"/><rect x="30" y="72" width="40" height="6" rx="3" fill="#faf9f7"/><rect x="30" y="82" width="26" height="6" rx="3" fill="#8b9aa1"/></svg>
+</template>
+</x-dc>
+</body>
+</html>

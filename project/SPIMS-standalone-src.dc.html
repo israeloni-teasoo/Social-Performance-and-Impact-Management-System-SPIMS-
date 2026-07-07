@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  :root { --accent:#E31A38; --navy:#111C55; --ink:#2A2E52; --muted:#8A8DA6; --line:#E9E9F1; --bg:#F4F4F8; }
+  .spims-scroll::-webkit-scrollbar { width: 10px; }
+  .spims-scroll::-webkit-scrollbar-thumb { background: #d7d8e4; border-radius: 8px; border:3px solid transparent; background-clip: padding-box; }
+  .navbtn:hover { background: rgba(255,255,255,0.06) !important; }
+  .rowh:hover { background: #fafafe; }
+  .card-lift { transition: transform .15s ease, box-shadow .15s ease; }
+  .card-lift:hover { transform: translateY(-2px); box-shadow: 0 12px 30px -18px rgba(17,28,85,0.35); }
+</style>
+</helmet>
+
+<div style="display:flex;height:100vh;width:100vw;font-family:'Poppins',sans-serif;background:var(--bg);color:var(--ink);overflow:hidden;">
+
+  <!-- ══════════ SIDEBAR ══════════ -->
+  <aside style="width:262px;flex-shrink:0;background:var(--navy);color:#C7C9DA;display:flex;flex-direction:column;padding:22px 16px;">
+    <div style="display:flex;align-items:center;gap:12px;padding:6px 10px 22px;">
+      <div style="width:38px;height:38px;border-radius:11px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:17px;color:#fff;letter-spacing:-0.02em;">S</div>
+      <div style="line-height:1.1;">
+        <div style="font-size:18px;font-weight:800;color:#fff;letter-spacing:-0.01em;">SPIMS</div>
+        <div style="font-size:10.5px;font-weight:500;color:#7C7FA0;letter-spacing:0.08em;text-transform:uppercase;">Social Perf. &amp; Impact</div>
+      </div>
+    </div>
+
+    <nav class="spims-scroll" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:3px;">
+      <sc-if value="{{ isExec }}" hint-placeholder-val="{{ true }}"><div style="display:flex;flex-direction:column;gap:3px;">
+      <div style="font-size:10.5px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#5D6088;padding:14px 12px 6px;">Overview</div>
+      <button class="navbtn" onClick="{{ goDashboard }}" style="display:flex;align-items:center;gap:12px;padding:10px 12px;border:none;border-radius:10px;background:{{ navBg.dashboard }};color:{{ navFg.dashboard }};font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;text-align:left;width:100%;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        Executive Dashboard
+      </button>
+
+      <div style="font-size:10.5px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#5D6088;padding:14px 12px 6px;">Plan &amp; Track</div>
+      <button class="navbtn" onClick="{{ goPortfolio }}" style="display:flex;align-items:center;gap:12px;padding:10px 12px;border:none;border-radius:10px;background:{{ navBg.portfolio }};color:{{ navFg.portfolio }};font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;text-align:left;width:100%;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 4v16"/></svg>
+        Project Portfolio
+      </button>
+      <button class="navbtn" onClick="{{ goCommunities }}" style="display:flex;align-items:center;gap:12px;padding:10px 12px;border:none;border-radius:10px;background:{{ navBg.communities }};color:{{ navFg.communities }};font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;text-align:left;width:100%;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-5.2-7-11a7 7 0 0 1 14 0c0 5.8-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+        Communities
+      </button>
+
+      <div style="font-size:10.5px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#5D6088;padding:14px 12px 6px;">Measure</div>
+      <button class="navbtn" onClick="{{ goImpact }}" style="display:flex;align-items:center;gap:12px;padding:10px 12px;border:none;border-radius:10px;background:{{ navBg.impact }};color:{{ navFg.impact }};font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;text-align:left;width:100%;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>
+        Impact Chain
+      </button>
+      <button class="navbtn" onClick="{{ goGrievances }}" style="display:flex;align-items:center;gap:12px;padding:10px 12px;border:none;border-radius:10px;background:{{ navBg.grievances }};color:{{ navFg.grievances }};font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;text-align:left;width:100%;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 20h20L12 3Z"/><path d="M12 10v4M12 17.5v.5"/></svg>
+        Grievances
+      </button>
+
+      <div style="font-size:10.5px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#5D6088;padding:14px 12px 6px;">Report &amp; Comply</div>
+      <button class="navbtn" onClick="{{ goIndicators }}" style="display:flex;align-items:center;gap:12px;padding:10px 12px;border:none;border-radius:10px;background:{{ navBg.indicators }};color:{{ navFg.indicators }};font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;text-align:left;width:100%;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3.5" cy="6" r="1.5"/><circle cx="3.5" cy="12" r="1.5"/><circle cx="3.5" cy="18" r="1.5"/></svg>
+        Indicator Library
+      </button>
+      <button class="navbtn" onClick="{{ goReports }}" style="display:flex;align-items:center;gap:12px;padding:10px 12px;border:none;border-radius:10px;background:{{ navBg.reports }};color:{{ navFg.reports }};font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;text-align:left;width:100%;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9Z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg>
+        Reports &amp; Exports
+      </button>
+      </div></sc-if>
+
+      <sc-if value="{{ isManager }}"><div style="display:flex;flex-direction:column;gap:3px;">
+        <div style="font-size:10.5px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#5D6088;padding:14px 12px 6px;">Workspace</div>
+        <button class="navbtn" onClick="{{ goMyProjects }}" style="display:flex;align-items:center;gap:12px;padding:10px 12px;border:none;border-radius:10px;background:{{ navBg.myprojects }};color:{{ navFg.myprojects }};font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;text-align:left;width:100%;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 4v16"/></svg>
+          My Projects
+        </button>
+        <button class="navbtn" onClick="{{ goNewProject }}" style="display:flex;align-items:center;gap:12px;padding:10px 12px;border:none;border-radius:10px;background:{{ navBg.newproject }};color:{{ navFg.newproject }};font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;text-align:left;width:100%;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg>
+          New Project
+        </button>
+        <div style="font-size:10.5px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#5D6088;padding:14px 12px 6px;">Review &amp; report</div>
+        <button class="navbtn" onClick="{{ goApprovals }}" style="display:flex;align-items:center;gap:12px;padding:10px 12px;border:none;border-radius:10px;background:{{ navBg.approvals }};color:{{ navFg.approvals }};font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;text-align:left;width:100%;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg>
+          Approvals
+          <span style="margin-left:auto;font-size:10.5px;font-weight:700;background:var(--accent);color:#fff;border-radius:20px;padding:1px 8px;">4</span>
+        </button>
+        <button class="navbtn" onClick="{{ goReports }}" style="display:flex;align-items:center;gap:12px;padding:10px 12px;border:none;border-radius:10px;background:{{ navBg.reports }};color:{{ navFg.reports }};font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;text-align:left;width:100%;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9Z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg>
+          Reports &amp; Exports
+        </button>
+      </div></sc-if>
+
+      <sc-if value="{{ isField }}"><div style="display:flex;flex-direction:column;gap:3px;">
+        <div style="font-size:10.5px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#5D6088;padding:14px 12px 6px;">Field work</div>
+        <button class="navbtn" onClick="{{ goMyTasks }}" style="display:flex;align-items:center;gap:12px;padding:10px 12px;border:none;border-radius:10px;background:{{ navBg.mytasks }};color:{{ navFg.mytasks }};font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;text-align:left;width:100%;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h11M9 12h11M9 18h11"/><path d="m3 6 1.5 1.5L7 5M3 12l1.5 1.5L7 11M3 18l1.5 1.5L7 17"/></svg>
+          My Tasks
+          <span style="margin-left:auto;font-size:10.5px;font-weight:700;background:var(--accent);color:#fff;border-radius:20px;padding:1px 8px;">4</span>
+        </button>
+        <button class="navbtn" onClick="{{ goLogActivity }}" style="display:flex;align-items:center;gap:12px;padding:10px 12px;border:none;border-radius:10px;background:{{ navBg.logactivity }};color:{{ navFg.logactivity }};font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;text-align:left;width:100%;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+          Log Activity
+        </button>
+        <button class="navbtn" onClick="{{ goLogGrievance }}" style="display:flex;align-items:center;gap:12px;padding:10px 12px;border:none;border-radius:10px;background:{{ navBg.loggrievance }};color:{{ navFg.loggrievance }};font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;text-align:left;width:100%;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z"/><path d="M12 8v5M12 15.5v.01"/></svg>
+          Log Grievance
+        </button>
+        <div style="font-size:10.5px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#5D6088;padding:14px 12px 6px;">Repository</div>
+        <button class="navbtn" onClick="{{ goEvidence }}" style="display:flex;align-items:center;gap:12px;padding:10px 12px;border:none;border-radius:10px;background:{{ navBg.evidence }};color:{{ navFg.evidence }};font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;text-align:left;width:100%;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.5"/><path d="m21 16-5-5L5 19"/></svg>
+          Evidence
+        </button>
+      </div></sc-if>
+
+      <sc-if value="{{ isRelations }}"><div style="display:flex;flex-direction:column;gap:3px;">
+        <div style="font-size:10.5px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#5D6088;padding:14px 12px 6px;">Grievances</div>
+        <button class="navbtn" onClick="{{ goCases }}" style="display:flex;align-items:center;gap:12px;padding:10px 12px;border:none;border-radius:10px;background:{{ navBg.cases }};color:{{ navFg.cases }};font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;text-align:left;width:100%;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9Z"/><path d="M14 3v6h6M9 14l2 2 4-4"/></svg>
+          Grievance Cases
+          <span style="margin-left:auto;font-size:10.5px;font-weight:700;background:var(--accent);color:#fff;border-radius:20px;padding:1px 8px;">{{ gOpen }}</span>
+        </button>
+        <button class="navbtn" onClick="{{ goLogGrievance }}" style="display:flex;align-items:center;gap:12px;padding:10px 12px;border:none;border-radius:10px;background:{{ navBg.loggrievance }};color:{{ navFg.loggrievance }};font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;text-align:left;width:100%;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z"/><path d="M12 8v5M12 15.5v.01"/></svg>
+          Log Grievance
+        </button>
+        <div style="font-size:10.5px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#5D6088;padding:14px 12px 6px;">Engagement</div>
+        <button class="navbtn" onClick="{{ goStakeholders }}" style="display:flex;align-items:center;gap:12px;padding:10px 12px;border:none;border-radius:10px;background:{{ navBg.stakeholders }};color:{{ navFg.stakeholders }};font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;text-align:left;width:100%;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0"/><path d="M16 6a3 3 0 0 1 0 6M17 20a6 6 0 0 0-2-4.5"/></svg>
+          Stakeholders
+        </button>
+        <button class="navbtn" onClick="{{ goCommunities }}" style="display:flex;align-items:center;gap:12px;padding:10px 12px;border:none;border-radius:10px;background:{{ navBg.communities }};color:{{ navFg.communities }};font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;text-align:left;width:100%;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-5.2-7-11a7 7 0 0 1 14 0c0 5.8-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+          Communities
+        </button>
+      </div></sc-if>
+    </nav>
+
+    <div style="display:flex;align-items:center;gap:11px;padding:14px 10px 4px;margin-top:10px;border-top:1px solid rgba(255,255,255,0.08);">
+      <div style="width:36px;height:36px;border-radius:50%;background:#2A356E;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#fff;">{{ userInitials }}</div>
+      <div style="line-height:1.2;flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ userName }}</div>
+        <div style="font-size:11px;color:#7C7FA0;">{{ userRole }}</div>
+      </div>
+    </div>
+    <div style="font-size:10.5px;color:#5D6088;padding:8px 10px 0;">Tenant · <span style="color:#9EA1C0;">{{ orgName }}</span></div>
+  </aside>
+
+  <!-- ══════════ MAIN ══════════ -->
+  <div style="flex:1;display:flex;flex-direction:column;min-width:0;">
+
+    <!-- top bar -->
+    <header style="height:66px;flex-shrink:0;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 30px;">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <span style="font-size:12px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);">{{ orgName }}</span>
+        <span style="color:var(--line);">/</span>
+        <span style="font-size:14px;font-weight:600;color:var(--navy);">{{ crumb }}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);">Viewing as</span>
+          <div style="display:flex;gap:3px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:4px;">
+            <button onClick="{{ goExec }}" style="font-family:inherit;font-size:12.5px;font-weight:600;padding:7px 13px;border:none;border-radius:7px;cursor:pointer;background:{{ rBg.exec }};color:{{ rFg.exec }};">Executive</button>
+            <button onClick="{{ goManager }}" style="font-family:inherit;font-size:12.5px;font-weight:600;padding:7px 13px;border:none;border-radius:7px;cursor:pointer;background:{{ rBg.manager }};color:{{ rFg.manager }};">Manager</button>
+            <button onClick="{{ goField }}" style="font-family:inherit;font-size:12.5px;font-weight:600;padding:7px 13px;border:none;border-radius:7px;cursor:pointer;background:{{ rBg.field }};color:{{ rFg.field }};">Field</button>
+            <button onClick="{{ goRelations }}" style="font-family:inherit;font-size:12.5px;font-weight:600;padding:7px 13px;border:none;border-radius:7px;cursor:pointer;background:{{ rBg.relations }};color:{{ rFg.relations }};">Relations</button>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:9px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 14px;width:220px;color:var(--muted);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
+          <span style="font-size:13px;">Search projects, communities…</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:7px 12px;font-size:12.5px;font-weight:600;color:var(--navy);">
+          <span style="width:7px;height:7px;border-radius:50%;background:#1F8A5B;display:inline-block;"></span>FY 2026 · ₦ Naira
+        </div>
+      </div>
+    </header>
+
+    <main class="spims-scroll" style="flex:1;overflow-y:auto;padding:30px 34px 48px;">
+
+      <!-- ════════════════ EXECUTIVE DASHBOARD ════════════════ -->
+      <sc-if value="{{ isDashboard }}" hint-placeholder-val="{{ true }}">
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:24px;">
+          <div>
+            <h1 style="font-size:30px;font-weight:800;letter-spacing:-0.02em;margin:0 0 6px;color:var(--navy);">Executive Dashboard</h1>
+            <p style="font-size:14.5px;color:var(--muted);margin:0;">Company-wide social performance — the whole story, at a glance. <span style="color:#B84;">Illustrative data.</span></p>
+          </div>
+          <div style="display:flex;gap:8px;background:#fff;border:1px solid var(--line);border-radius:11px;padding:4px;">
+            <span style="font-size:12.5px;font-weight:600;padding:8px 16px;border-radius:8px;background:var(--navy);color:#fff;">Local + Global</span>
+            <span style="font-size:12.5px;font-weight:600;padding:8px 16px;border-radius:8px;color:var(--muted);">Local</span>
+            <span style="font-size:12.5px;font-weight:600;padding:8px 16px;border-radius:8px;color:var(--muted);">Global</span>
+          </div>
+        </div>
+
+        <!-- KPI row -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:18px;">
+          <div class="card-lift" style="background:var(--navy);color:#fff;border-radius:16px;padding:22px 24px;">
+            <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#9EA1C0;">Social investment · FY26</div>
+            <div style="font-size:38px;font-weight:800;letter-spacing:-0.02em;margin:8px 0 4px;">₦4.68<span style="font-size:20px;font-weight:700;">B</span></div>
+            <div style="font-size:12.5px;color:#C7C9DA;">90% of ₦5.2B budget utilised · $64M since 2010</div>
+          </div>
+          <div class="card-lift" style="background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px 24px;">
+            <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);">Beneficiaries reached</div>
+            <div style="font-size:38px;font-weight:800;letter-spacing:-0.02em;margin:8px 0 4px;color:var(--accent);">312K</div>
+            <div style="font-size:12.5px;color:var(--muted);"><span style="color:#1F8A5B;font-weight:600;">▲ 18%</span> vs FY25</div>
+          </div>
+          <div class="card-lift" style="background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px 24px;">
+            <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);">Active projects</div>
+            <div style="font-size:38px;font-weight:800;letter-spacing:-0.02em;margin:8px 0 4px;color:var(--navy);">47</div>
+            <div style="font-size:12.5px;color:var(--muted);">38 on track · 6 at risk · 3 delayed</div>
+          </div>
+          <div class="card-lift" style="background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px 24px;">
+            <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);">Host communities</div>
+            <div style="font-size:38px;font-weight:800;letter-spacing:-0.02em;margin:8px 0 4px;color:var(--navy);">42</div>
+            <div style="font-size:12.5px;color:var(--muted);">Edo · Delta · Imo</div>
+          </div>
+        </div>
+
+        <!-- middle grid -->
+        <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:18px;margin-bottom:18px;">
+          <!-- spend by theme -->
+          <div style="background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px 26px;">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:22px;">
+              <div style="font-size:16px;font-weight:700;color:var(--navy);">Where the money went</div>
+              <div style="font-size:12px;color:var(--muted);">FY26 spend by pillar</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:18px;">
+              <div style="display:flex;align-items:center;gap:14px;"><span style="width:130px;font-size:13.5px;font-weight:600;">Education</span><span style="flex:1;height:22px;background:var(--bg);border-radius:6px;overflow:hidden;"><span style="display:block;height:100%;width:45%;background:#2B4C9B;border-radius:6px;"></span></span><span style="width:112px;font-size:13.5px;font-weight:700;text-align:right;">₦2.10B · 45%</span></div>
+              <div style="display:flex;align-items:center;gap:14px;"><span style="width:130px;font-size:13.5px;font-weight:600;">Health</span><span style="flex:1;height:22px;background:var(--bg);border-radius:6px;overflow:hidden;"><span style="display:block;height:100%;width:22%;background:#1F8A5B;border-radius:6px;"></span></span><span style="width:112px;font-size:13.5px;font-weight:700;text-align:right;">₦1.03B · 22%</span></div>
+              <div style="display:flex;align-items:center;gap:14px;"><span style="width:130px;font-size:13.5px;font-weight:600;">Infrastructure</span><span style="flex:1;height:22px;background:var(--bg);border-radius:6px;overflow:hidden;"><span style="display:block;height:100%;width:20%;background:#0E7C86;border-radius:6px;"></span></span><span style="width:112px;font-size:13.5px;font-weight:700;text-align:right;">₦0.94B · 20%</span></div>
+              <div style="display:flex;align-items:center;gap:14px;"><span style="width:130px;font-size:13.5px;font-weight:600;">Economic Emp.</span><span style="flex:1;height:22px;background:var(--bg);border-radius:6px;overflow:hidden;"><span style="display:block;height:100%;width:13%;background:#C0491E;border-radius:6px;"></span></span><span style="width:112px;font-size:13.5px;font-weight:700;text-align:right;">₦0.61B · 13%</span></div>
+            </div>
+            <div style="display:flex;gap:26px;margin-top:24px;padding-top:18px;border-top:1px solid var(--line);">
+              <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">By state · Edo</div><div style="font-size:18px;font-weight:700;color:var(--navy);">58%</div></div>
+              <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">Delta</div><div style="font-size:18px;font-weight:700;color:var(--navy);">34%</div></div>
+              <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">Imo</div><div style="font-size:18px;font-weight:700;color:var(--navy);">8%</div></div>
+            </div>
+          </div>
+          <!-- aspiration ring -->
+          <div style="background:var(--navy);color:#fff;border-radius:16px;padding:24px 26px;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+            <div style="font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#9EA1C0;margin-bottom:16px;align-self:flex-start;">{{ targetYear }} Social aspirations</div>
+            <div style="width:190px;height:190px;border-radius:50%;background:conic-gradient(var(--accent) 0% 52%, rgba(255,255,255,0.12) 52% 100%);display:flex;align-items:center;justify-content:center;">
+              <div style="width:142px;height:142px;border-radius:50%;background:var(--navy);display:flex;flex-direction:column;align-items:center;justify-content:center;">
+                <span style="font-size:50px;font-weight:800;line-height:1;">52%</span>
+                <span style="font-size:12px;color:#9EA1C0;margin-top:4px;">achieved</span>
+              </div>
+            </div>
+            <div style="font-size:13.5px;color:#C7C9DA;margin-top:18px;text-align:center;">On track across 4 pillars — Economic Empowerment flagged as the priority gap.</div>
+          </div>
+        </div>
+
+        <!-- lower grid: who benefited / what changed / compliance / risk / value -->
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;">
+          <!-- who benefited -->
+          <div style="background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px 24px;">
+            <div style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:18px;">Who benefited</div>
+            <div style="display:flex;flex-direction:column;gap:15px;">
+              <div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;"><span style="font-weight:600;">Female</span><span style="color:var(--muted);">48%</span></div><span style="display:block;height:8px;background:var(--bg);border-radius:5px;overflow:hidden;"><span style="display:block;height:100%;width:48%;background:var(--accent);"></span></span></div>
+              <div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;"><span style="font-weight:600;">Youth (under 35)</span><span style="color:var(--muted);">64%</span></div><span style="display:block;height:8px;background:var(--bg);border-radius:5px;overflow:hidden;"><span style="display:block;height:100%;width:64%;background:#2B4C9B;"></span></span></div>
+              <div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;"><span style="font-weight:600;">Persons w/ disability</span><span style="color:var(--muted);">3%</span></div><span style="display:block;height:8px;background:var(--bg);border-radius:5px;overflow:hidden;"><span style="display:block;height:100%;width:12%;background:#0E7C86;"></span></span></div>
+            </div>
+          </div>
+          <!-- what changed -->
+          <div style="background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px 24px;">
+            <div style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:18px;">What changed <span style="font-weight:500;font-size:12px;color:var(--muted);">· outcomes</span></div>
+            <div style="display:flex;flex-direction:column;gap:14px;">
+              <div style="display:flex;align-items:baseline;gap:10px;"><span style="font-size:22px;font-weight:800;color:#1F8A5B;">+12%</span><span style="font-size:13px;color:var(--ink);">literacy in STEP schools</span></div>
+              <div style="display:flex;align-items:baseline;gap:10px;"><span style="font-size:22px;font-weight:800;color:#1F8A5B;">−8%</span><span style="font-size:13px;color:var(--ink);">youth unemployment (YEP LGAs)</span></div>
+              <div style="display:flex;align-items:baseline;gap:10px;"><span style="font-size:22px;font-weight:800;color:#1F8A5B;">+22K</span><span style="font-size:13px;color:var(--ink);">people with clean-water access</span></div>
+            </div>
+          </div>
+          <!-- value created -->
+          <div style="background:linear-gradient(160deg,#1a2a63,#111c55);color:#fff;border-radius:16px;padding:22px 24px;">
+            <div style="font-size:15px;font-weight:700;margin-bottom:18px;">Value created</div>
+            <div style="display:flex;gap:22px;">
+              <div><div style="font-size:30px;font-weight:800;color:#fff;">3.4×</div><div style="font-size:11.5px;color:#9EA1C0;">SROI ratio</div></div>
+              <div><div style="font-size:30px;font-weight:800;color:#fff;">78%</div><div style="font-size:11.5px;color:#9EA1C0;">Satisfaction</div></div>
+            </div>
+            <div style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:space-between;">
+              <span style="font-size:12.5px;color:#C7C9DA;">ESG · Social score</span>
+              <span style="font-size:15px;font-weight:800;background:var(--accent);padding:3px 12px;border-radius:8px;">B+</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- compliance + risk strip -->
+        <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:18px;margin-top:18px;">
+          <div style="background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px 24px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;"><div style="font-size:15px;font-weight:700;color:var(--navy);">Are we compliant?</div><span style="font-size:12px;font-weight:600;color:#1F8A5B;">24 / 28 commitments met</span></div>
+            <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;">
+              <div style="display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:10px;padding:11px 14px;"><span style="color:#1F8A5B;">✓</span><span style="font-size:13px;">PIA HCDT — 3% OpEx funded</span></div>
+              <div style="display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:10px;padding:11px 14px;"><span style="font-size:12px;font-weight:700;color:#2B4C9B;">87%</span><span style="font-size:13px;">NCDMB local content</span></div>
+              <div style="display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:10px;padding:11px 14px;"><span style="font-size:12px;font-weight:700;color:#2B4C9B;">92%</span><span style="font-size:13px;">NUPRC grievance SLA</span></div>
+              <div style="display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:10px;padding:11px 14px;"><span style="color:#C0491E;">!</span><span style="font-size:13px;">4 IFRS S1 gaps open</span></div>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px 24px;">
+            <div style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:16px;">What risks exist?</div>
+            <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px;"><div style="width:44px;height:44px;border-radius:11px;background:rgba(227,26,56,0.1);color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;">6</div><div><div style="font-size:13.5px;font-weight:600;">High-risk projects</div><div style="font-size:12px;color:var(--muted);">budget or delivery flagged</div></div></div>
+            <div style="display:flex;align-items:center;gap:14px;"><div style="width:44px;height:44px;border-radius:11px;background:rgba(192,73,30,0.1);color:#C0491E;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;">4</div><div><div style="font-size:13.5px;font-weight:600;">Grievances &gt; 30 days</div><div style="font-size:12px;color:var(--muted);">breaching resolution SLA</div></div></div>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ════════════════ PROJECT PORTFOLIO ════════════════ -->
+      <sc-if value="{{ isPortfolio }}">
+      <div>
+        <h1 style="font-size:30px;font-weight:800;letter-spacing:-0.02em;margin:0 0 6px;color:var(--navy);">Project Portfolio</h1>
+        <p style="font-size:14.5px;color:var(--muted);margin:0 0 22px;">47 active projects across four pillars. Track spend, delivery and risk against plan.</p>
+
+        <div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;">
+          <span style="font-size:12.5px;font-weight:600;padding:8px 16px;border-radius:9px;background:var(--navy);color:#fff;">All pillars</span>
+          <span style="font-size:12.5px;font-weight:600;padding:8px 16px;border-radius:9px;background:#fff;border:1px solid var(--line);color:var(--ink);">Education</span>
+          <span style="font-size:12.5px;font-weight:600;padding:8px 16px;border-radius:9px;background:#fff;border:1px solid var(--line);color:var(--ink);">Health</span>
+          <span style="font-size:12.5px;font-weight:600;padding:8px 16px;border-radius:9px;background:#fff;border:1px solid var(--line);color:var(--ink);">Infrastructure</span>
+          <span style="font-size:12.5px;font-weight:600;padding:8px 16px;border-radius:9px;background:#fff;border:1px solid var(--line);color:var(--ink);">Economic Emp.</span>
+        </div>
+
+        <div style="background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;">
+          <div style="display:grid;grid-template-columns:2.2fr 1.1fr 1fr 1.4fr 1.2fr 1fr;padding:15px 22px;font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);background:#fafafe;border-bottom:1px solid var(--line);">
+            <span>Project</span><span>Pillar</span><span>State</span><span>Budget · Utilised</span><span>Progress</span><span>Status</span>
+          </div>
+          <sc-for list="{{ projects }}" as="p" hint-placeholder-count="8">
+          <div class="rowh" style="display:grid;grid-template-columns:2.2fr 1.1fr 1fr 1.4fr 1.2fr 1fr;padding:16px 22px;font-size:13.5px;align-items:center;border-bottom:1px solid var(--line);">
+            <div><div style="font-weight:600;color:var(--navy);">{{ p.name }}</div><div style="font-size:11.5px;color:var(--muted);">{{ p.id }} · {{ p.output }}</div></div>
+            <div><span style="font-size:11.5px;font-weight:600;padding:4px 10px;border-radius:20px;background:{{ p.pillarBg }};color:{{ p.pillarFg }};">{{ p.pillar }}</span></div>
+            <div style="color:var(--ink);">{{ p.state }}</div>
+            <div><div style="font-weight:600;">{{ p.budget }}</div><span style="display:block;height:6px;width:110px;background:var(--bg);border-radius:4px;overflow:hidden;margin-top:5px;"><span style="display:block;height:100%;width:{{ p.utilPct }};background:#2B4C9B;"></span></span></div>
+            <div style="display:flex;align-items:center;gap:8px;"><span style="flex:1;height:6px;background:var(--bg);border-radius:4px;overflow:hidden;"><span style="display:block;height:100%;width:{{ p.progPct }};background:var(--accent);"></span></span><span style="font-size:12px;font-weight:700;color:var(--muted);">{{ p.progress }}</span></div>
+            <div><span style="font-size:11.5px;font-weight:600;padding:4px 11px;border-radius:20px;background:{{ p.statusBg }};color:{{ p.statusFg }};">{{ p.status }}</span></div>
+          </div>
+          </sc-for>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ════════════════ IMPACT CHAIN ════════════════ -->
+      <sc-if value="{{ isImpact }}">
+      <div>
+        <h1 style="font-size:30px;font-weight:800;letter-spacing:-0.02em;margin:0 0 6px;color:var(--navy);">Impact Chain</h1>
+        <p style="font-size:14.5px;color:var(--muted);margin:0 0 20px;">Trace one programme from what we invest to what it means. Example — <strong style="color:var(--ink);">STEP · Seplat Teachers Empowerment Programme</strong>.</p>
+
+        <div style="display:flex;gap:8px;margin-bottom:22px;flex-wrap:wrap;">
+          <span style="font-size:12.5px;font-weight:600;padding:8px 16px;border-radius:9px;background:var(--navy);color:#fff;">STEP</span>
+          <span style="font-size:12.5px;font-weight:600;padding:8px 16px;border-radius:9px;background:#fff;border:1px solid var(--line);color:var(--ink);">Eye Can See</span>
+          <span style="font-size:12.5px;font-weight:600;padding:8px 16px;border-radius:9px;background:#fff;border:1px solid var(--line);color:var(--ink);">YEP</span>
+          <span style="font-size:12.5px;font-weight:600;padding:8px 16px;border-radius:9px;background:#fff;border:1px solid var(--line);color:var(--ink);">PEARLs Quiz</span>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:22px;">
+          <div style="background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px 18px;">
+            <div style="font-size:12px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);">01 · Inputs</div>
+            <div style="font-size:18px;font-weight:700;margin:10px 0 12px;">What we invest</div>
+            <div style="font-size:13px;line-height:1.45;color:var(--ink);border-top:1px solid var(--line);padding-top:12px;">₦480M, staff &amp; partners — C4C, state ministries of education.</div>
+          </div>
+          <div style="background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px 18px;">
+            <div style="font-size:12px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);">02 · Activities</div>
+            <div style="font-size:18px;font-weight:700;margin:10px 0 12px;">What we do</div>
+            <div style="font-size:13px;line-height:1.45;color:var(--ink);border-top:1px solid var(--line);padding-top:12px;">Train &amp; certify teachers and inspectors in Edo &amp; Delta.</div>
+          </div>
+          <div style="background:#2B4C9B;color:#fff;border-radius:14px;padding:20px 18px;position:relative;">
+            <div style="position:absolute;top:-10px;left:18px;background:#2B4C9B;font-size:9.5px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;padding:3px 9px;border-radius:20px;">Reported today</div>
+            <div style="font-size:12px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;color:#B9CBEB;">03 · Outputs</div>
+            <div style="font-size:18px;font-weight:700;margin:10px 0 12px;">What we deliver</div>
+            <div style="font-size:13px;line-height:1.45;color:#E4ECF8;border-top:1px solid rgba(255,255,255,0.2);padding-top:12px;"><strong style="color:#fff;">623 teachers</strong> certified in 2026.</div>
+          </div>
+          <div style="background:#fff;border:1px solid var(--accent);border-radius:14px;padding:20px 18px;">
+            <div style="font-size:12px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent);">04 · Outcomes</div>
+            <div style="font-size:18px;font-weight:700;margin:10px 0 12px;">What changes</div>
+            <div style="font-size:13px;line-height:1.45;color:var(--ink);border-top:1px solid #F6D3D9;padding-top:12px;">Better teaching quality &amp; classroom practice; +12% literacy.</div>
+          </div>
+          <div style="background:var(--accent);color:#fff;border-radius:14px;padding:20px 18px;position:relative;">
+            <div style="position:absolute;top:-10px;left:18px;background:var(--navy);font-size:9.5px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;padding:3px 9px;border-radius:20px;">Platform adds</div>
+            <div style="font-size:12px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;color:#FFD2D9;">05 · Impact</div>
+            <div style="font-size:18px;font-weight:700;margin:10px 0 12px;">What it means</div>
+            <div style="font-size:13px;line-height:1.45;color:#FFE4E8;border-top:1px solid rgba(255,255,255,0.28);padding-top:12px;"><strong style="color:#fff;">50,000+ children</strong> better educated → poverty &amp; restiveness reduced.</div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+          <div style="background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px 24px;">
+            <div style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:18px;">Baseline → Midline → Endline</div>
+            <div style="display:flex;align-items:flex-end;gap:24px;height:150px;padding-bottom:8px;">
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;"><span style="font-size:13px;font-weight:700;">54%</span><span style="width:100%;height:54px;background:#D7DBEA;border-radius:8px 8px 0 0;"></span><span style="font-size:12px;color:var(--muted);">Baseline</span></div>
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;"><span style="font-size:13px;font-weight:700;">61%</span><span style="width:100%;height:82px;background:#2B4C9B;border-radius:8px 8px 0 0;"></span><span style="font-size:12px;color:var(--muted);">Midline</span></div>
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;"><span style="font-size:13px;font-weight:700;color:var(--accent);">66%</span><span style="width:100%;height:104px;background:var(--accent);border-radius:8px 8px 0 0;"></span><span style="font-size:12px;color:var(--muted);">Endline</span></div>
+            </div>
+            <div style="font-size:12.5px;color:var(--muted);margin-top:6px;">Pupil literacy proficiency in STEP-supported schools.</div>
+          </div>
+          <div style="background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px 24px;">
+            <div style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:16px;">Dual-lens tags on this programme</div>
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              <div style="display:flex;align-items:center;gap:12px;"><span style="font-size:10.5px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;padding:4px 10px;border-radius:6px;background:rgba(43,76,155,0.1);color:#2B4C9B;">Local</span><span style="font-size:13px;">NCDMB human-capital development</span></div>
+              <div style="display:flex;align-items:center;gap:12px;"><span style="font-size:10.5px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;padding:4px 10px;border-radius:6px;background:rgba(227,26,56,0.1);color:var(--accent);">Global</span><span style="font-size:13px;">GRI 404 · IPIECA SOC-6</span></div>
+              <div style="display:flex;align-items:center;gap:12px;"><span style="font-size:10.5px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;padding:4px 10px;border-radius:6px;background:rgba(31,138,91,0.12);color:#1F8A5B;">SDG</span><span style="font-size:13px;">SDG 4 · Quality Education &amp; SDG 8</span></div>
+            </div>
+            <div style="margin-top:18px;padding-top:16px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;">
+              <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">Cost per outcome</div><div style="font-size:22px;font-weight:800;color:var(--navy);">₦2,140</div></div>
+              <div style="text-align:right;"><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">Est. SROI</div><div style="font-size:22px;font-weight:800;color:var(--accent);">3.4×</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ════════════════ COMMUNITIES ════════════════ -->
+      <sc-if value="{{ isCommunities }}">
+      <div>
+        <h1 style="font-size:30px;font-weight:800;letter-spacing:-0.02em;margin:0 0 6px;color:var(--navy);">Communities</h1>
+        <p style="font-size:14.5px;color:var(--muted);margin:0 0 22px;">Host community profiles — leadership, needs and the projects running in each.</p>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px;">
+          <sc-for list="{{ communities }}" as="c" hint-placeholder-count="6">
+          <div class="card-lift" style="background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px 24px;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;">
+              <div><div style="font-size:18px;font-weight:700;color:var(--navy);">{{ c.name }}</div><div style="font-size:12.5px;color:var(--muted);">{{ c.lga }}, {{ c.state }}</div></div>
+              <span style="font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;background:var(--bg);color:var(--ink);">{{ c.projects }} projects</span>
+            </div>
+            <div style="display:flex;gap:20px;border-top:1px solid var(--line);padding-top:14px;">
+              <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;">Population</div><div style="font-size:16px;font-weight:700;">{{ c.pop }}</div></div>
+              <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;">FY26 spend</div><div style="font-size:16px;font-weight:700;">{{ c.spend }}</div></div>
+            </div>
+            <div style="font-size:12.5px;color:var(--ink);margin-top:14px;line-height:1.4;"><span style="color:var(--muted);">CDC:</span> {{ c.cdc }}</div>
+          </div>
+          </sc-for>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ════════════════ INDICATOR LIBRARY ════════════════ -->
+      <sc-if value="{{ isIndicators }}">
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:20px;">
+          <div>
+            <h1 style="font-size:30px;font-weight:800;letter-spacing:-0.02em;margin:0 0 6px;color:var(--navy);">Indicator Library</h1>
+            <p style="font-size:14.5px;color:var(--muted);margin:0;">Capture each metric once — report it against the local mandate and global capital-market frameworks.</p>
+          </div>
+          <div style="display:flex;gap:6px;background:#fff;border:1px solid var(--line);border-radius:11px;padding:4px;">
+            <span style="font-size:12.5px;font-weight:600;padding:8px 16px;border-radius:8px;background:var(--navy);color:#fff;">Both lenses</span>
+            <span style="font-size:12.5px;font-weight:600;padding:8px 16px;border-radius:8px;color:var(--muted);">Local</span>
+            <span style="font-size:12.5px;font-weight:600;padding:8px 16px;border-radius:8px;color:var(--muted);">Global</span>
+          </div>
+        </div>
+
+        <div style="background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;">
+          <div style="display:grid;grid-template-columns:1.5fr 1.5fr 1.6fr 0.7fr;background:var(--navy);color:#fff;font-size:11.5px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;">
+            <div style="padding:16px 22px;">Social metric</div>
+            <div style="padding:16px 22px;border-left:1px solid rgba(255,255,255,0.12);">Local — Nigeria</div>
+            <div style="padding:16px 22px;border-left:1px solid rgba(255,255,255,0.12);">Global standard</div>
+            <div style="padding:16px 22px;border-left:1px solid rgba(255,255,255,0.12);">SDG</div>
+          </div>
+          <sc-for list="{{ indicators }}" as="i" hint-placeholder-count="6">
+          <div class="rowh" style="display:grid;grid-template-columns:1.5fr 1.5fr 1.6fr 0.7fr;font-size:14px;border-bottom:1px solid var(--line);">
+            <div style="padding:16px 22px;font-weight:600;color:var(--navy);">{{ i.metric }}</div>
+            <div style="padding:16px 22px;color:var(--ink);border-left:1px solid var(--line);">{{ i.local }}</div>
+            <div style="padding:16px 22px;color:var(--ink);border-left:1px solid var(--line);">{{ i.global }}</div>
+            <div style="padding:16px 22px;font-weight:700;color:#2B4C9B;border-left:1px solid var(--line);">{{ i.sdg }}</div>
+          </div>
+          </sc-for>
+        </div>
+        <p style="font-size:13px;color:var(--muted);margin:14px 0 0;">Illustrative mapping — the full indicator library is confirmed with Seplat during Phase 1.</p>
+      </div>
+      </sc-if>
+
+      <!-- ════════════════ GRIEVANCES (exec summary) ════════════════ -->
+      <sc-if value="{{ isGrievances }}">
+      <div>
+        <h1 style="font-size:30px;font-weight:800;letter-spacing:-0.02em;margin:0 0 6px;color:var(--navy);">Grievance Management</h1>
+        <p style="font-size:14.5px;color:var(--muted);margin:0 0 18px;">Intake, investigation and resolution — tracked against the NUPRC host-community SLA.</p>
+
+        <div style="display:flex;align-items:stretch;gap:0;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:22px;">
+          <div style="flex:1;padding:16px 22px;border-right:1px solid var(--line);"><div style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#2B4C9B;margin-bottom:4px;">Who raises it</div><div style="font-size:13.5px;color:var(--ink);line-height:1.4;">Community members &amp; stakeholders — via field officers, the phone hotline, walk-in desk or suggestion box.</div></div>
+          <div style="flex:1;padding:16px 22px;"><div style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--accent);margin-bottom:4px;">Who attends to it</div><div style="font-size:13.5px;color:var(--ink);line-height:1.4;">Community Relations — assign, investigate, resolve and close each case with the community.</div></div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:22px;">
+          <div style="background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px 22px;"><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">Open</div><div style="font-size:34px;font-weight:800;color:var(--accent);">{{ gOpen }}</div></div>
+          <div style="background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px 22px;"><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">Resolved / closed</div><div style="font-size:34px;font-weight:800;color:var(--navy);">{{ gClosed }}</div></div>
+          <div style="background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px 22px;"><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">Avg resolution</div><div style="font-size:34px;font-weight:800;color:var(--navy);">9<span style="font-size:16px;font-weight:600;"> days</span></div></div>
+          <div style="background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px 22px;"><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">Breaching SLA</div><div style="font-size:34px;font-weight:800;color:#C0491E;">{{ grievanceBreach }}</div></div>
+        </div>
+
+        <div style="background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;">
+          <div style="display:grid;grid-template-columns:0.8fr 1.9fr 1.4fr 1.4fr 0.9fr 1fr;padding:15px 22px;font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);background:#fafafe;border-bottom:1px solid var(--line);">
+            <span>Ref</span><span>Complaint</span><span>Raised by</span><span>Handled by</span><span>Severity</span><span>Status</span>
+          </div>
+          <sc-for list="{{ gList }}" as="g" hint-placeholder-count="5">
+          <div class="rowh" onClick="{{ g.open }}" style="display:grid;grid-template-columns:0.8fr 1.9fr 1.4fr 1.4fr 0.9fr 1fr;padding:16px 22px;font-size:13.5px;align-items:center;border-bottom:1px solid var(--line);cursor:pointer;">
+            <span style="font-family:monospace;font-size:12.5px;color:var(--muted);">{{ g.ref }}</span>
+            <span style="color:var(--navy);font-weight:500;">{{ g.title }}</span>
+            <span style="color:var(--ink);">{{ g.raiserName }}<br><span style="font-size:11.5px;color:var(--muted);">{{ g.community }}</span></span>
+            <span style="font-weight:600;color:{{ g.assigneeColor }};">{{ g.assigneeShort }}</span>
+            <span><span style="font-size:11.5px;font-weight:600;padding:4px 11px;border-radius:20px;background:{{ g.sevBg }};color:{{ g.sevFg }};">{{ g.severity }}</span></span>
+            <span><span style="font-size:11.5px;font-weight:600;padding:4px 11px;border-radius:20px;background:{{ g.statusBg }};color:{{ g.statusFg }};">{{ g.status }}</span></span>
+          </div>
+          </sc-for>
+        </div>
+        <p style="font-size:12.5px;color:var(--muted);margin:14px 0 0;">Click any case to open the full case file. Switch to <strong style="color:var(--ink);">Relations</strong> to manage the workflow.</p>
+      </div>
+      </sc-if>
+
+      <!-- ════════════════ REPORTS ════════════════ -->
+      <sc-if value="{{ isReports }}">
+      <div>
+        <h1 style="font-size:30px;font-weight:800;letter-spacing:-0.02em;margin:0 0 6px;color:var(--navy);">Reports &amp; Exports</h1>
+        <p style="font-size:14.5px;color:var(--muted);margin:0 0 22px;">One dataset, two audiences. Generate board, regulatory and investor reports — no double entry.</p>
+
+        <div style="background:linear-gradient(120deg,#111c55,#1c2e6e);color:#fff;border-radius:16px;padding:26px 30px;margin-bottom:22px;display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div style="font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#9EA1C0;">Same data, reported two ways</div>
+            <div style="font-size:22px;font-weight:700;margin-top:6px;">Local compliance &amp; global ESG — from one entry.</div>
+          </div>
+          <div style="display:flex;gap:10px;">
+            <span style="font-size:12.5px;font-weight:600;padding:9px 16px;border-radius:9px;background:rgba(255,255,255,0.12);">PDF</span>
+            <span style="font-size:12.5px;font-weight:600;padding:9px 16px;border-radius:9px;background:rgba(255,255,255,0.12);">Excel</span>
+            <span style="font-size:12.5px;font-weight:600;padding:9px 16px;border-radius:9px;background:rgba(255,255,255,0.12);">PowerPoint</span>
+            <span style="font-size:12.5px;font-weight:600;padding:9px 16px;border-radius:9px;background:rgba(255,255,255,0.12);">Word</span>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px;">
+          <sc-for list="{{ reports }}" as="r" hint-placeholder-count="6">
+          <div class="card-lift" style="background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px;display:flex;flex-direction:column;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+              <span style="font-size:10.5px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;padding:4px 10px;border-radius:6px;background:{{ r.tagBg }};color:{{ r.tagFg }};">{{ r.lens }}</span>
+              <span style="font-size:11.5px;color:var(--muted);">{{ r.updated }}</span>
+            </div>
+            <div style="font-size:17px;font-weight:700;color:var(--navy);margin-bottom:6px;">{{ r.name }}</div>
+            <p style="font-size:13px;color:var(--ink);line-height:1.45;margin:0 0 18px;flex:1;">{{ r.desc }}</p>
+            <button style="align-self:flex-start;font-family:inherit;font-size:13px;font-weight:600;color:#fff;background:var(--accent);border:none;border-radius:9px;padding:9px 18px;cursor:pointer;">Generate report →</button>
+          </div>
+          </sc-for>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ════════════════ MANAGER · MY PROJECTS ════════════════ -->
+      <sc-if value="{{ isMyProjects }}">
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:22px;">
+          <div>
+            <h1 style="font-size:30px;font-weight:800;letter-spacing:-0.02em;margin:0 0 6px;color:var(--navy);">My Projects</h1>
+            <p style="font-size:14.5px;color:var(--muted);margin:0;">Projects you own across Edo &amp; Delta. Update delivery, log spend and submit for approval.</p>
+          </div>
+          <button onClick="{{ goNewProject }}" style="display:flex;align-items:center;gap:8px;font-family:inherit;font-size:13.5px;font-weight:600;color:#fff;background:var(--accent);border:none;border-radius:10px;padding:12px 20px;cursor:pointer;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+            New project
+          </button>
+        </div>
+        <div style="background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;">
+          <div style="display:grid;grid-template-columns:2.4fr 1.1fr 1fr 1.3fr 1fr 0.9fr;padding:15px 22px;font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);background:#fafafe;border-bottom:1px solid var(--line);">
+            <span>Project</span><span>Pillar</span><span>State</span><span>Progress</span><span>Status</span><span></span>
+          </div>
+          <sc-for list="{{ projects }}" as="p" hint-placeholder-count="8">
+          <div class="rowh" style="display:grid;grid-template-columns:2.4fr 1.1fr 1fr 1.3fr 1fr 0.9fr;padding:15px 22px;font-size:13.5px;align-items:center;border-bottom:1px solid var(--line);">
+            <div><div style="font-weight:600;color:var(--navy);">{{ p.name }}</div><div style="font-size:11.5px;color:var(--muted);">{{ p.id }} · {{ p.budget }} budget</div></div>
+            <div><span style="font-size:11.5px;font-weight:600;padding:4px 10px;border-radius:20px;background:{{ p.pillarBg }};color:{{ p.pillarFg }};">{{ p.pillar }}</span></div>
+            <div style="color:var(--ink);">{{ p.state }}</div>
+            <div style="display:flex;align-items:center;gap:8px;"><span style="flex:1;height:6px;background:var(--bg);border-radius:4px;overflow:hidden;"><span style="display:block;height:100%;width:{{ p.progPct }};background:var(--accent);"></span></span><span style="font-size:12px;font-weight:700;color:var(--muted);">{{ p.progress }}</span></div>
+            <div><span style="font-size:11.5px;font-weight:600;padding:4px 11px;border-radius:20px;background:{{ p.statusBg }};color:{{ p.statusFg }};">{{ p.status }}</span></div>
+            <div style="text-align:right;"><button onClick="{{ goNewProject }}" style="font-family:inherit;font-size:12.5px;font-weight:600;color:var(--navy);background:#fff;border:1px solid var(--line);border-radius:8px;padding:7px 14px;cursor:pointer;">Manage</button></div>
+          </div>
+          </sc-for>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ════════════════ MANAGER · NEW PROJECT ════════════════ -->
+      <sc-if value="{{ isNewProject }}">
+      <div style="max-width:1080px;">
+        <h1 style="font-size:30px;font-weight:800;letter-spacing:-0.02em;margin:0 0 6px;color:var(--navy);">New Project</h1>
+        <p style="font-size:14.5px;color:var(--muted);margin:0 0 24px;">Enter a project once. It is tagged against both local and global indicators, then routed for approval — no double entry.</p>
+
+        <div style="background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px 26px;margin-bottom:18px;">
+          <div style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--line);">1 · Project details</div>
+          <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:16px;"><label style="font-size:12px;font-weight:600;color:var(--navy);">Project title</label><input value="Solar Skills Academy — Cohort 3" style="width:100%;font-family:inherit;font-size:14px;padding:11px 13px;border:1px solid var(--line);border-radius:10px;background:#fbfbfd;color:var(--ink);"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px 20px;">
+            <div style="display:flex;flex-direction:column;gap:7px;"><label style="font-size:12px;font-weight:600;color:var(--navy);">Project ID</label><input value="SPL-2026-048" readonly style="width:100%;font-family:monospace;font-size:14px;padding:11px 13px;border:1px solid var(--line);border-radius:10px;background:#f1f1f6;color:var(--muted);"></div>
+            <div style="display:flex;flex-direction:column;gap:7px;"><label style="font-size:12px;font-weight:600;color:var(--navy);">Pillar</label><select style="width:100%;font-family:inherit;font-size:14px;padding:11px 13px;border:1px solid var(--line);border-radius:10px;background:#fbfbfd;color:var(--ink);"><option>Economic Empowerment</option><option>Education</option><option>Health</option><option>Infrastructure</option></select></div>
+            <div style="display:flex;flex-direction:column;gap:7px;"><label style="font-size:12px;font-weight:600;color:var(--navy);">Project owner</label><input value="Tunde Bello" style="width:100%;font-family:inherit;font-size:14px;padding:11px 13px;border:1px solid var(--line);border-radius:10px;background:#fbfbfd;color:var(--ink);"></div>
+          </div>
+        </div>
+
+        <div style="background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px 26px;margin-bottom:18px;">
+          <div style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--line);">2 · Location &amp; community</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px 20px;">
+            <div style="display:flex;flex-direction:column;gap:7px;"><label style="font-size:12px;font-weight:600;color:var(--navy);">Community</label><select style="width:100%;font-family:inherit;font-size:14px;padding:11px 13px;border:1px solid var(--line);border-radius:10px;background:#fbfbfd;color:var(--ink);"><option>Sapele</option><option>Oben</option><option>Amukpe</option><option>Ovhor</option><option>Orogun</option></select></div>
+            <div style="display:flex;flex-direction:column;gap:7px;"><label style="font-size:12px;font-weight:600;color:var(--navy);">LGA</label><input value="Sapele LGA" style="width:100%;font-family:inherit;font-size:14px;padding:11px 13px;border:1px solid var(--line);border-radius:10px;background:#fbfbfd;color:var(--ink);"></div>
+            <div style="display:flex;flex-direction:column;gap:7px;"><label style="font-size:12px;font-weight:600;color:var(--navy);">State</label><select style="width:100%;font-family:inherit;font-size:14px;padding:11px 13px;border:1px solid var(--line);border-radius:10px;background:#fbfbfd;color:var(--ink);"><option>Delta</option><option>Edo</option><option>Imo</option></select></div>
+            <div style="display:flex;flex-direction:column;gap:7px;"><label style="font-size:12px;font-weight:600;color:var(--navy);">GPS coordinates</label><input value="5.8904, 5.6767" style="width:100%;font-family:monospace;font-size:13px;padding:11px 13px;border:1px solid var(--line);border-radius:10px;background:#fbfbfd;color:var(--ink);"></div>
+          </div>
+        </div>
+
+        <div style="background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px 26px;margin-bottom:18px;">
+          <div style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--line);">3 · Timeline &amp; budget</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px 20px;">
+            <div style="display:flex;flex-direction:column;gap:7px;"><label style="font-size:12px;font-weight:600;color:var(--navy);">Start date</label><input value="2026-09-01" style="width:100%;font-family:inherit;font-size:14px;padding:11px 13px;border:1px solid var(--line);border-radius:10px;background:#fbfbfd;color:var(--ink);"></div>
+            <div style="display:flex;flex-direction:column;gap:7px;"><label style="font-size:12px;font-weight:600;color:var(--navy);">End date</label><input value="2027-06-30" style="width:100%;font-family:inherit;font-size:14px;padding:11px 13px;border:1px solid var(--line);border-radius:10px;background:#fbfbfd;color:var(--ink);"></div>
+            <div style="display:flex;flex-direction:column;gap:7px;"><label style="font-size:12px;font-weight:600;color:var(--navy);">Budget (₦)</label><input value="₦ 180,000,000" style="width:100%;font-family:inherit;font-size:14px;padding:11px 13px;border:1px solid var(--line);border-radius:10px;background:#fbfbfd;color:var(--ink);"></div>
+            <div style="display:flex;flex-direction:column;gap:7px;"><label style="font-size:12px;font-weight:600;color:var(--navy);">Funding source</label><select style="width:100%;font-family:inherit;font-size:14px;padding:11px 13px;border:1px solid var(--line);border-radius:10px;background:#fbfbfd;color:var(--ink);"><option>PIA HCDT — 3% OpEx</option><option>Direct CSR budget</option><option>Partner co-funded (C4C)</option></select></div>
+            <div style="display:flex;flex-direction:column;gap:7px;"><label style="font-size:12px;font-weight:600;color:var(--navy);">Contractor</label><input value="Bright Energy Ltd" style="width:100%;font-family:inherit;font-size:14px;padding:11px 13px;border:1px solid var(--line);border-radius:10px;background:#fbfbfd;color:var(--ink);"></div>
+            <div style="display:flex;flex-direction:column;gap:7px;"><label style="font-size:12px;font-weight:600;color:var(--navy);">Implementing NGO</label><input value="C4C Foundation" style="width:100%;font-family:inherit;font-size:14px;padding:11px 13px;border:1px solid var(--line);border-radius:10px;background:#fbfbfd;color:var(--ink);"></div>
+          </div>
+        </div>
+
+        <div style="background:var(--navy);color:#fff;border-radius:16px;padding:24px 26px;margin-bottom:18px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,0.14);"><div style="font-size:15px;font-weight:700;">4 · Dual-lens indicator tags</div><span style="font-size:12px;color:#9EA1C0;">one entry → local + global reports</span></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px 20px;">
+            <div style="display:flex;flex-direction:column;gap:7px;"><label style="font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#9FC0EB;">Local — Nigeria</label><select style="width:100%;font-family:inherit;font-size:14px;padding:11px 13px;border:1px solid rgba(255,255,255,0.18);border-radius:10px;background:rgba(255,255,255,0.06);color:#fff;"><option>NCDMB human-capital dev.</option><option>PIA HCDT — 3% OpEx</option><option>NUPRC HC Regs 2022</option></select></div>
+            <div style="display:flex;flex-direction:column;gap:7px;"><label style="font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#F4A6B2;">Global standard</label><select style="width:100%;font-family:inherit;font-size:14px;padding:11px 13px;border:1px solid rgba(255,255,255,0.18);border-radius:10px;background:rgba(255,255,255,0.06);color:#fff;"><option>GRI 404 · IPIECA SOC-6</option><option>GRI 203 / 413</option><option>GRI 401 · IPIECA SOC-5</option></select></div>
+            <div style="display:flex;flex-direction:column;gap:7px;"><label style="font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#9FE0BE;">SDG</label><select style="width:100%;font-family:inherit;font-size:14px;padding:11px 13px;border:1px solid rgba(255,255,255,0.18);border-radius:10px;background:rgba(255,255,255,0.06);color:#fff;"><option>SDG 8 · Decent Work</option><option>SDG 4 · Quality Education</option><option>SDG 7 · Clean Energy</option></select></div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:12px;justify-content:flex-end;align-items:center;">
+          <span style="font-size:12.5px;color:var(--muted);margin-right:auto;">Submitting routes to your reviewer for approval before it appears on the executive dashboard.</span>
+          <button style="font-family:inherit;font-size:13.5px;font-weight:600;color:var(--navy);background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 22px;cursor:pointer;">Save draft</button>
+          <button onClick="{{ goApprovals }}" style="font-family:inherit;font-size:13.5px;font-weight:600;color:#fff;background:var(--accent);border:none;border-radius:10px;padding:12px 22px;cursor:pointer;">Submit for approval →</button>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ════════════════ MANAGER · APPROVALS ════════════════ -->
+      <sc-if value="{{ isApprovals }}">
+      <div>
+        <h1 style="font-size:30px;font-weight:800;letter-spacing:-0.02em;margin:0 0 6px;color:var(--navy);">Approvals Queue</h1>
+        <p style="font-size:14.5px;color:var(--muted);margin:0 0 20px;">Field submissions waiting on your review. Approved records flow straight into the KPIs and reports.</p>
+
+        <div style="display:flex;align-items:center;gap:14px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 22px;margin-bottom:20px;font-size:13px;font-weight:600;color:var(--muted);flex-wrap:wrap;">
+          <span style="color:#2B4C9B;">Field officer logs</span>
+          <span style="color:var(--line);">→</span>
+          <span style="color:var(--accent);">Manager reviews &amp; approves</span>
+          <span style="color:var(--line);">→</span>
+          <span style="color:#1F8A5B;">Feeds indicators &amp; audit trail</span>
+          <span style="color:var(--line);">→</span>
+          <span style="color:var(--navy);">Executive dashboard &amp; reports</span>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <sc-for list="{{ pendingApprovals }}" as="a" hint-placeholder-count="4">
+          <div style="background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 22px;display:flex;align-items:center;gap:20px;">
+            <div style="width:42px;height:42px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--navy);flex-shrink:0;">{{ a.who }}</div>
+            <div style="flex:1;min-width:0;">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;"><span style="font-size:10.5px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;padding:3px 9px;border-radius:6px;background:{{ a.typeBg }};color:{{ a.typeFg }};">{{ a.type }}</span><span style="font-size:14px;font-weight:600;color:var(--navy);">{{ a.item }}</span></div>
+              <div style="font-size:12.5px;color:var(--muted);">{{ a.project }} · submitted {{ a.when }}</div>
+            </div>
+            <div style="display:flex;gap:10px;flex-shrink:0;">
+              <button style="font-family:inherit;font-size:12.5px;font-weight:600;color:var(--muted);background:#fff;border:1px solid var(--line);border-radius:9px;padding:9px 16px;cursor:pointer;">Return</button>
+              <button style="font-family:inherit;font-size:12.5px;font-weight:600;color:#fff;background:#1F8A5B;border:none;border-radius:9px;padding:9px 18px;cursor:pointer;">Approve</button>
+            </div>
+          </div>
+          </sc-for>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ════════════════ FIELD · MY TASKS ════════════════ -->
+      <sc-if value="{{ isMyTasks }}">
+      <div>
+        <div style="display:flex;align-items:center;gap:10px;background:#FFF4E9;border:1px solid #F3D9BC;border-radius:12px;padding:11px 18px;margin-bottom:20px;font-size:13px;color:#8A5A0B;font-weight:500;">
+          <span style="width:8px;height:8px;border-radius:50%;background:#C0491E;display:inline-block;"></span>
+          Working offline — 2 saved entries will sync automatically when you regain signal.
+        </div>
+        <h1 style="font-size:30px;font-weight:800;letter-spacing:-0.02em;margin:0 0 6px;color:var(--navy);">My Tasks</h1>
+        <p style="font-size:14.5px;color:var(--muted);margin:0 0 22px;">Assigned to you across Sapele cluster. Tap a task to log it — takes under five minutes.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <sc-for list="{{ tasks }}" as="t" hint-placeholder-count="4">
+          <div style="background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px 24px;display:flex;align-items:center;gap:18px;">
+            <div style="flex:1;">
+              <div style="font-size:17px;font-weight:700;color:var(--navy);margin-bottom:4px;">{{ t.title }}</div>
+              <div style="font-size:13px;color:var(--muted);">{{ t.project }} · <span style="color:{{ t.dueColor }};font-weight:600;">{{ t.due }}</span></div>
+            </div>
+            <button onClick="{{ goLogActivity }}" style="font-family:inherit;font-size:14px;font-weight:600;color:#fff;background:var(--accent);border:none;border-radius:11px;padding:13px 22px;cursor:pointer;white-space:nowrap;">Log now →</button>
+          </div>
+          </sc-for>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ════════════════ FIELD · LOG ACTIVITY ════════════════ -->
+      <sc-if value="{{ isLogActivity }}">
+      <div style="max-width:780px;margin:0 auto;">
+        <h1 style="font-size:30px;font-weight:800;letter-spacing:-0.02em;margin:0 0 6px;color:var(--navy);">Log Activity</h1>
+        <p style="font-size:14.5px;color:var(--muted);margin:0 0 22px;">Record what happened on the ground — activity, people reached and evidence, in one pass.</p>
+
+        <div style="background:#fff;border:1px solid var(--line);border-radius:16px;padding:26px 28px;">
+          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;"><label style="font-size:13px;font-weight:600;color:var(--navy);">Project</label><select style="width:100%;font-family:inherit;font-size:16px;padding:15px 16px;border:1px solid var(--line);border-radius:12px;background:#fbfbfd;color:var(--ink);"><option>STEP · Seplat Teachers Empowerment — Sapele</option><option>Eye Can See — Oben</option><option>YEP — Orogun</option></select></div>
+
+          <label style="font-size:13px;font-weight:600;color:var(--navy);display:block;margin-bottom:10px;">Activity type</label>
+          <div style="display:flex;flex-wrap:wrap;gap:9px;margin-bottom:22px;">
+            <sc-for list="{{ activityTypes }}" as="at" hint-placeholder-count="7">
+            <span style="font-size:13.5px;font-weight:500;padding:11px 16px;border-radius:11px;border:1px solid var(--line);background:#fbfbfd;color:var(--ink);cursor:pointer;">{{ at }}</span>
+            </sc-for>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 18px;margin-bottom:22px;">
+            <div style="display:flex;flex-direction:column;gap:8px;"><label style="font-size:13px;font-weight:600;color:var(--navy);">Date</label><input value="2026-07-06" style="width:100%;font-family:inherit;font-size:16px;padding:15px 16px;border:1px solid var(--line);border-radius:12px;background:#fbfbfd;color:var(--ink);"></div>
+            <div style="display:flex;flex-direction:column;gap:8px;"><label style="font-size:13px;font-weight:600;color:var(--navy);">Location (auto-GPS)</label><input value="Sapele — 5.8904, 5.6767" style="width:100%;font-family:monospace;font-size:14px;padding:15px 16px;border:1px solid var(--line);border-radius:12px;background:#f1f1f6;color:var(--muted);"></div>
+          </div>
+
+          <div style="background:#fbfbfd;border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin-bottom:22px;">
+            <label style="font-size:13px;font-weight:700;color:var(--navy);display:block;margin-bottom:14px;">Beneficiaries reached <span style="font-weight:500;color:var(--muted);">· disaggregated</span></label>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:12px;">
+              <div style="display:flex;flex-direction:column;gap:6px;"><label style="font-size:11.5px;color:var(--muted);">Total</label><input value="42" style="width:100%;font-family:inherit;font-size:18px;font-weight:700;text-align:center;padding:13px 8px;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--navy);"></div>
+              <div style="display:flex;flex-direction:column;gap:6px;"><label style="font-size:11.5px;color:var(--muted);">Female</label><input value="24" style="width:100%;font-family:inherit;font-size:18px;font-weight:700;text-align:center;padding:13px 8px;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--ink);"></div>
+              <div style="display:flex;flex-direction:column;gap:6px;"><label style="font-size:11.5px;color:var(--muted);">Male</label><input value="18" style="width:100%;font-family:inherit;font-size:18px;font-weight:700;text-align:center;padding:13px 8px;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--ink);"></div>
+              <div style="display:flex;flex-direction:column;gap:6px;"><label style="font-size:11.5px;color:var(--muted);">Youth</label><input value="31" style="width:100%;font-family:inherit;font-size:18px;font-weight:700;text-align:center;padding:13px 8px;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--ink);"></div>
+              <div style="display:flex;flex-direction:column;gap:6px;"><label style="font-size:11.5px;color:var(--muted);">PWD</label><input value="1" style="width:100%;font-family:inherit;font-size:18px;font-weight:700;text-align:center;padding:13px 8px;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--ink);"></div>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:22px;"><label style="font-size:13px;font-weight:600;color:var(--navy);">Site notes</label><textarea rows="3" style="width:100%;font-family:inherit;font-size:15px;padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:#fbfbfd;color:var(--ink);resize:vertical;">Full-day literacy methods training delivered at Sapele Grammar School. Strong turnout; two teachers requested follow-up materials.</textarea></div>
+
+          <label style="font-size:13px;font-weight:600;color:var(--navy);display:block;margin-bottom:10px;">Evidence</label>
+          <div style="display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap;">
+            <div style="flex:1;min-width:200px;border:1.5px dashed #C7CADB;border-radius:12px;padding:22px;text-align:center;color:var(--muted);background:#fbfbfd;">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:6px;"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.5"/><path d="m21 16-5-5L5 19"/></svg>
+              <div style="font-size:13px;font-weight:600;color:var(--ink);">Add photos</div>
+              <div style="font-size:11.5px;">2 attached</div>
+            </div>
+            <div style="flex:1;min-width:200px;border:1.5px dashed #C7CADB;border-radius:12px;padding:22px;text-align:center;color:var(--muted);background:#fbfbfd;">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:6px;"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9Z"/><path d="M14 3v6h6"/></svg>
+              <div style="font-size:13px;font-weight:600;color:var(--ink);">Attendance sheet</div>
+              <div style="font-size:11.5px;">1 attached</div>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:12px;">
+            <button style="flex:1;font-family:inherit;font-size:15px;font-weight:600;color:var(--navy);background:#fff;border:1px solid var(--line);border-radius:12px;padding:15px;cursor:pointer;">Save offline</button>
+            <button onClick="{{ goMyTasks }}" style="flex:1.4;font-family:inherit;font-size:15px;font-weight:600;color:#fff;background:var(--accent);border:none;border-radius:12px;padding:15px;cursor:pointer;">Save &amp; submit for approval →</button>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ════════════════ FIELD · EVIDENCE ════════════════ -->
+      <sc-if value="{{ isEvidence }}">
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:22px;">
+          <div>
+            <h1 style="font-size:30px;font-weight:800;letter-spacing:-0.02em;margin:0 0 6px;color:var(--navy);">Evidence Repository</h1>
+            <p style="font-size:14.5px;color:var(--muted);margin:0;">Photos, sheets, videos and documents — geo-tagged and linked to their project.</p>
+          </div>
+          <button onClick="{{ goLogActivity }}" style="display:flex;align-items:center;gap:8px;font-family:inherit;font-size:13.5px;font-weight:600;color:#fff;background:var(--accent);border:none;border-radius:10px;padding:12px 20px;cursor:pointer;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+            Upload
+          </button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px;">
+          <sc-for list="{{ evidenceItems }}" as="e" hint-placeholder-count="6">
+          <div class="card-lift" style="background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;">
+            <div style="height:132px;background:repeating-linear-gradient(45deg,#eef0f6,#eef0f6 9px,#e5e8f2 9px,#e5e8f2 18px);display:flex;align-items:center;justify-content:center;">
+              <span style="font-family:monospace;font-size:11px;font-weight:600;letter-spacing:0.08em;color:#9498b5;background:#fff;padding:4px 10px;border-radius:6px;">{{ e.kind }}</span>
+            </div>
+            <div style="padding:14px 16px;">
+              <div style="font-family:monospace;font-size:12.5px;font-weight:600;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ e.label }}</div>
+              <div style="font-size:11.5px;color:var(--muted);margin-top:3px;">{{ e.meta }}</div>
+            </div>
+          </div>
+          </sc-for>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ════════════════ RELATIONS · GRIEVANCE CASES ════════════════ -->
+      <sc-if value="{{ isCases }}">
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:20px;">
+          <div>
+            <h1 style="font-size:30px;font-weight:800;letter-spacing:-0.02em;margin:0 0 6px;color:var(--navy);">Grievance Cases</h1>
+            <p style="font-size:14.5px;color:var(--muted);margin:0;">Community complaints assigned to you. Open a case to assign, investigate, resolve and close it.</p>
+          </div>
+          <button onClick="{{ goLogGrievance }}" style="display:flex;align-items:center;gap:8px;font-family:inherit;font-size:13.5px;font-weight:600;color:#fff;background:var(--accent);border:none;border-radius:10px;padding:12px 20px;cursor:pointer;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+            Log grievance
+          </button>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:22px;">
+          <div style="background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px 22px;"><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">Open &amp; active</div><div style="font-size:34px;font-weight:800;color:var(--accent);">{{ gOpen }}</div></div>
+          <div style="background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px 22px;"><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">Investigating</div><div style="font-size:34px;font-weight:800;color:#2B4C9B;">{{ gInvestigating }}</div></div>
+          <div style="background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px 22px;"><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">Unassigned</div><div style="font-size:34px;font-weight:800;color:#C0491E;">{{ gUnassigned }}</div></div>
+          <div style="background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px 22px;"><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">Breaching SLA</div><div style="font-size:34px;font-weight:800;color:#C0491E;">{{ grievanceBreach }}</div></div>
+        </div>
+
+        <div style="background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;">
+          <div style="display:grid;grid-template-columns:0.8fr 1.9fr 1.4fr 1.4fr 0.9fr 1fr;padding:15px 22px;font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);background:#fafafe;border-bottom:1px solid var(--line);">
+            <span>Ref</span><span>Complaint</span><span>Raised by</span><span>Handled by</span><span>Severity</span><span>Status</span>
+          </div>
+          <sc-for list="{{ gList }}" as="g" hint-placeholder-count="5">
+          <div class="rowh" onClick="{{ g.open }}" style="display:grid;grid-template-columns:0.8fr 1.9fr 1.4fr 1.4fr 0.9fr 1fr;padding:16px 22px;font-size:13.5px;align-items:center;border-bottom:1px solid var(--line);cursor:pointer;">
+            <span style="font-family:monospace;font-size:12.5px;color:var(--muted);">{{ g.ref }}</span>
+            <span style="color:var(--navy);font-weight:500;">{{ g.title }}</span>
+            <span style="color:var(--ink);">{{ g.raiserName }}<br><span style="font-size:11.5px;color:var(--muted);">{{ g.community }}</span></span>
+            <span style="font-weight:600;color:{{ g.assigneeColor }};">{{ g.assigneeShort }}</span>
+            <span><span style="font-size:11.5px;font-weight:600;padding:4px 11px;border-radius:20px;background:{{ g.sevBg }};color:{{ g.sevFg }};">{{ g.severity }}</span></span>
+            <span><span style="font-size:11.5px;font-weight:600;padding:4px 11px;border-radius:20px;background:{{ g.statusBg }};color:{{ g.statusFg }};">{{ g.status }}</span></span>
+          </div>
+          </sc-for>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ════════════════ LOG GRIEVANCE (intake) ════════════════ -->
+      <sc-if value="{{ isLogGrievance }}">
+      <div style="max-width:820px;">
+        <h1 style="font-size:30px;font-weight:800;letter-spacing:-0.02em;margin:0 0 6px;color:var(--navy);">Log Grievance</h1>
+        <p style="font-size:14.5px;color:var(--muted);margin:0 0 22px;">Capture a complaint raised by a community member or stakeholder. It opens a case and routes to Community Relations.</p>
+
+        <div style="background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px 26px;margin-bottom:18px;">
+          <div style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--line);">Who raised it</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 20px;">
+            <div style="display:flex;flex-direction:column;gap:7px;"><label style="font-size:12px;font-weight:600;color:var(--navy);">Name of complainant</label><input ref="{{ gName }}" placeholder="e.g. Pa Godwin Eze" style="width:100%;font-family:inherit;font-size:14px;padding:11px 13px;border:1px solid var(--line);border-radius:10px;background:#fbfbfd;color:var(--ink);"></div>
+            <div style="display:flex;flex-direction:column;gap:7px;"><label style="font-size:12px;font-weight:600;color:var(--navy);">Contact</label><input ref="{{ gContact }}" placeholder="Phone or via CDC" style="width:100%;font-family:inherit;font-size:14px;padding:11px 13px;border:1px solid var(--line);border-radius:10px;background:#fbfbfd;color:var(--ink);"></div>
+            <div style="display:flex;flex-direction:column;gap:7px;"><label style="font-size:12px;font-weight:600;color:var(--navy);">Community</label><select ref="{{ gCommunity }}" style="width:100%;font-family:inherit;font-size:14px;padding:11px 13px;border:1px solid var(--line);border-radius:10px;background:#fbfbfd;color:var(--ink);"><option>Sapele, Delta</option><option>Oben, Edo</option><option>Amukpe, Delta</option><option>Ovhor, Delta</option><option>Orogun, Delta</option><option>Ozara, Edo</option></select></div>
+            <div style="display:flex;flex-direction:column;gap:7px;"><label style="font-size:12px;font-weight:600;color:var(--navy);">Intake channel</label><select ref="{{ gChannel }}" style="width:100%;font-family:inherit;font-size:14px;padding:11px 13px;border:1px solid var(--line);border-radius:10px;background:#fbfbfd;color:var(--ink);"><option>Walk-in desk</option><option>Phone hotline</option><option>Community meeting</option><option>Suggestion box</option><option>Field officer visit</option><option>Email / letter</option></select></div>
+          </div>
+        </div>
+
+        <div style="background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px 26px;margin-bottom:18px;">
+          <div style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--line);">The complaint</div>
+          <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:16px;"><label style="font-size:12px;font-weight:600;color:var(--navy);">Summary</label><input ref="{{ gTitle }}" placeholder="Short title, e.g. Delayed borehole handover" style="width:100%;font-family:inherit;font-size:14px;padding:11px 13px;border:1px solid var(--line);border-radius:10px;background:#fbfbfd;color:var(--ink);"></div>
+          <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px 20px;margin-bottom:16px;">
+            <div style="display:flex;flex-direction:column;gap:7px;"><label style="font-size:12px;font-weight:600;color:var(--navy);">Category</label><select ref="{{ gCategory }}" style="width:100%;font-family:inherit;font-size:14px;padding:11px 13px;border:1px solid var(--line);border-radius:10px;background:#fbfbfd;color:var(--ink);"><option>Infrastructure / service delivery</option><option>Employment / local content</option><option>Environment / nuisance</option><option>Programme / fairness</option><option>Programme / access</option><option>Compensation / land</option><option>Safety</option><option>Other</option></select></div>
+            <div style="display:flex;flex-direction:column;gap:7px;"><label style="font-size:12px;font-weight:600;color:var(--navy);">Severity</label><select ref="{{ gSeverity }}" style="width:100%;font-family:inherit;font-size:14px;padding:11px 13px;border:1px solid var(--line);border-radius:10px;background:#fbfbfd;color:var(--ink);"><option>Low</option><option selected>Medium</option><option>High</option></select></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:7px;"><label style="font-size:12px;font-weight:600;color:var(--navy);">Description</label><textarea ref="{{ gDesc }}" rows="3" placeholder="What happened, and what the complainant is asking for." style="width:100%;font-family:inherit;font-size:14px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:#fbfbfd;color:var(--ink);resize:vertical;"></textarea></div>
+        </div>
+
+        <div style="display:flex;gap:12px;justify-content:flex-end;align-items:center;">
+          <span style="font-size:12.5px;color:var(--muted);margin-right:auto;">On submit, a case reference is generated and the grievance appears in the case log immediately.</span>
+          <button onClick="{{ goCases }}" style="font-family:inherit;font-size:13.5px;font-weight:600;color:var(--navy);background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 22px;cursor:pointer;">Cancel</button>
+          <button onClick="{{ logGrievance }}" style="font-family:inherit;font-size:13.5px;font-weight:600;color:#fff;background:var(--accent);border:none;border-radius:10px;padding:12px 22px;cursor:pointer;">Log grievance &amp; open case →</button>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ════════════════ STAKEHOLDER REGISTER ════════════════ -->
+      <sc-if value="{{ isStakeholders }}">
+      <div>
+        <h1 style="font-size:30px;font-weight:800;letter-spacing:-0.02em;margin:0 0 6px;color:var(--navy);">Stakeholder Register</h1>
+        <p style="font-size:14.5px;color:var(--muted);margin:0 0 22px;">Government, community, NGO and traditional stakeholders — engagements, commitments and status.</p>
+        <div style="background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;">
+          <div style="display:grid;grid-template-columns:2fr 1.5fr 1.3fr 0.9fr 1fr 0.9fr;padding:15px 22px;font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);background:#fafafe;border-bottom:1px solid var(--line);">
+            <span>Stakeholder</span><span>Type</span><span>Community</span><span>Engagements</span><span>Commitments</span><span>Status</span>
+          </div>
+          <sc-for list="{{ stakeholders }}" as="s" hint-placeholder-count="6">
+          <div class="rowh" style="display:grid;grid-template-columns:2fr 1.5fr 1.3fr 0.9fr 1fr 0.9fr;padding:16px 22px;font-size:13.5px;align-items:center;border-bottom:1px solid var(--line);">
+            <span style="font-weight:600;color:var(--navy);">{{ s.name }}</span>
+            <span style="color:var(--ink);">{{ s.type }}</span>
+            <span style="color:var(--ink);">{{ s.community }}</span>
+            <span style="font-weight:700;color:var(--navy);">{{ s.engagements }}</span>
+            <span style="color:var(--ink);">{{ s.commitments }}</span>
+            <span><span style="font-size:11.5px;font-weight:600;padding:4px 11px;border-radius:20px;background:{{ s.statusBg }};color:{{ s.statusFg }};">{{ s.status }}</span></span>
+          </div>
+          </sc-for>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ════════════════ CASE FILE MODAL ════════════════ -->
+      <sc-if value="{{ caseOpen }}">
+      <div style="position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;padding:32px;">
+        <div onClick="{{ closeCase }}" style="position:absolute;inset:0;background:rgba(17,28,85,0.5);"></div>
+        <div class="spims-scroll" style="position:relative;background:#fff;border-radius:18px;max-width:800px;width:100%;max-height:88vh;overflow-y:auto;box-shadow:0 30px 80px -20px rgba(0,0,0,0.55);">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:24px 28px 18px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#fff;z-index:1;">
+            <div>
+              <div style="font-family:monospace;font-size:12.5px;color:var(--muted);margin-bottom:6px;">{{ caseData.ref }} · {{ caseData.category }}</div>
+              <div style="font-size:22px;font-weight:800;color:var(--navy);line-height:1.2;">{{ caseData.title }}</div>
+              <div style="display:flex;gap:8px;margin-top:12px;">
+                <span style="font-size:11.5px;font-weight:600;padding:4px 12px;border-radius:20px;background:{{ caseData.sevBg }};color:{{ caseData.sevFg }};">{{ caseData.severity }} severity</span>
+                <span style="font-size:11.5px;font-weight:600;padding:4px 12px;border-radius:20px;background:{{ caseData.statusBg }};color:{{ caseData.statusFg }};">{{ caseData.status }}</span>
+              </div>
+            </div>
+            <button onClick="{{ closeCase }}" style="font-family:inherit;font-size:22px;line-height:1;color:var(--muted);background:var(--bg);border:none;border-radius:10px;width:38px;height:38px;cursor:pointer;flex-shrink:0;">×</button>
+          </div>
+
+          <div style="padding:22px 28px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+              <div style="background:var(--bg);border-radius:12px;padding:16px 18px;">
+                <div style="font-size:10.5px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#2B4C9B;margin-bottom:8px;">Raised by</div>
+                <div style="font-size:15px;font-weight:700;color:var(--navy);">{{ caseData.raisedBy.name }}</div>
+                <div style="font-size:12.5px;color:var(--muted);margin-bottom:12px;">{{ caseData.raisedBy.role }} · {{ caseData.raisedBy.community }}</div>
+                <div style="font-size:12.5px;color:var(--ink);line-height:1.9;"><span style="color:var(--muted);">Contact:</span> {{ caseData.raisedBy.contact }}<br><span style="color:var(--muted);">Channel:</span> {{ caseData.channel }}<br><span style="color:var(--muted);">Date raised:</span> {{ caseData.dateRaised }}</div>
+              </div>
+              <div style="background:var(--bg);border-radius:12px;padding:16px 18px;">
+                <div style="font-size:10.5px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--accent);margin-bottom:8px;">Handled by</div>
+                <div style="font-size:15px;font-weight:700;color:var(--navy);">{{ caseData.assigneeLabel }}</div>
+                <div style="font-size:12.5px;color:var(--muted);margin-bottom:12px;">Community Relations</div>
+                <div style="font-size:12.5px;color:var(--ink);line-height:1.9;"><span style="color:var(--muted);">Logged by:</span> {{ caseData.loggedBy }}<br><span style="color:var(--muted);">SLA due:</span> {{ caseData.dueDate }}</div>
+              </div>
+            </div>
+
+            <div style="font-size:13.5px;color:var(--ink);line-height:1.5;background:#fbfbfd;border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:22px;">{{ caseData.description }}</div>
+
+            <div style="font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Case history</div>
+            <div style="margin-bottom:6px;">
+              <sc-for list="{{ caseData.timeline }}" as="t" hint-placeholder-count="2">
+              <div style="display:flex;gap:14px;padding:11px 0;border-bottom:1px solid var(--line);">
+                <div style="width:9px;height:9px;border-radius:50%;background:var(--accent);margin-top:5px;flex-shrink:0;"></div>
+                <div><div style="font-size:13.5px;color:var(--ink);line-height:1.4;">{{ t.action }}</div><div style="font-size:11.5px;color:var(--muted);margin-top:2px;">{{ t.actor }} · {{ t.ts }}</div></div>
+              </div>
+              </sc-for>
+            </div>
+
+            <sc-if value="{{ canHandle }}">
+            <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--line);">
+              <sc-if value="{{ caseUnassigned }}">
+              <div>
+                <div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:12px;">Assign a handler to start investigation</div>
+                <div style="display:flex;gap:12px;">
+                  <select ref="{{ assignRef }}" style="flex:1;font-family:inherit;font-size:14px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:#fbfbfd;color:var(--ink);"><option>Blessing Aganbi · Community Relations</option><option>Peter Obiora · Community Liaison</option><option>Ngozi Uba · Stakeholder Manager</option></select>
+                  <button onClick="{{ doAssign }}" style="font-family:inherit;font-size:14px;font-weight:600;color:#fff;background:var(--accent);border:none;border-radius:10px;padding:12px 24px;cursor:pointer;white-space:nowrap;">Assign &amp; start →</button>
+                </div>
+              </div>
+              </sc-if>
+
+              <sc-if value="{{ caseIsInvestigating }}">
+              <div>
+                <div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:12px;">Add an investigation note</div>
+                <div style="display:flex;gap:12px;margin-bottom:22px;">
+                  <input ref="{{ noteRef }}" placeholder="e.g. Site visited; contractor to complete handover by Friday." style="flex:1;font-family:inherit;font-size:14px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:#fbfbfd;color:var(--ink);">
+                  <button onClick="{{ doAddNote }}" style="font-family:inherit;font-size:14px;font-weight:600;color:var(--navy);background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 22px;cursor:pointer;white-space:nowrap;">Add note</button>
+                </div>
+                <div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:12px;">Resolve the case</div>
+                <textarea ref="{{ resolutionRef }}" rows="2" placeholder="Describe how the grievance was resolved with the community." style="width:100%;font-family:inherit;font-size:14px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:#fbfbfd;color:var(--ink);resize:vertical;margin-bottom:12px;"></textarea>
+                <div style="display:flex;gap:12px;justify-content:flex-end;">
+                  <button onClick="{{ doEscalate }}" style="font-family:inherit;font-size:13.5px;font-weight:600;color:#C0491E;background:#fff;border:1px solid #F0D3C4;border-radius:10px;padding:11px 20px;cursor:pointer;">Escalate</button>
+                  <button onClick="{{ doResolve }}" style="font-family:inherit;font-size:13.5px;font-weight:600;color:#fff;background:#1F8A5B;border:none;border-radius:10px;padding:11px 24px;cursor:pointer;">Mark resolved ✓</button>
+                </div>
+              </div>
+              </sc-if>
+
+              <sc-if value="{{ caseIsResolved }}">
+              <div>
+                <div style="background:rgba(31,138,91,0.08);border:1px solid rgba(31,138,91,0.25);border-radius:12px;padding:14px 16px;margin-bottom:16px;"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#1F8A5B;margin-bottom:4px;">Resolution</div><div style="font-size:13.5px;color:var(--ink);line-height:1.45;">{{ caseData.resolution }}</div></div>
+                <div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:12px;">Close the case with a satisfaction rating</div>
+                <div style="display:flex;gap:12px;">
+                  <select ref="{{ satisfactionRef }}" style="flex:1;font-family:inherit;font-size:14px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:#fbfbfd;color:var(--ink);"><option>Very satisfied</option><option>Satisfied</option><option>Neutral</option><option>Dissatisfied</option></select>
+                  <button onClick="{{ doClose }}" style="font-family:inherit;font-size:14px;font-weight:600;color:#fff;background:var(--navy);border:none;border-radius:10px;padding:12px 24px;cursor:pointer;white-space:nowrap;">Close case</button>
+                </div>
+              </div>
+              </sc-if>
+
+              <sc-if value="{{ caseIsClosed }}">
+              <div style="background:var(--bg);border-radius:12px;padding:16px 18px;">
+                <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6B6E88;margin-bottom:6px;">Case closed</div>
+                <div style="font-size:13.5px;color:var(--ink);line-height:1.5;">{{ caseData.resolution }}</div>
+                <div style="font-size:12.5px;color:var(--muted);margin-top:8px;">Community satisfaction: <strong style="color:var(--navy);">{{ caseData.satisfaction }}</strong></div>
+              </div>
+              </sc-if>
+            </div>
+            </sc-if>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+    </main>
+  </div>
+</div>
+
+<template id="__bundler_thumbnail">
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" fill="#111C55"/><rect x="20" y="24" width="34" height="52" rx="4" fill="#1c2e6e"/><rect x="26" y="32" width="22" height="5" rx="2.5" fill="#E31A38"/><rect x="26" y="42" width="22" height="4" rx="2" fill="#9EA1C0"/><rect x="26" y="50" width="16" height="4" rx="2" fill="#9EA1C0"/><circle cx="70" cy="42" r="14" fill="none" stroke="#E31A38" stroke-width="6" stroke-dasharray="55 33"/><rect x="60" y="64" width="20" height="4" rx="2" fill="#F4F4F8"/></svg>
+</template>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900},&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#E31A38&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;#E31A38&quot;,&quot;#111C55&quot;,&quot;#1F8A5B&quot;,&quot;#C0491E&quot;],&quot;section&quot;:&quot;Brand&quot;},&quot;orgName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Seplat Energy Plc&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Brand&quot;},&quot;targetYear&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:2030,&quot;min&quot;:2027,&quot;max&quot;:2035,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Content&quot;}}">
+class Component extends DCLogic {
+  state = { view: 'dashboard', role: 'exec', grievances: [], selectedGrievance: null, seq: 119 };
+
+  gTitle = React.createRef(); gName = React.createRef(); gContact = React.createRef();
+  gCommunity = React.createRef(); gCategory = React.createRef(); gChannel = React.createRef();
+  gSeverity = React.createRef(); gDesc = React.createRef();
+  assignRef = React.createRef(); noteRef = React.createRef(); resolutionRef = React.createRef(); satisfactionRef = React.createRef();
+
+  componentDidMount() {
+    this.applyTheme();
+    let saved = null;
+    try { saved = JSON.parse(localStorage.getItem('spims_grievances_v1')); } catch (e) {}
+    if (saved && saved.list) this.setState({ grievances: saved.list, seq: saved.seq || 119 });
+    else this.setState({ grievances: this.seedGrievances() });
+  }
+  componentDidUpdate() { this.applyTheme(); }
+  applyTheme() {
+    const root = document.documentElement;
+    if (this.props.accent) root.style.setProperty('--accent', this.props.accent);
+  }
+  persist = () => { try { localStorage.setItem('spims_grievances_v1', JSON.stringify({ list: this.state.grievances, seq: this.state.seq })); } catch (e) {} };
+
+  now() { const d = new Date(); return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short'}) + ' · ' + d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}); }
+  today() { const d = new Date(); return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
+  plusDays(n) { const d = new Date(Date.now()+n*86400000); return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
+  currentUser() { return ({ exec:'Amaka Okonkwo · Executive', manager:'Tunde Bello · Project Manager', field:'Grace Idemudia · Field Officer', relations:'Blessing Aganbi · Community Relations' })[this.state.role]; }
+
+  setView(v) { return () => this.setState({ view: v }); }
+  setRole(r) { const def = { exec:'dashboard', manager:'myprojects', field:'mytasks', relations:'cases' }[r]; return () => this.setState({ role: r, view: def, selectedGrievance: null }); }
+
+  updateG(id, patch, entry) {
+    this.setState(s => ({ grievances: s.grievances.map(g => g.id===id ? { ...g, ...patch, timeline: entry ? [...g.timeline, entry] : g.timeline } : g) }), this.persist);
+  }
+  closeCase = () => this.setState({ selectedGrievance: null });
+
+  logGrievance = () => {
+    const val = r => (r.current && r.current.value.trim()) ? r.current.value.trim() : '';
+    const ref = 'GRV-' + this.state.seq;
+    const channel = val(this.gChannel) || 'Walk-in desk';
+    const rec = {
+      id: Date.now(), ref,
+      title: val(this.gTitle) || 'Untitled grievance',
+      category: val(this.gCategory) || 'General',
+      severity: val(this.gSeverity) || 'Medium',
+      status: 'Open', channel,
+      raisedBy: { name: val(this.gName) || 'Anonymous', role: 'Community member', community: val(this.gCommunity) || '—', contact: val(this.gContact) || '—' },
+      loggedBy: this.currentUser(), assignee: null, description: val(this.gDesc),
+      dateRaised: this.today(), dueDate: this.plusDays(14), overdue: false, resolution: null, satisfaction: null,
+      timeline: [ { ts: this.now(), actor: this.currentUser(), action: 'Grievance logged via ' + channel } ],
+    };
+    this.setState(s => ({ grievances: [rec, ...s.grievances], seq: s.seq + 1, view: 'cases', selectedGrievance: rec.id }), this.persist);
+    [this.gTitle,this.gName,this.gContact,this.gCommunity,this.gDesc].forEach(r => { if (r.current) r.current.value=''; });
+  };
+  assignCase = (id) => {
+    const who = (this.assignRef.current && this.assignRef.current.value) || 'Blessing Aganbi · Community Relations';
+    this.updateG(id, { assignee: who, status: 'Investigating' }, { ts: this.now(), actor: this.currentUser(), action: 'Assigned to ' + who + ' · investigation started' });
+  };
+  addNote = (id) => {
+    const n = (this.noteRef.current && this.noteRef.current.value.trim()) || '';
+    if (!n) return;
+    this.updateG(id, {}, { ts: this.now(), actor: this.currentUser(), action: 'Note: ' + n });
+    if (this.noteRef.current) this.noteRef.current.value = '';
+  };
+  resolveCase = (id) => {
+    const r = (this.resolutionRef.current && this.resolutionRef.current.value.trim()) || 'Resolved with the community.';
+    this.updateG(id, { status: 'Resolved', resolution: r, resolvedDate: this.today() }, { ts: this.now(), actor: this.currentUser(), action: 'Resolved · ' + r });
+  };
+  closeGrievance = (id) => {
+    const s = (this.satisfactionRef.current && this.satisfactionRef.current.value) || 'Satisfied';
+    this.updateG(id, { status: 'Closed', satisfaction: s }, { ts: this.now(), actor: this.currentUser(), action: 'Case closed · satisfaction: ' + s });
+  };
+  escalateCase = (id) => {
+    this.updateG(id, { severity: 'High' }, { ts: this.now(), actor: this.currentUser(), action: 'Escalated to senior management' });
+  };
+
+  seedGrievances() {
+    return [
+      { id:1, ref:'GRV-118', title:'Delayed borehole handover', category:'Infrastructure / service delivery', severity:'High', status:'Investigating', channel:'Community meeting',
+        raisedBy:{ name:'Pa Godwin Eze', role:'Community elder', community:'Ovhor, Delta', contact:'0803 000 1121' },
+        loggedBy:'Grace Idemudia · Field Officer', assignee:'Blessing Aganbi · Community Relations',
+        description:'Borehole completed but not handed over; community still without potable water.',
+        dateRaised:'28 Jun 2026', dueDate:'12 Jul 2026', overdue:false, resolution:null, satisfaction:null,
+        timeline:[ { ts:'28 Jun · 10:12', actor:'Grace Idemudia · Field Officer', action:'Grievance logged via community meeting' }, { ts:'29 Jun · 09:40', actor:'Blessing Aganbi · Community Relations', action:'Assigned to self · investigation started' } ] },
+      { id:2, ref:'GRV-116', title:'Local hiring dispute', category:'Employment / local content', severity:'Medium', status:'Open', channel:'Phone hotline',
+        raisedBy:{ name:'Comrade Efe Ako', role:'Youth leader', community:'Sapele, Delta', contact:'0810 000 4432' },
+        loggedBy:'John Efe · Field Officer', assignee:null,
+        description:'Youths allege non-locals were hired for the training-centre construction.',
+        dateRaised:'01 Jul 2026', dueDate:'15 Jul 2026', overdue:false, resolution:null, satisfaction:null,
+        timeline:[ { ts:'01 Jul · 14:05', actor:'John Efe · Field Officer', action:'Grievance logged via phone hotline' } ] },
+      { id:3, ref:'GRV-113', title:'Dust from construction site', category:'Environment / nuisance', severity:'Medium', status:'Investigating', channel:'Walk-in desk',
+        raisedBy:{ name:'Mrs. Rita Okoro', role:'Resident', community:'Orogun, Delta', contact:'0805 000 8890' },
+        loggedBy:'Grace Idemudia · Field Officer', assignee:'Blessing Aganbi · Community Relations',
+        description:'Excess dust from mini-grid works is affecting nearby homes.',
+        dateRaised:'20 Jun 2026', dueDate:'04 Jul 2026', overdue:true, resolution:null, satisfaction:null,
+        timeline:[ { ts:'20 Jun · 11:30', actor:'Grace Idemudia · Field Officer', action:'Grievance logged via walk-in desk' }, { ts:'22 Jun · 08:15', actor:'Blessing Aganbi · Community Relations', action:'Assigned to self · investigation started' } ] },
+      { id:4, ref:'GRV-111', title:'Scholarship shortlist query', category:'Programme / fairness', severity:'Low', status:'Resolved', channel:'Community meeting',
+        raisedBy:{ name:'Mr. Sunday Ibe', role:'Parent', community:'Oben, Edo', contact:'0813 000 2210' },
+        loggedBy:'John Efe · Field Officer', assignee:'Blessing Aganbi · Community Relations',
+        description:'Query over how the scholarship shortlist was compiled.',
+        dateRaised:'10 Jun 2026', dueDate:'24 Jun 2026', overdue:false, resolution:'Selection criteria published and shared with the CDC; two eligible names reinstated.', resolvedDate:'21 Jun 2026', satisfaction:null,
+        timeline:[ { ts:'10 Jun · 09:00', actor:'John Efe · Field Officer', action:'Grievance logged via community meeting' }, { ts:'12 Jun · 10:20', actor:'Blessing Aganbi · Community Relations', action:'Assigned to self · investigation started' }, { ts:'21 Jun · 16:40', actor:'Blessing Aganbi · Community Relations', action:'Resolved · criteria published, two names reinstated' } ] },
+      { id:5, ref:'GRV-109', title:'Clinic opening-hours request', category:'Programme / access', severity:'Low', status:'Closed', channel:'Suggestion box',
+        raisedBy:{ name:"Amukpe Women's Cooperative", role:"Women's group", community:'Amukpe, Delta', contact:'via CDC' },
+        loggedBy:'Grace Idemudia · Field Officer', assignee:'Blessing Aganbi · Community Relations',
+        description:'Request to extend Eye Can See clinic hours on market days.',
+        dateRaised:'02 Jun 2026', dueDate:'16 Jun 2026', overdue:false, resolution:'Clinic hours extended on Wednesdays and Saturdays with the outreach team.', resolvedDate:'11 Jun 2026', satisfaction:'Very satisfied',
+        timeline:[ { ts:'02 Jun · 12:00', actor:'Grace Idemudia · Field Officer', action:'Grievance logged via suggestion box' }, { ts:'04 Jun · 09:10', actor:'Blessing Aganbi · Community Relations', action:'Assigned to self · investigation started' }, { ts:'11 Jun · 15:00', actor:'Blessing Aganbi · Community Relations', action:'Resolved · hours extended' }, { ts:'14 Jun · 10:00', actor:'Blessing Aganbi · Community Relations', action:'Case closed · satisfaction: Very satisfied' } ] },
+    ];
+  }
+
+  renderVals() {
+    const view = this.state.view;
+    const keys = ['dashboard','portfolio','impact','communities','indicators','grievances','reports','myprojects','newproject','approvals','mytasks','logactivity','evidence','cases','loggrievance','stakeholders'];
+    const navBg = {}, navFg = {};
+    keys.forEach(k => {
+      navBg[k] = view === k ? 'rgba(227,26,56,0.16)' : 'transparent';
+      navFg[k] = view === k ? '#ffffff' : '#C7C9DA';
+    });
+    const crumbs = {
+      dashboard: 'Executive Dashboard', portfolio: 'Project Portfolio', impact: 'Impact Chain',
+      communities: 'Communities', indicators: 'Indicator Library', grievances: 'Grievances', reports: 'Reports & Exports',
+      myprojects: 'My Projects', newproject: 'New Project', approvals: 'Approvals Queue',
+      mytasks: 'My Tasks', logactivity: 'Log Activity', evidence: 'Evidence Repository',
+      cases: 'Grievance Cases', loggrievance: 'Log Grievance', stakeholders: 'Stakeholder Register'
+    };
+
+    const eduBg = 'rgba(43,76,155,0.12)', eduFg = '#2B4C9B';
+    const healBg = 'rgba(31,138,91,0.14)', healFg = '#1F8A5B';
+    const infraBg = 'rgba(14,124,134,0.14)', infraFg = '#0E7C86';
+    const econBg = 'rgba(192,73,30,0.14)', econFg = '#C0491E';
+    const okBg = 'rgba(31,138,91,0.14)', okFg = '#1F8A5B';
+    const warnBg = 'rgba(192,73,30,0.14)', warnFg = '#C0491E';
+    const riskBg = 'rgba(227,26,56,0.12)', riskFg = '#E31A38';
+
+    const projects = [
+      { id:'STEP',  name:'Teachers Empowerment (STEP)', output:'623 teachers certified', pillar:'Education', pillarBg:eduBg, pillarFg:eduFg, state:'Edo · Delta', budget:'₦480M', utilPct:'90%', progress:'90%', progPct:'90%', status:'On track', statusBg:okBg, statusFg:okFg },
+      { id:'PEARL', name:'PEARLs Academic Quiz',        output:'51,955 students', pillar:'Education', pillarBg:eduBg, pillarFg:eduFg, state:'Multi-state', budget:'₦210M', utilPct:'96%', progress:'96%', progPct:'96%', status:'On track', statusBg:okBg, statusFg:okFg },
+      { id:'EYE',   name:'Eye Can See Outreach',        output:'23,447 screened', pillar:'Health', pillarBg:healBg, pillarFg:healFg, state:'Edo', budget:'₦640M', utilPct:'72%', progress:'70%', progPct:'70%', status:'On track', statusBg:okBg, statusFg:okFg },
+      { id:'WATER', name:'Community Water Scheme',       output:'12 boreholes', pillar:'Infrastructure', pillarBg:infraBg, pillarFg:infraFg, state:'Delta', budget:'₦520M', utilPct:'58%', progress:'54%', progPct:'54%', status:'At risk', statusBg:riskBg, statusFg:riskFg },
+      { id:'POWER', name:'Mini-grid Electrification',    output:'3 sites energised', pillar:'Infrastructure', pillarBg:infraBg, pillarFg:infraFg, state:'Imo', budget:'₦710M', utilPct:'41%', progress:'38%', progPct:'38%', status:'Delayed', statusBg:warnBg, statusFg:warnFg },
+      { id:'YEP',   name:'Youth Entrepreneurship (YEP)', output:'129+ trained', pillar:'Economic Emp.', pillarBg:econBg, pillarFg:econFg, state:'Delta', budget:'₦300M', utilPct:'66%', progress:'64%', progPct:'64%', status:'On track', statusBg:okBg, statusFg:okFg },
+      { id:'FELL',  name:'Entrepreneurship Fellowship',  output:'55 fellows', pillar:'Economic Emp.', pillarBg:econBg, pillarFg:econFg, state:'Edo', budget:'₦150M', utilPct:'88%', progress:'85%', progPct:'85%', status:'On track', statusBg:okBg, statusFg:okFg },
+      { id:'STEAM', name:'STEAM Labs & Scholarships',    output:'2 labs built', pillar:'Education', pillarBg:eduBg, pillarFg:eduFg, state:'Edo · Delta', budget:'₦260M', utilPct:'50%', progress:'48%', progPct:'48%', status:'At risk', statusBg:riskBg, statusFg:riskFg },
+    ];
+
+    const communities = [
+      { name:'Sapele',  lga:'Sapele LGA',   state:'Delta', pop:'≈174K', projects:6, spend:'₦640M', cdc:'Chief E. Okpako · active CDC' },
+      { name:'Oben',    lga:'Orhionmwon',   state:'Edo',   pop:'≈28K',  projects:4, spend:'₦410M', cdc:'HRH Ogiegbaen · active CDC' },
+      { name:'Amukpe',  lga:'Sapele LGA',   state:'Delta', pop:'≈52K',  projects:3, spend:'₦230M', cdc:'Women & Youth council' },
+      { name:'Ovhor',   lga:'Ughelli South',state:'Delta', pop:'≈19K',  projects:2, spend:'₦180M', cdc:'CDC forming · Phase 1' },
+      { name:'Orogun',  lga:'Ughelli North',state:'Delta', pop:'≈61K',  projects:5, spend:'₦520M', cdc:'Chief Council · active' },
+      { name:'Ozara',   lga:'Igueben',      state:'Edo',   pop:'≈14K',  projects:2, spend:'₦120M', cdc:'Traditional council' },
+    ];
+
+    const indicators = [
+      { metric:'Local employment & content', local:'NCDMB Nigerian Content %', global:'GRI 202 / 401 · IPIECA SOC-5', sdg:'8' },
+      { metric:'Community investment (₦)',   local:'PIA HCDT — 3% OpEx',       global:'GRI 203 / 413 · IPIECA SOC-9', sdg:'1 · 11' },
+      { metric:'Skills & training',          local:'NCDMB human-capital dev.', global:'GRI 404 · IPIECA SOC-6',        sdg:'4 · 8' },
+      { metric:'Health access',              local:'State health partnerships',global:'GRI 203 / 403',                 sdg:'3' },
+      { metric:'Engagement & grievances',    local:'NUPRC HC Regs 2022',       global:'GRI 413 · IPIECA SOC-13',       sdg:'16' },
+      { metric:'Women & youth inclusion',    local:'Federal inclusion targets',global:'GRI 405 · IPIECA SOC-4',        sdg:'5 · 10' },
+    ];
+
+    // Grievances live in component state now — see seedGrievances() and the gList derivation below.
+
+    const reports = [
+      { name:'Board Social Performance Pack', lens:'Board', tagBg:'rgba(17,28,85,0.1)', tagFg:'#111C55', desc:'Quarterly KPI summary, aspiration progress and risk register for the Seplat board.', updated:'Updated 2d ago' },
+      { name:'ESG / Sustainability Report',   lens:'Global', tagBg:riskBg, tagFg:riskFg, desc:'GRI 400, IFRS S1 and IPIECA social disclosures — investor-grade, LSE-ready.', updated:'Updated 5d ago' },
+      { name:'NCDMB Compliance Return',       lens:'Local', tagBg:eduBg, tagFg:eduFg, desc:'Nigerian content, community employment and human-capital development return.', updated:'Updated 1w ago' },
+      { name:'PIA HCDT Statement',            lens:'Local', tagBg:eduBg, tagFg:eduFg, desc:'Host Community Development Trust 3% OpEx allocation and spend reconciliation.', updated:'Updated 1w ago' },
+      { name:'SDG Contribution Report',       lens:'Global', tagBg:riskBg, tagFg:riskFg, desc:'Investment and impact mapped to the UN Sustainable Development Goals.', updated:'Updated 3d ago' },
+      { name:'Community Feedback Report',      lens:'Community', tagBg:healBg, tagFg:healFg, desc:'Plain-language summary of projects and outcomes for host communities.', updated:'Updated 4d ago' },
+    ];
+
+    const role = this.state.role;
+    const rBg = { exec: role==='exec'?'#111C55':'transparent', manager: role==='manager'?'#111C55':'transparent', field: role==='field'?'#111C55':'transparent', relations: role==='relations'?'#111C55':'transparent' };
+    const rFg = { exec: role==='exec'?'#fff':'#8A8DA6', manager: role==='manager'?'#fff':'#8A8DA6', field: role==='field'?'#fff':'#8A8DA6', relations: role==='relations'?'#fff':'#8A8DA6' };
+    const users = { exec:{name:'Amaka Okonkwo',role:'Executive · Read-only',initials:'AO'}, manager:{name:'Tunde Bello',role:'Project Manager · Edo',initials:'TB'}, field:{name:'Grace Idemudia',role:'Field Officer · Sapele',initials:'GI'}, relations:{name:'Blessing Aganbi',role:'Community Relations',initials:'BA'} };
+    const u = users[role];
+    const activityTypes = ['Training / workshop','Community meeting','Site visit','Public consultation','Awareness campaign','M&E monitoring visit','Distribution / handover'];
+    const tasks = [
+      { title:'Log Q3 teacher-training session', project:'STEP · Sapele', due:'Due today', dueColor:'#C0491E' },
+      { title:'Beneficiary count — eye screening', project:'Eye Can See · Oben', due:'Due tomorrow', dueColor:'#8A8DA6' },
+      { title:'Upload borehole handover photos', project:'Water Scheme · Ovhor', due:'Due in 3 days', dueColor:'#8A8DA6' },
+      { title:'Community meeting minutes', project:'YEP · Orogun', due:'Overdue · 1 day', dueColor:'#E31A38' },
+    ];
+    const pendingApprovals = [
+      { who:'Grace Idemudia', item:'Activity log — teacher training (42 attendees)', project:'STEP · Sapele', when:'2h ago', type:'Activity', typeBg:'rgba(43,76,155,0.12)', typeFg:'#2B4C9B' },
+      { who:'John Efe', item:'Beneficiary count — 318 people screened', project:'Eye Can See · Oben', when:'5h ago', type:'Beneficiaries', typeBg:'rgba(31,138,91,0.14)', typeFg:'#1F8A5B' },
+      { who:'Grace Idemudia', item:'Spend record — ₦2.4M training venue', project:'STEP · Sapele', when:'Yesterday', type:'Spend', typeBg:'rgba(192,73,30,0.14)', typeFg:'#C0491E' },
+      { who:'Mary Uche', item:'Evidence — 8 photos + attendance sheet', project:'YEP · Orogun', when:'Yesterday', type:'Evidence', typeBg:'rgba(17,28,85,0.1)', typeFg:'#111C55' },
+    ];
+    const evidenceItems = [
+      { label:'training-session.jpg', meta:'STEP · Sapele · 12 Jun', kind:'PHOTO' },
+      { label:'attendance-sheet.pdf', meta:'STEP · Sapele · 12 Jun', kind:'DOC' },
+      { label:'borehole-handover.jpg', meta:'Water · Ovhor · 09 Jun', kind:'PHOTO' },
+      { label:'eye-clinic-outreach.jpg', meta:'Eye Can See · Oben · 08 Jun', kind:'PHOTO' },
+      { label:'community-meeting.mp4', meta:'YEP · Orogun · 05 Jun', kind:'VIDEO' },
+      { label:'mou-signed.pdf', meta:'YEP · Orogun · 01 Jun', kind:'DOC' },
+    ];
+
+    const gr = this.state.grievances;
+    const sevC = s => ({High:['rgba(227,26,56,0.12)','#E31A38'],Medium:['rgba(192,73,30,0.14)','#C0491E'],Low:['rgba(31,138,91,0.14)','#1F8A5B']}[s] || ['#eee','#555']);
+    const stC = s => ({Open:['rgba(192,73,30,0.14)','#C0491E'],Investigating:['rgba(43,76,155,0.12)','#2B4C9B'],Resolved:['rgba(31,138,91,0.14)','#1F8A5B'],Closed:['rgba(138,141,166,0.18)','#6B6E88']}[s] || ['#eee','#555']);
+    const gList = gr.map(g => { const sv=sevC(g.severity), st=stC(g.status); return { ...g, community: g.raisedBy.community, raiserName: g.raisedBy.name, sevBg:sv[0], sevFg:sv[1], statusBg:st[0], statusFg:st[1], assigneeShort: g.assignee ? g.assignee.split(' · ')[0] : 'Unassigned', assigneeColor: g.assignee ? '#2A2E52' : '#C0491E', open: () => this.setState({ selectedGrievance: g.id }) }; });
+    const gOpen = gr.filter(g => g.status==='Open' || g.status==='Investigating').length;
+    const gInvestigating = gr.filter(g => g.status==='Investigating').length;
+    const gClosed = gr.filter(g => g.status==='Resolved' || g.status==='Closed').length;
+    const gUnassigned = gr.filter(g => g.status==='Open' && !g.assignee).length;
+    const grievanceBreach = gr.filter(g => (g.status==='Open'||g.status==='Investigating') && g.overdue).length;
+    const sel = gr.find(g => g.id === this.state.selectedGrievance) || null;
+    const selSev = sel ? sevC(sel.severity) : ['','']; const selSt = sel ? stC(sel.status) : ['',''];
+    const caseData = sel ? { ...sel, sevBg:selSev[0], sevFg:selSev[1], statusBg:selSt[0], statusFg:selSt[1], assigneeLabel: sel.assignee || 'Unassigned' } : {};
+    const canHandle = this.state.role !== 'exec';
+    const stakeStatus = st => st==='Active' ? ['rgba(31,138,91,0.14)','#1F8A5B'] : ['rgba(192,73,30,0.14)','#C0491E'];
+    const stakeholders = [
+      { name:'Ovhor Community Development Committee', type:'Community institution', community:'Ovhor, Delta', engagements:6, commitments:'2 open', status:'Active' },
+      { name:'Delta State Ministry of Education', type:'Government agency', community:'State-wide', engagements:4, commitments:'On track', status:'Active' },
+      { name:'C4C Foundation', type:'Implementing NGO', community:'Multi-community', engagements:9, commitments:'On track', status:'Active' },
+      { name:"Sapele Women's Cooperative", type:"Women's group", community:'Sapele, Delta', engagements:3, commitments:'1 open', status:'Active' },
+      { name:'Niger Delta Youth Council', type:'Youth group', community:'Regional', engagements:5, commitments:'2 open', status:'Watch' },
+      { name:'HRH the Ogie of Oben', type:'Traditional institution', community:'Oben, Edo', engagements:4, commitments:'On track', status:'Active' },
+    ].map(s => { const c = stakeStatus(s.status); return { ...s, statusBg:c[0], statusFg:c[1] }; });
+
+    return {
+      isDashboard: view==='dashboard', isPortfolio: view==='portfolio', isImpact: view==='impact',
+      isCommunities: view==='communities', isIndicators: view==='indicators', isGrievances: view==='grievances', isReports: view==='reports',
+      goDashboard: this.setView('dashboard'), goPortfolio: this.setView('portfolio'), goImpact: this.setView('impact'),
+      goCommunities: this.setView('communities'), goIndicators: this.setView('indicators'), goGrievances: this.setView('grievances'), goReports: this.setView('reports'),
+      navBg, navFg, crumb: crumbs[view],
+      orgName: this.props.orgName ?? 'Seplat Energy Plc',
+      targetYear: this.props.targetYear ?? 2030,
+      projects, communities, indicators, reports,
+      isExec: role==='exec', isManager: role==='manager', isField: role==='field', isRelations: role==='relations',
+      goExec: this.setRole('exec'), goManager: this.setRole('manager'), goField: this.setRole('field'), goRelations: this.setRole('relations'),
+      rBg, rFg, userName: u.name, userRole: u.role, userInitials: u.initials,
+      isMyProjects: view==='myprojects', isNewProject: view==='newproject', isApprovals: view==='approvals',
+      isMyTasks: view==='mytasks', isLogActivity: view==='logactivity', isEvidence: view==='evidence',
+      goMyProjects: this.setView('myprojects'), goNewProject: this.setView('newproject'), goApprovals: this.setView('approvals'),
+      goMyTasks: this.setView('mytasks'), goLogActivity: this.setView('logactivity'), goEvidence: this.setView('evidence'),
+      activityTypes, tasks, pendingApprovals, evidenceItems,
+      gList, gOpen, gInvestigating, gClosed, gUnassigned, grievanceBreach, stakeholders, canHandle,
+      caseOpen: !!sel, caseData,
+      caseIsOpen: !!sel && sel.status==='Open', caseIsInvestigating: !!sel && sel.status==='Investigating',
+      caseIsResolved: !!sel && sel.status==='Resolved', caseIsClosed: !!sel && sel.status==='Closed',
+      caseUnassigned: !!sel && !sel.assignee,
+      doAssign: () => sel && this.assignCase(sel.id), doAddNote: () => sel && this.addNote(sel.id),
+      doResolve: () => sel && this.resolveCase(sel.id), doClose: () => sel && this.closeGrievance(sel.id),
+      doEscalate: () => sel && this.escalateCase(sel.id), closeCase: this.closeCase, logGrievance: this.logGrievance,
+      isCases: view==='cases', isLogGrievance: view==='loggrievance', isStakeholders: view==='stakeholders',
+      goCases: this.setView('cases'), goLogGrievance: this.setView('loggrievance'), goStakeholders: this.setView('stakeholders'),
+      gTitle: this.gTitle, gName: this.gName, gContact: this.gContact, gCommunity: this.gCommunity,
+      gCategory: this.gCategory, gChannel: this.gChannel, gSeverity: this.gSeverity, gDesc: this.gDesc,
+      assignRef: this.assignRef, noteRef: this.noteRef, resolutionRef: this.resolutionRef, satisfactionRef: this.satisfactionRef,
+    };
+  }
+}
+</script>
+</body>
+</html>
