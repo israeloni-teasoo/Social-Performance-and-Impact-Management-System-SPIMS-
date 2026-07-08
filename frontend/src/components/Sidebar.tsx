@@ -140,6 +140,7 @@ export function Sidebar({
 
             <div style={SECTION_LABEL}>Report &amp; Comply</div>
             <NavButton icon="indicators" label="Indicator Library" active={view === 'indicators'} onClick={() => setView('indicators')} />
+            <NavButton icon="standards" label="Standards Library" active={view === 'standards'} onClick={() => setView('standards')} />
             <NavButton icon="reports" label="Reports & Exports" active={view === 'reports'} onClick={() => setView('reports')} />
           </div>
         )}
@@ -176,6 +177,10 @@ export function Sidebar({
             <NavButton icon="communities" label="Communities" active={view === 'communities'} onClick={() => setView('communities')} />
           </div>
         )}
+
+        <div style={{ marginTop: 'auto', paddingTop: 12 }}>
+          <NavButton icon="help" label="How SPIMS Works" active={view === 'help'} onClick={() => setView('help')} />
+        </div>
       </nav>
 
       <div

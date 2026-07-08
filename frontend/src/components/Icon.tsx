@@ -110,6 +110,19 @@ const PATHS: Record<string, ReactElement> = {
       <path d="M14 3v6h6" />
     </>
   ),
+  standards: (
+    <>
+      <path d="M12 3 5 6v5c0 5 3 8 7 9 4-1 7-4 7-9V6l-7-3Z" />
+      <path d="m9 12 2 2 4-4" />
+    </>
+  ),
+  help: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M9.5 9a2.5 2.5 0 0 1 4.8 1c0 1.5-2.3 1.8-2.3 3.5" />
+      <path d="M12 17.5v.01" />
+    </>
+  ),
 };
 
 export function Icon({

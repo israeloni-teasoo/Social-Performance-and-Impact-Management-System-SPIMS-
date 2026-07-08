@@ -17,7 +17,9 @@ export type View =
   | 'cases'
   | 'loggrievance'
   | 'stakeholders'
-  | 'projectdetail';
+  | 'projectdetail'
+  | 'standards'
+  | 'help';
 
 export interface Project {
   id: string;

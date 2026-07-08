@@ -18,9 +18,31 @@ const OUTCOME_ROWS = [
   { delta: '+22K', desc: 'people with clean-water access', localTag: 'PIA HCDT', globalTag: 'SDG 6' },
 ];
 
+const LENS_BANNER: Record<Lens, { bg: string; border: string; color: string; text: string }> = {
+  both: {
+    bg: 'rgba(17,28,85,0.06)',
+    border: 'rgba(17,28,85,0.18)',
+    color: 'var(--navy)',
+    text: 'Showing both lenses — the same dataset, framed for Nigerian regulators and international investors side by side.',
+  },
+  local: {
+    bg: 'rgba(43,76,155,0.08)',
+    border: 'rgba(43,76,155,0.25)',
+    color: '#2B4C9B',
+    text: 'Local lens — framed for Nigerian regulators: NCDMB local content, PIA Host Community Development Trust, NUPRC host-community rules.',
+  },
+  global: {
+    bg: 'rgba(227,26,56,0.07)',
+    border: 'rgba(227,26,56,0.22)',
+    color: 'var(--accent)',
+    text: 'Global lens — framed for international investors: GRI Standards, IFRS Sustainability Disclosures (ISSB), and UN SDGs.',
+  },
+};
+
 export function ExecutiveDashboard({ targetYear }: { targetYear: number }) {
   const [lens, setLens] = useState<Lens>('both');
   const visibleCompliance = lens === 'both' ? COMPLIANCE_ITEMS : COMPLIANCE_ITEMS.filter((c) => c.lens === lens);
+  const banner = LENS_BANNER[lens];
 
   const tabStyle = (active: boolean) => ({
     fontSize: 12.5,
@@ -36,7 +58,7 @@ export function ExecutiveDashboard({ targetYear }: { targetYear: number }) {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 24 , flexWrap: 'wrap', gap: 16 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 18, flexWrap: 'wrap', gap: 16 }}>
         <div>
           <h1 style={{ fontSize: 30, fontWeight: 800, letterSpacing: '-0.02em', margin: '0 0 6px', color: 'var(--navy)' }}>
             Executive Dashboard
@@ -58,6 +80,25 @@ export function ExecutiveDashboard({ targetYear }: { targetYear: number }) {
         </div>
       </div>
 
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
+          background: banner.bg,
+          border: `1px solid ${banner.border}`,
+          borderRadius: 12,
+          padding: '12px 18px',
+          marginBottom: 18,
+          fontSize: 13,
+          fontWeight: 600,
+          color: banner.color,
+        }}
+      >
+        <span style={{ width: 8, height: 8, borderRadius: '50%', background: banner.color, flexShrink: 0 }} />
+        {banner.text}
+      </div>
+
       {/* KPI row */}
       <div className="grid-4" style={{ marginBottom: 18 }}>
         <div className="card-lift" style={{ background: 'var(--navy)', color: '#fff', borderRadius: 16, padding: '22px 24px' }}>
@@ -67,7 +108,11 @@ export function ExecutiveDashboard({ targetYear }: { targetYear: number }) {
           <div style={{ fontSize: 38, fontWeight: 800, letterSpacing: '-0.02em', margin: '8px 0 4px' }}>
             ₦4.68<span style={{ fontSize: 20, fontWeight: 700 }}>B</span>
           </div>
-          <div style={{ fontSize: 12.5, color: '#C7C9DA' }}>90% of ₦5.2B budget utilised · $64M since 2010</div>
+          <div style={{ fontSize: 12.5, color: '#C7C9DA' }}>
+            {lens === 'local' && '90% of ₦5.2B budget utilised · 3% PIA HCDT OpEx mandate met'}
+            {lens === 'global' && '$64M invested since 2010 · GRI 201-1 economic value disclosed'}
+            {lens === 'both' && '90% of ₦5.2B budget utilised · $64M since 2010'}
+          </div>
         </div>
         <div className="card-lift" style={card}>
           <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--muted)' }}>
@@ -75,7 +120,9 @@ export function ExecutiveDashboard({ targetYear }: { targetYear: number }) {
           </div>
           <div style={{ fontSize: 38, fontWeight: 800, letterSpacing: '-0.02em', margin: '8px 0 4px', color: 'var(--accent)' }}>312K</div>
           <div style={{ fontSize: 12.5, color: 'var(--muted)' }}>
-            <span style={{ color: '#1F8A5B', fontWeight: 600 }}>▲ 18%</span> vs FY25
+            {lens === 'local' && 'per NCDMB host-community headcount'}
+            {lens === 'global' && <><span style={{ color: '#1F8A5B', fontWeight: 600 }}>▲ 18%</span> vs FY25 · GRI 413-1</>}
+            {lens === 'both' && <><span style={{ color: '#1F8A5B', fontWeight: 600 }}>▲ 18%</span> vs FY25</>}
           </div>
         </div>
         <div className="card-lift" style={card}>
@@ -97,9 +144,13 @@ export function ExecutiveDashboard({ targetYear }: { targetYear: number }) {
       {/* middle grid */}
       <div className="grid-dash-money" style={{ marginBottom: 18 }}>
         <div style={card}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 22 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 22, flexWrap: 'wrap', gap: 8 }}>
             <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--navy)' }}>Where the money went</div>
-            <div style={{ fontSize: 12, color: 'var(--muted)' }}>FY26 spend by pillar</div>
+            <div style={{ fontSize: 12, color: 'var(--muted)' }}>
+              {lens === 'local' && 'FY26 spend by NCDMB reporting category'}
+              {lens === 'global' && 'FY26 spend by GRI 201-1 category'}
+              {lens === 'both' && 'FY26 spend by pillar'}
+            </div>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
             {[
@@ -220,12 +271,17 @@ export function ExecutiveDashboard({ targetYear }: { targetYear: number }) {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             {OUTCOME_ROWS.map((row) => (
-              <div key={row.desc} style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
+              <div key={row.desc} style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
                 <span style={{ fontSize: 22, fontWeight: 800, color: '#1F8A5B' }}>{row.delta}</span>
                 <span style={{ fontSize: 13, color: 'var(--ink)' }}>{row.desc}</span>
-                {lens !== 'both' && (
-                  <span style={{ fontSize: 10.5, fontWeight: 700, padding: '2px 8px', borderRadius: 20, background: lens === 'local' ? 'rgba(43,76,155,0.1)' : 'rgba(31,138,91,0.12)', color: lens === 'local' ? '#2B4C9B' : '#1F8A5B' }}>
-                    {lens === 'local' ? row.localTag : row.globalTag}
+                {(lens === 'both' || lens === 'local') && (
+                  <span style={{ fontSize: 10.5, fontWeight: 700, padding: '2px 8px', borderRadius: 20, background: 'rgba(43,76,155,0.1)', color: '#2B4C9B' }}>
+                    {row.localTag}
+                  </span>
+                )}
+                {(lens === 'both' || lens === 'global') && (
+                  <span style={{ fontSize: 10.5, fontWeight: 700, padding: '2px 8px', borderRadius: 20, background: 'rgba(31,138,91,0.12)', color: '#1F8A5B' }}>
+                    {row.globalTag}
                   </span>
                 )}
               </div>
@@ -265,8 +321,10 @@ export function ExecutiveDashboard({ targetYear }: { targetYear: number }) {
       {/* compliance + risk strip */}
       <div className="grid-dash-compliance" style={{ marginTop: 18 }}>
         <div style={card}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-            <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--navy)' }}>Are we compliant?</div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 8 }}>
+            <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--navy)' }}>
+              Are we compliant? <span style={{ fontWeight: 500, fontSize: 12, color: 'var(--muted)' }}>· {lens === 'both' ? 'local + global' : lens} view</span>
+            </div>
             <span style={{ fontSize: 12, fontWeight: 600, color: '#1F8A5B' }}>
               {lens === 'both' ? '24 / 28' : lens === 'local' ? '3 / 3' : '2 / 3'} commitments met
             </span>

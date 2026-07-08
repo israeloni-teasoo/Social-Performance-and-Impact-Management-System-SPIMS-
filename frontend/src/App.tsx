@@ -16,6 +16,7 @@ import { Evidence } from './views/Evidence';
 import { ExecutiveDashboard } from './views/ExecutiveDashboard';
 import { GrievanceCases } from './views/GrievanceCases';
 import { GrievancesExec } from './views/GrievancesExec';
+import { HelpPage } from './views/HelpPage';
 import { ImpactChain } from './views/ImpactChain';
 import { IndicatorLibrary } from './views/IndicatorLibrary';
 import { LogActivity } from './views/LogActivity';
@@ -27,6 +28,7 @@ import { ProjectDetail } from './views/ProjectDetail';
 import { ProjectPortfolio } from './views/ProjectPortfolio';
 import { Reports } from './views/Reports';
 import { StakeholderRegister } from './views/StakeholderRegister';
+import { StandardsLibrary } from './views/StandardsLibrary';
 
 const TARGET_YEAR = 2030;
 const ORG_NAME = 'Seplat Energy Plc';
@@ -109,8 +111,9 @@ export default function App() {
           {view === 'impact' && <ImpactChain projects={PROJECTS} />}
           {view === 'communities' && <Communities communities={COMMUNITIES} />}
           {view === 'indicators' && <IndicatorLibrary indicators={INDICATORS} />}
+          {view === 'standards' && <StandardsLibrary projects={PROJECTS} goProjectDetail={(id) => goProjectDetail(id, 'standards')} />}
           {view === 'grievances' && <GrievancesExec grievances={grievances} onOpen={setSelectedId} />}
-          {view === 'reports' && <Reports reports={REPORTS} pushToast={pushToast} />}
+          {view === 'reports' && <Reports reports={REPORTS} projects={PROJECTS} impacts={PROJECT_IMPACTS} pushToast={pushToast} />}
           {view === 'myprojects' && <MyProjects projects={PROJECTS} goNewProject={() => setView('newproject')} onOpen={(id) => goProjectDetail(id, 'myprojects')} />}
           {view === 'newproject' && <NewProject goApprovals={() => setView('approvals')} pushToast={pushToast} />}
           {view === 'approvals' && <Approvals approvals={approvals} onApprove={approve} onReturn={returnItem} />}
@@ -120,8 +123,14 @@ export default function App() {
           {view === 'cases' && <GrievanceCases grievances={grievances} onOpen={setSelectedId} goLogGrievance={() => setView('loggrievance')} />}
           {view === 'loggrievance' && <LogGrievance onCancel={() => setView('cases')} onSubmit={handleLogGrievance} />}
           {view === 'stakeholders' && <StakeholderRegister stakeholders={stakeholders} onAdd={addStakeholder} />}
+          {view === 'help' && <HelpPage />}
           {view === 'projectdetail' && selectedProject && (
-            <ProjectDetail project={selectedProject} impact={PROJECT_IMPACTS[selectedProject.code]} goBack={() => setView(projectDetailReturnView)} />
+            <ProjectDetail
+              project={selectedProject}
+              impact={PROJECT_IMPACTS[selectedProject.code]}
+              goBack={() => setView(projectDetailReturnView)}
+              pushToast={pushToast}
+            />
           )}
         </main>
       </div>

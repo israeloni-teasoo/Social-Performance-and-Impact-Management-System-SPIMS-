@@ -1,10 +1,36 @@
+import { useState } from 'react';
 import { ImpactStageCard as StageCard } from '../components/ImpactStageCard';
-import { h1, PILLAR_COLORS, pill, STATUS_COLORS } from '../ui';
+import { exportProjectReport } from '../reportExport';
+import { h1, PILLAR_COLORS, pill, primaryBtn, STATUS_COLORS } from '../ui';
 import type { Project, ProjectImpact } from '../types';
+import type { ToastTone } from '../useToastQueue';
 
-export function ProjectDetail({ project, impact, goBack }: { project: Project; impact: ProjectImpact | undefined; goBack: () => void }) {
+const FORMATS: { key: 'pdf' | 'excel' | 'word'; label: string }[] = [
+  { key: 'pdf', label: 'PDF' },
+  { key: 'excel', label: 'Excel' },
+  { key: 'word', label: 'Word' },
+];
+
+export function ProjectDetail({
+  project,
+  impact,
+  goBack,
+  pushToast,
+}: {
+  project: Project;
+  impact: ProjectImpact | undefined;
+  goBack: () => void;
+  pushToast: (message: string, tone?: ToastTone) => void;
+}) {
   const [pillarBg, pillarFg] = PILLAR_COLORS[project.pillar] ?? ['#eee', '#555'];
   const [statusBg, statusFg] = STATUS_COLORS[project.status] ?? ['#eee', '#555'];
+  const [formatOpen, setFormatOpen] = useState(false);
+
+  const handleFormat = (format: (typeof FORMATS)[number]['key']) => {
+    setFormatOpen(false);
+    const filename = exportProjectReport(project, impact, format);
+    pushToast(`Downloaded ${filename}.`, 'success');
+  };
 
   return (
     <div>
@@ -41,6 +67,25 @@ export function ProjectDetail({ project, impact, goBack }: { project: Project; i
           <h1 style={{ ...h1, margin: '0 0 4px' }}>{project.name}</h1>
           <p style={{ fontSize: 14.5, color: 'var(--muted)', margin: 0 }}>{project.state} · {project.output}</p>
         </div>
+        <div style={{ position: 'relative' }}>
+          {formatOpen ? (
+            <div style={{ display: 'flex', gap: 8 }}>
+              {FORMATS.map((f) => (
+                <button
+                  key={f.key}
+                  onClick={() => handleFormat(f.key)}
+                  style={{ fontFamily: 'inherit', fontSize: 12.5, fontWeight: 600, color: 'var(--navy)', background: '#fff', border: '1px solid var(--line)', borderRadius: 8, padding: '8px 14px', cursor: 'pointer' }}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <button onClick={() => setFormatOpen(true)} style={primaryBtn}>
+              Download project report →
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="grid-4" style={{ marginBottom: 22 }}>
@@ -71,13 +116,35 @@ export function ProjectDetail({ project, impact, goBack }: { project: Project; i
 
       {impact ? (
         <>
-          <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--navy)', marginBottom: 14 }}>Impact chain</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
+            <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--navy)' }}>Impact chain</div>
+            <span style={{ fontSize: 11.5, color: 'var(--muted)' }}>Where does this data come from?</span>
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              gap: 18,
+              flexWrap: 'wrap',
+              fontSize: 12,
+              color: 'var(--ink)',
+              background: '#fbfbfd',
+              border: '1px solid var(--line)',
+              borderRadius: 12,
+              padding: '12px 16px',
+              marginBottom: 14,
+            }}
+          >
+            <span><strong style={{ color: '#2B4C9B' }}>Inputs &amp; Activities</strong> — entered by the field officer / project manager when the project is set up.</span>
+            <span><strong style={{ color: 'var(--navy)' }}>Outputs</strong> — aggregated automatically from approved field activity logs (Log Activity → manager approval).</span>
+            <span><strong style={{ color: 'var(--accent)' }}>Outcomes &amp; Impact</strong> — calculated by applying the stated methodology below to those outputs; not a live sensor feed.</span>
+            <span>⚠ All figures shown are Phase 1 illustrative placeholders pending confirmed field data from Seplat's M&amp;E team — see note below.</span>
+          </div>
           <div className="grid-impact-cols" style={{ marginBottom: 22 }}>
-            <StageCard index="01" label="Inputs" title="What we invest" detail={impact.inputs} variant="plain" />
-            <StageCard index="02" label="Activities" title="What we do" detail={impact.activities} variant="plain" />
-            <StageCard index="03" label="Outputs" title="What we deliver" detail={impact.outputHeadline} variant="navyFill" badge="Reported today" />
-            <StageCard index="04" label="Outcomes" title="What changes" detail={impact.outcome} variant="accentBorder" />
-            <StageCard index="05" label="Impact" title="What it means" detail={impact.impactDetail} variant="accentFill" badge="Platform adds" />
+            <StageCard index="01" label="Inputs" title="What we invest" detail={impact.inputs} variant="plain" badge="Entered by team" />
+            <StageCard index="02" label="Activities" title="What we do" detail={impact.activities} variant="plain" badge="Entered by team" />
+            <StageCard index="03" label="Outputs" title="What we deliver" detail={impact.outputHeadline} variant="navyFill" badge="System-aggregated" />
+            <StageCard index="04" label="Outcomes" title="What changes" detail={impact.outcome} variant="accentBorder" badge="Calculated" />
+            <StageCard index="05" label="Impact" title="What it means" detail={impact.impactDetail} variant="accentFill" badge="Calculated" />
           </div>
 
           <div
