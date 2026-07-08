@@ -39,7 +39,7 @@ export function LogActivity({ goMyTasks }: { goMyTasks: () => void }) {
           ))}
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px 18px', marginBottom: 22 }}>
+        <div className="form-grid-2" style={{ marginBottom: 22 }}>
           <div style={formField}>
             <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--navy)' }}>Date</label>
             <input defaultValue="2026-07-06" style={{ ...input, fontSize: 16, padding: '15px 16px', borderRadius: 12 }} />
@@ -57,7 +57,7 @@ export function LogActivity({ goMyTasks }: { goMyTasks: () => void }) {
           <label style={{ fontSize: 13, fontWeight: 700, color: 'var(--navy)', display: 'block', marginBottom: 14 }}>
             Beneficiaries reached <span style={{ fontWeight: 500, color: 'var(--muted)' }}>· disaggregated</span>
           </label>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr', gap: 12 }}>
+          <div className="form-grid-5">
             {[
               { label: 'Total', value: '42', color: 'var(--navy)' },
               { label: 'Female', value: '24', color: 'var(--ink)' },
@@ -99,7 +99,7 @@ export function LogActivity({ goMyTasks }: { goMyTasks: () => void }) {
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: 12 }}>
+        <div className="btn-row-stack">
           <button style={{ flex: 1, fontFamily: 'inherit', fontSize: 15, fontWeight: 600, color: 'var(--navy)', background: '#fff', border: '1px solid var(--line)', borderRadius: 12, padding: 15, cursor: 'pointer' }}>
             Save offline
           </button>

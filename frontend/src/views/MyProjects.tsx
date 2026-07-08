@@ -5,7 +5,7 @@ import type { Project } from '../types';
 export function MyProjects({ projects, goNewProject }: { projects: Project[]; goNewProject: () => void }) {
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 22 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 22 , flexWrap: 'wrap', gap: 16 }}>
         <div>
           <h1 style={h1}>My Projects</h1>
           <p style={{ fontSize: 14.5, color: 'var(--muted)', margin: 0 }}>
@@ -17,7 +17,8 @@ export function MyProjects({ projects, goNewProject }: { projects: Project[]; go
           New project
         </button>
       </div>
-      <div style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: 16, overflow: 'hidden' }}>
+      <div className="table-scroll">
+      <div style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: 16, overflow: 'hidden', minWidth: 860 }}>
         <div style={{ ...tableHeaderRow, display: 'grid', gridTemplateColumns: '2.4fr 1.1fr 1fr 1.3fr 1fr 0.9fr' }}>
           <span>Project</span>
           <span>Pillar</span>
@@ -58,6 +59,7 @@ export function MyProjects({ projects, goNewProject }: { projects: Project[]; go
             </div>
           );
         })}
+      </div>
       </div>
     </div>
   );

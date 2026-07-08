@@ -6,7 +6,7 @@ export function Communities({ communities }: { communities: Community[] }) {
     <div>
       <h1 style={h1}>Communities</h1>
       <p style={subtitle}>Host community profiles — leadership, needs and the projects running in each.</p>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 18 }}>
+      <div className="grid-3">
         {communities.map((c) => (
           <div key={c.id} className="card-lift" style={card}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 }}>

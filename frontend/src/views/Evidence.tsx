@@ -5,7 +5,7 @@ import type { EvidenceItem } from '../types';
 export function Evidence({ items, goLogActivity }: { items: EvidenceItem[]; goLogActivity: () => void }) {
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 22 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 22 , flexWrap: 'wrap', gap: 16 }}>
         <div>
           <h1 style={h1}>Evidence Repository</h1>
           <p style={{ fontSize: 14.5, color: 'var(--muted)', margin: 0 }}>
@@ -17,7 +17,7 @@ export function Evidence({ items, goLogActivity }: { items: EvidenceItem[]; goLo
           Upload
         </button>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 18 }}>
+      <div className="grid-3">
         {items.map((e) => (
           <div key={e.id} className="card-lift" style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: 14, overflow: 'hidden' }}>
             <div

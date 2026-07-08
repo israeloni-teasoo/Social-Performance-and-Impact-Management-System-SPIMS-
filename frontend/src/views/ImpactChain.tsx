@@ -23,7 +23,7 @@ export function ImpactChain() {
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 12, marginBottom: 22 }}>
+      <div className="grid-impact-cols" style={{ marginBottom: 22 }}>
         <div style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: 14, padding: '20px 18px' }}>
           <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--muted)' }}>
             01 · Inputs
@@ -103,7 +103,7 @@ export function ImpactChain() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18 }}>
+      <div className="grid-impact-lower">
         <div style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: 16, padding: '22px 24px' }}>
           <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--navy)', marginBottom: 18 }}>Baseline → Midline → Endline</div>
           <div style={{ display: 'flex', alignItems: 'flex-end', gap: 24, height: 150, paddingBottom: 8 }}>

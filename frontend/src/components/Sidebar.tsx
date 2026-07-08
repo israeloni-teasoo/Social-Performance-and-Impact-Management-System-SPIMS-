@@ -71,6 +71,7 @@ export function Sidebar({
   userName,
   userRole,
   userInitials,
+  open,
 }: {
   role: Role;
   view: View;
@@ -80,12 +81,12 @@ export function Sidebar({
   userName: string;
   userRole: string;
   userInitials: string;
+  open: boolean;
 }) {
   return (
     <aside
+      className={`spims-sidebar${open ? ' is-open' : ''}`}
       style={{
-        width: 262,
-        flexShrink: 0,
         background: 'var(--navy)',
         color: '#C7C9DA',
         display: 'flex',

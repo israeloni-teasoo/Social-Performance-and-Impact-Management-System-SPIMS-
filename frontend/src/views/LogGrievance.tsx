@@ -41,7 +41,7 @@ export function LogGrievance({
 
       <div style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: 16, padding: '24px 26px', marginBottom: 18 }}>
         <div style={sectionCardTitle}>Who raised it</div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px 20px' }}>
+        <div className="form-grid-2">
           <div style={formField}>
             <label style={label}>Name of complainant</label>
             <input ref={nameRef} placeholder="e.g. Pa Godwin Eze" style={input} />
@@ -81,7 +81,7 @@ export function LogGrievance({
           <label style={label}>Summary</label>
           <input ref={titleRef} placeholder="Short title, e.g. Delayed borehole handover" style={input} />
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '16px 20px', marginBottom: 16 }}>
+        <div className="form-grid-2-1" style={{ marginBottom: 16 }}>
           <div style={formField}>
             <label style={label}>Category</label>
             <select ref={categoryRef} style={input} defaultValue="Infrastructure / service delivery">
@@ -115,7 +115,7 @@ export function LogGrievance({
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', alignItems: 'center' }}>
+      <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', alignItems: 'center', flexWrap: 'wrap' }}>
         <span style={{ fontSize: 12.5, color: 'var(--muted)', marginRight: 'auto' }}>
           On submit, a case reference is generated and the grievance appears in the case log immediately.
         </span>

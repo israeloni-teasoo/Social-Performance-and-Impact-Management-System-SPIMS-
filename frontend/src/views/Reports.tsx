@@ -34,7 +34,7 @@ export function Reports({ reports }: { reports: Report[] }) {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 18 }}>
+      <div className="grid-3">
         {reports.map((r) => {
           const [tagBg, tagFg] = REPORT_LENS_COLORS[r.lens] ?? ['#eee', '#555'];
           return (

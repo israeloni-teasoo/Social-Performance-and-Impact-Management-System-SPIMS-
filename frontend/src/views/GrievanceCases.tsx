@@ -18,7 +18,7 @@ export function GrievanceCases({
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 20 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 20 , flexWrap: 'wrap', gap: 16 }}>
         <div>
           <h1 style={h1}>Grievance Cases</h1>
           <p style={{ fontSize: 14.5, color: 'var(--muted)', margin: 0 }}>
@@ -31,7 +31,7 @@ export function GrievanceCases({
         </button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 18, marginBottom: 22 }}>
+      <div className="grid-4" style={{ marginBottom: 22 }}>
         <div style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: 16, padding: '20px 22px' }}>
           <div style={{ fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Open &amp; active</div>
           <div style={{ fontSize: 34, fontWeight: 800, color: 'var(--accent)' }}>{gOpen}</div>
@@ -50,7 +50,8 @@ export function GrievanceCases({
         </div>
       </div>
 
-      <div style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: 16, overflow: 'hidden' }}>
+      <div className="table-scroll">
+      <div style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: 16, overflow: 'hidden', minWidth: 860 }}>
         <div style={{ ...tableHeaderRow, display: 'grid', gridTemplateColumns: '0.8fr 1.9fr 1.4fr 1.4fr 0.9fr 1fr' }}>
           <span>Ref</span>
           <span>Complaint</span>
@@ -88,6 +89,7 @@ export function GrievanceCases({
             </div>
           );
         })}
+      </div>
       </div>
     </div>
   );

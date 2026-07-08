@@ -48,3 +48,284 @@ body {
 button {
   font-family: inherit;
 }
+
+/* ══════════ App shell / responsive layout ══════════ */
+
+.spims-shell {
+  display: flex;
+  height: 100vh;
+  height: 100dvh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+.spims-main-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.spims-sidebar {
+  width: 262px;
+  flex-shrink: 0;
+  transition: transform 0.25s ease;
+}
+
+.spims-sidebar-backdrop {
+  display: none;
+}
+
+.spims-hamburger {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .spims-sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 300;
+    transform: translateX(-100%);
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  }
+  .spims-sidebar.is-open {
+    transform: translateX(0);
+    box-shadow: 20px 0 50px -20px rgba(0, 0, 0, 0.45);
+  }
+  .spims-sidebar-backdrop.is-open {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(17, 28, 85, 0.45);
+    z-index: 290;
+  }
+  .spims-hamburger {
+    display: flex !important;
+  }
+}
+
+/* ══════════ Topbar responsiveness ══════════ */
+
+.spims-topbar {
+  flex-wrap: wrap;
+  height: auto;
+  min-height: 66px;
+  row-gap: 10px;
+}
+
+.spims-topbar-search {
+  display: flex;
+}
+
+.spims-topbar-viewingas-label {
+  display: inline;
+}
+
+@media (max-width: 900px) {
+  .spims-topbar-search {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .spims-topbar-viewingas-label {
+    display: none;
+  }
+  .spims-topbar-fy {
+    display: none !important;
+  }
+}
+
+/* ══════════ Responsive grids ══════════ */
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+.grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+}
+.grid-dash-money {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 18px;
+}
+.grid-dash-lower {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 18px;
+}
+.grid-dash-compliance {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 18px;
+}
+.grid-compliance-inner {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+.grid-impact-cols {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+}
+.grid-impact-lower {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+@media (max-width: 1200px) {
+  .grid-impact-cols {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (max-width: 1024px) {
+  .grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .grid-dash-money,
+  .grid-dash-compliance,
+  .grid-dash-lower,
+  .grid-2,
+  .grid-impact-lower {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 640px) {
+  .grid-4,
+  .grid-3 {
+    grid-template-columns: 1fr;
+  }
+  .grid-impact-cols {
+    grid-template-columns: 1fr 1fr;
+  }
+  .grid-compliance-inner {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 420px) {
+  .grid-impact-cols {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ══════════ Responsive form grids ══════════ */
+
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 20px;
+}
+.form-grid-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px 20px;
+}
+.form-grid-4 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 16px 20px;
+}
+.form-grid-5 {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+}
+.form-grid-2-1 {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px 20px;
+}
+
+@media (max-width: 900px) {
+  .form-grid-3,
+  .form-grid-4 {
+    grid-template-columns: 1fr 1fr;
+  }
+  .form-grid-5 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (max-width: 560px) {
+  .form-grid-2,
+  .form-grid-2-1,
+  .form-grid-3,
+  .form-grid-4 {
+    grid-template-columns: 1fr;
+  }
+  .form-grid-5 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ══════════ Data tables: scroll horizontally instead of breaking ══════════ */
+
+.table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.table-min-w {
+  min-width: 760px;
+}
+
+/* ══════════ Modal ══════════ */
+
+.spims-modal-overlay {
+  padding: 32px;
+}
+.spims-modal-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.spims-modal-row > select,
+.spims-modal-row > input {
+  flex: 1 1 200px;
+}
+
+.btn-row-stack {
+  display: flex;
+  gap: 12px;
+}
+@media (max-width: 480px) {
+  .btn-row-stack {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 560px) {
+  .spims-modal-overlay {
+    padding: 0;
+    align-items: flex-end !important;
+  }
+  .spims-modal-overlay .spims-modal-card {
+    border-radius: 18px 18px 0 0 !important;
+    max-height: 92vh !important;
+  }
+}
+
+@media (max-width: 1024px) {
+  main {
+    padding: 22px 18px 40px !important;
+  }
+}
+@media (max-width: 560px) {
+  main {
+    padding: 18px 14px 32px !important;
+  }
+}

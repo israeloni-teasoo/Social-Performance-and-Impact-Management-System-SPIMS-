@@ -24,13 +24,13 @@ export function MyTasks({ tasks, goLogActivity }: { tasks: FieldTask[]; goLogAct
       </div>
       <h1 style={h1}>My Tasks</h1>
       <p style={subtitle}>Assigned to you across Sapele cluster. Tap a task to log it — takes under five minutes.</p>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+      <div className="grid-2">
         {tasks.map((t) => (
           <div
             key={t.id}
-            style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: 14, padding: '22px 24px', display: 'flex', alignItems: 'center', gap: 18 }}
+            style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: 14, padding: '22px 24px', display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap' }}
           >
-            <div style={{ flex: 1 }}>
+            <div style={{ flex: '1 1 180px' }}>
               <div style={{ fontSize: 17, fontWeight: 700, color: 'var(--navy)', marginBottom: 4 }}>{t.title}</div>
               <div style={{ fontSize: 13, color: 'var(--muted)' }}>
                 {t.project} · <span style={{ color: t.dueColor, fontWeight: 600 }}>{t.due}</span>

@@ -3,7 +3,7 @@ import { card } from '../ui';
 export function ExecutiveDashboard({ targetYear }: { targetYear: number }) {
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 24 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 24 , flexWrap: 'wrap', gap: 16 }}>
         <div>
           <h1 style={{ fontSize: 30, fontWeight: 800, letterSpacing: '-0.02em', margin: '0 0 6px', color: 'var(--navy)' }}>
             Executive Dashboard
@@ -22,7 +22,7 @@ export function ExecutiveDashboard({ targetYear }: { targetYear: number }) {
       </div>
 
       {/* KPI row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 18, marginBottom: 18 }}>
+      <div className="grid-4" style={{ marginBottom: 18 }}>
         <div className="card-lift" style={{ background: 'var(--navy)', color: '#fff', borderRadius: 16, padding: '22px 24px' }}>
           <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#9EA1C0' }}>
             Social investment · FY26
@@ -58,7 +58,7 @@ export function ExecutiveDashboard({ targetYear }: { targetYear: number }) {
       </div>
 
       {/* middle grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 18, marginBottom: 18 }}>
+      <div className="grid-dash-money" style={{ marginBottom: 18 }}>
         <div style={card}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 22 }}>
             <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--navy)' }}>Where the money went</div>
@@ -153,7 +153,7 @@ export function ExecutiveDashboard({ targetYear }: { targetYear: number }) {
       </div>
 
       {/* lower grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 18 }}>
+      <div className="grid-dash-lower">
         <div style={card}>
           <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--navy)', marginBottom: 18 }}>Who benefited</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 15 }}>
@@ -224,13 +224,13 @@ export function ExecutiveDashboard({ targetYear }: { targetYear: number }) {
       </div>
 
       {/* compliance + risk strip */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 18, marginTop: 18 }}>
+      <div className="grid-dash-compliance" style={{ marginTop: 18 }}>
         <div style={card}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
             <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--navy)' }}>Are we compliant?</div>
             <span style={{ fontSize: 12, fontWeight: 600, color: '#1F8A5B' }}>24 / 28 commitments met</span>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 12 }}>
+          <div className="grid-compliance-inner">
             {[
               { icon: '✓', iconColor: '#1F8A5B', text: 'PIA HCDT — 3% OpEx funded' },
               { icon: '87%', iconColor: '#2B4C9B', text: 'NCDMB local content' },

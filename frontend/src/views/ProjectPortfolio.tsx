@@ -21,7 +21,8 @@ export function ProjectPortfolio({ projects }: { projects: Project[] }) {
         ))}
       </div>
 
-      <div style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: 16, overflow: 'hidden' }}>
+      <div className="table-scroll">
+      <div style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: 16, overflow: 'hidden', minWidth: 920 }}>
         <div style={{ ...tableHeaderRow, display: 'grid', gridTemplateColumns: '2.2fr 1.1fr 1fr 1.4fr 1.2fr 1fr' }}>
           <span>Project</span>
           <span>Pillar</span>
@@ -63,6 +64,7 @@ export function ProjectPortfolio({ projects }: { projects: Project[] }) {
             </div>
           );
         })}
+      </div>
       </div>
     </div>
   );

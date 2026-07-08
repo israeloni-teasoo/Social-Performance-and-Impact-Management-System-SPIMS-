@@ -6,7 +6,8 @@ export function StakeholderRegister({ stakeholders }: { stakeholders: Stakeholde
     <div>
       <h1 style={h1}>Stakeholder Register</h1>
       <p style={subtitle}>Government, community, NGO and traditional stakeholders — engagements, commitments and status.</p>
-      <div style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: 16, overflow: 'hidden' }}>
+      <div className="table-scroll">
+      <div style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: 16, overflow: 'hidden', minWidth: 820 }}>
         <div style={{ ...tableHeaderRow, display: 'grid', gridTemplateColumns: '2fr 1.5fr 1.3fr 0.9fr 1fr 0.9fr' }}>
           <span>Stakeholder</span>
           <span>Type</span>
@@ -30,6 +31,7 @@ export function StakeholderRegister({ stakeholders }: { stakeholders: Stakeholde
             </div>
           );
         })}
+      </div>
       </div>
     </div>
   );

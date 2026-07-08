@@ -28,7 +28,7 @@ export function NewProject({ goApprovals }: { goApprovals: () => void }) {
           <label style={label}>Project title</label>
           <input defaultValue="Solar Skills Academy — Cohort 3" style={input} />
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px 20px' }}>
+        <div className="form-grid-3">
           <div style={formField}>
             <label style={label}>Project ID</label>
             <input defaultValue="SPL-2026-048" readOnly style={{ ...input, fontFamily: 'monospace', background: '#f1f1f6', color: 'var(--muted)' }} />
@@ -51,7 +51,7 @@ export function NewProject({ goApprovals }: { goApprovals: () => void }) {
 
       <div style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: 16, padding: '24px 26px', marginBottom: 18 }}>
         <div style={sectionCardTitle}>2 · Location &amp; community</div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '16px 20px' }}>
+        <div className="form-grid-4">
           <div style={formField}>
             <label style={label}>Community</label>
             <select style={selectStyle} defaultValue="Sapele">
@@ -83,7 +83,7 @@ export function NewProject({ goApprovals }: { goApprovals: () => void }) {
 
       <div style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: 16, padding: '24px 26px', marginBottom: 18 }}>
         <div style={sectionCardTitle}>3 · Timeline &amp; budget</div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px 20px' }}>
+        <div className="form-grid-3">
           <div style={formField}>
             <label style={label}>Start date</label>
             <input defaultValue="2026-09-01" style={input} />
@@ -129,7 +129,7 @@ export function NewProject({ goApprovals }: { goApprovals: () => void }) {
           <div style={{ fontSize: 15, fontWeight: 700 }}>4 · Dual-lens indicator tags</div>
           <span style={{ fontSize: 12, color: '#9EA1C0' }}>one entry → local + global reports</span>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px 20px' }}>
+        <div className="form-grid-3">
           <div style={darkFormField}>
             <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#9FC0EB' }}>
               Local — Nigeria
@@ -161,7 +161,7 @@ export function NewProject({ goApprovals }: { goApprovals: () => void }) {
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', alignItems: 'center' }}>
+      <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', alignItems: 'center', flexWrap: 'wrap' }}>
         <span style={{ fontSize: 12.5, color: 'var(--muted)', marginRight: 'auto' }}>
           Submitting routes to your reviewer for approval before it appears on the executive dashboard.
         </span>

@@ -3,7 +3,7 @@ import type { Indicator } from '../types';
 export function IndicatorLibrary({ indicators }: { indicators: Indicator[] }) {
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 20 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 20 , flexWrap: 'wrap', gap: 16 }}>
         <div>
           <h1 style={{ fontSize: 30, fontWeight: 800, letterSpacing: '-0.02em', margin: '0 0 6px', color: 'var(--navy)' }}>
             Indicator Library
@@ -21,7 +21,8 @@ export function IndicatorLibrary({ indicators }: { indicators: Indicator[] }) {
         </div>
       </div>
 
-      <div style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: 16, overflow: 'hidden' }}>
+      <div className="table-scroll">
+      <div style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: 16, overflow: 'hidden', minWidth: 760 }}>
         <div
           style={{
             display: 'grid',
@@ -51,6 +52,7 @@ export function IndicatorLibrary({ indicators }: { indicators: Indicator[] }) {
             <div style={{ padding: '16px 22px', fontWeight: 700, color: '#2B4C9B', borderLeft: '1px solid var(--line)' }}>{i.sdg}</div>
           </div>
         ))}
+      </div>
       </div>
       <p style={{ fontSize: 13, color: 'var(--muted)', margin: '14px 0 0' }}>
         Illustrative mapping — the full indicator library is confirmed with Seplat during Phase 1.

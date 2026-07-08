@@ -28,15 +28,22 @@ const ORG_NAME = 'Seplat Energy Plc';
 
 export default function App() {
   const [role, setRoleState] = useState<Role>('exec');
-  const [view, setView] = useState<View>('dashboard');
+  const [view, setViewState] = useState<View>('dashboard');
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const { grievances, logGrievance, assign, addNote, resolve, closeCase, escalate } = useGrievanceStore(role);
 
   const setRole = (r: Role) => {
     setRoleState(r);
-    setView(DEFAULT_VIEW_FOR_ROLE[r]);
+    setViewState(DEFAULT_VIEW_FOR_ROLE[r]);
     setSelectedId(null);
+    setSidebarOpen(false);
+  };
+
+  const setView = (v: View) => {
+    setViewState(v);
+    setSidebarOpen(false);
   };
 
   const handleLogGrievance = (input: Parameters<typeof logGrievance>[0]) => {
@@ -50,7 +57,8 @@ export default function App() {
   const user = ROLE_USERS[role];
 
   return (
-    <div style={{ display: 'flex', height: '100vh', width: '100vw', fontFamily: "'Poppins',sans-serif", background: 'var(--bg)', color: 'var(--ink)', overflow: 'hidden' }}>
+    <div className="spims-shell" style={{ fontFamily: "'Poppins',sans-serif", background: 'var(--bg)', color: 'var(--ink)' }}>
+      <div className={`spims-sidebar-backdrop${sidebarOpen ? ' is-open' : ''}`} onClick={() => setSidebarOpen(false)} />
       <Sidebar
         role={role}
         view={view}
@@ -60,10 +68,11 @@ export default function App() {
         userName={user.name}
         userRole={user.role}
         userInitials={user.initials}
+        open={sidebarOpen}
       />
 
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-        <Topbar orgName={ORG_NAME} crumb={CRUMBS[view]} role={role} setRole={setRole} />
+      <div className="spims-main-col">
+        <Topbar orgName={ORG_NAME} crumb={CRUMBS[view]} role={role} setRole={setRole} onMenuClick={() => setSidebarOpen((o) => !o)} />
 
         <main className="spims-scroll" style={{ flex: 1, overflowY: 'auto', padding: '30px 34px 48px' }}>
           {view === 'dashboard' && <ExecutiveDashboard targetYear={TARGET_YEAR} />}

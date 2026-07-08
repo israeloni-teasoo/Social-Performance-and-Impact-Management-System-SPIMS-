@@ -31,10 +31,10 @@ export function CaseModal({
   const canHandle = role !== 'exec';
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 32 }}>
+    <div className="spims-modal-overlay" style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div onClick={onCloseModal} style={{ position: 'absolute', inset: 0, background: 'rgba(17,28,85,0.5)' }}></div>
       <div
-        className="spims-scroll"
+        className="spims-scroll spims-modal-card"
         style={{
           position: 'relative',
           background: '#fff',
@@ -78,7 +78,7 @@ export function CaseModal({
         </div>
 
         <div style={{ padding: '22px 28px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
+          <div className="grid-2" style={{ marginBottom: 20 }}>
             <div style={{ background: 'var(--bg)', borderRadius: 12, padding: '16px 18px' }}>
               <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#2B4C9B', marginBottom: 8 }}>
                 Raised by
@@ -135,8 +135,8 @@ export function CaseModal({
               {grievance.status === 'Open' && !grievance.assignee && (
                 <div>
                   <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--navy)', marginBottom: 12 }}>Assign a handler to start investigation</div>
-                  <div style={{ display: 'flex', gap: 12 }}>
-                    <select ref={assignRef} style={{ flex: 1, fontFamily: 'inherit', fontSize: 14, padding: '12px 14px', border: '1px solid var(--line)', borderRadius: 10, background: '#fbfbfd', color: 'var(--ink)' }}>
+                  <div className="spims-modal-row">
+                    <select ref={assignRef} style={{ fontFamily: 'inherit', fontSize: 14, padding: '12px 14px', border: '1px solid var(--line)', borderRadius: 10, background: '#fbfbfd', color: 'var(--ink)' }}>
                       <option>Blessing Aganbi · Community Relations</option>
                       <option>Peter Obiora · Community Liaison</option>
                       <option>Ngozi Uba · Stakeholder Manager</option>
@@ -154,11 +154,11 @@ export function CaseModal({
               {grievance.status === 'Investigating' && (
                 <div>
                   <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--navy)', marginBottom: 12 }}>Add an investigation note</div>
-                  <div style={{ display: 'flex', gap: 12, marginBottom: 22 }}>
+                  <div className="spims-modal-row" style={{ marginBottom: 22 }}>
                     <input
                       ref={noteRef}
                       placeholder="e.g. Site visited; contractor to complete handover by Friday."
-                      style={{ flex: 1, fontFamily: 'inherit', fontSize: 14, padding: '12px 14px', border: '1px solid var(--line)', borderRadius: 10, background: '#fbfbfd', color: 'var(--ink)' }}
+                      style={{ fontFamily: 'inherit', fontSize: 14, padding: '12px 14px', border: '1px solid var(--line)', borderRadius: 10, background: '#fbfbfd', color: 'var(--ink)' }}
                     />
                     <button
                       onClick={() => {
@@ -179,7 +179,7 @@ export function CaseModal({
                     placeholder="Describe how the grievance was resolved with the community."
                     style={{ width: '100%', fontFamily: 'inherit', fontSize: 14, padding: '12px 14px', border: '1px solid var(--line)', borderRadius: 10, background: '#fbfbfd', color: 'var(--ink)', resize: 'vertical', marginBottom: 12 }}
                   />
-                  <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+                  <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
                     <button
                       onClick={onEscalate}
                       style={{ fontFamily: 'inherit', fontSize: 13.5, fontWeight: 600, color: '#C0491E', background: '#fff', border: '1px solid #F0D3C4', borderRadius: 10, padding: '11px 20px', cursor: 'pointer' }}
@@ -205,8 +205,8 @@ export function CaseModal({
                     <div style={{ fontSize: 13.5, color: 'var(--ink)', lineHeight: 1.45 }}>{grievance.resolution}</div>
                   </div>
                   <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--navy)', marginBottom: 12 }}>Close the case with a satisfaction rating</div>
-                  <div style={{ display: 'flex', gap: 12 }}>
-                    <select ref={satisfactionRef} style={{ flex: 1, fontFamily: 'inherit', fontSize: 14, padding: '12px 14px', border: '1px solid var(--line)', borderRadius: 10, background: '#fbfbfd', color: 'var(--ink)' }}>
+                  <div className="spims-modal-row">
+                    <select ref={satisfactionRef} style={{ fontFamily: 'inherit', fontSize: 14, padding: '12px 14px', border: '1px solid var(--line)', borderRadius: 10, background: '#fbfbfd', color: 'var(--ink)' }}>
                       <option>Very satisfied</option>
                       <option>Satisfied</option>
                       <option>Neutral</option>

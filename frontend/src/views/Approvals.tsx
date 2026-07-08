@@ -40,7 +40,7 @@ export function Approvals({ approvals }: { approvals: Approval[] }) {
           return (
             <div
               key={a.id}
-              style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: 14, padding: '18px 22px', display: 'flex', alignItems: 'center', gap: 20 }}
+              style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: 14, padding: '18px 22px', display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}
             >
               <div
                 style={{
@@ -59,7 +59,7 @@ export function Approvals({ approvals }: { approvals: Approval[] }) {
               >
                 {a.who}
               </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ flex: '1 1 220px', minWidth: 200 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
                   <span
                     style={{
