@@ -1,5 +1,6 @@
 import { formField, h1, input, label, primaryBtn, secondaryBtn, sectionCardTitle } from '../ui';
 import type { CSSProperties } from 'react';
+import type { ToastTone } from '../useToastQueue';
 
 const selectStyle: CSSProperties = { ...input };
 const darkFormField: CSSProperties = { display: 'flex', flexDirection: 'column', gap: 7 };
@@ -14,7 +15,7 @@ const darkInput: CSSProperties = {
   color: '#fff',
 };
 
-export function NewProject({ goApprovals }: { goApprovals: () => void }) {
+export function NewProject({ goApprovals, pushToast }: { goApprovals: () => void; pushToast: (message: string, tone?: ToastTone) => void }) {
   return (
     <div style={{ maxWidth: 1080 }}>
       <h1 style={h1}>New Project</h1>
@@ -165,8 +166,16 @@ export function NewProject({ goApprovals }: { goApprovals: () => void }) {
         <span style={{ fontSize: 12.5, color: 'var(--muted)', marginRight: 'auto' }}>
           Submitting routes to your reviewer for approval before it appears on the executive dashboard.
         </span>
-        <button style={secondaryBtn}>Save draft</button>
-        <button onClick={goApprovals} style={primaryBtn}>
+        <button onClick={() => pushToast('Draft saved. You can find it under My Projects.', 'info')} style={secondaryBtn}>
+          Save draft
+        </button>
+        <button
+          onClick={() => {
+            pushToast('Project submitted — routed to your reviewer for approval.', 'success');
+            goApprovals();
+          }}
+          style={primaryBtn}
+        >
           Submit for approval →
         </button>
       </div>

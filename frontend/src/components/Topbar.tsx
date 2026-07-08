@@ -1,5 +1,6 @@
+import { useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
-import type { Role } from '../types';
+import type { Community, Project, Role } from '../types';
 import { Icon } from './Icon';
 
 const ROLE_BUTTONS: { key: Role; label: string }[] = [
@@ -29,13 +30,41 @@ export function Topbar({
   role,
   setRole,
   onMenuClick,
+  projects,
+  communities,
+  goProjectDetail,
+  goCommunities,
 }: {
   orgName: string;
   crumb: string;
   role: Role;
   setRole: (r: Role) => void;
   onMenuClick: () => void;
+  projects: Project[];
+  communities: Community[];
+  goProjectDetail: (id: string) => void;
+  goCommunities: () => void;
 }) {
+  const [query, setQuery] = useState('');
+  const [focused, setFocused] = useState(false);
+  const blurTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  const q = query.trim().toLowerCase();
+  const matchedProjects = q ? projects.filter((p) => p.name.toLowerCase().includes(q) || p.code.toLowerCase().includes(q)).slice(0, 5) : [];
+  const matchedCommunities = q ? communities.filter((c) => c.name.toLowerCase().includes(q) || c.state.toLowerCase().includes(q)).slice(0, 5) : [];
+  const showDropdown = focused && q.length > 0;
+
+  const selectProject = (id: string) => {
+    goProjectDetail(id);
+    setQuery('');
+    setFocused(false);
+  };
+  const selectCommunity = () => {
+    goCommunities();
+    setQuery('');
+    setFocused(false);
+  };
+
   return (
     <header
       className="spims-topbar"
@@ -96,21 +125,87 @@ export function Topbar({
             ))}
           </div>
         </div>
-        <div
-          className="spims-topbar-search"
-          style={{
-            alignItems: 'center',
-            gap: 9,
-            background: 'var(--bg)',
-            border: '1px solid var(--line)',
-            borderRadius: 10,
-            padding: '8px 14px',
-            width: 220,
-            color: 'var(--muted)',
-          }}
-        >
-          <Icon name="search" size={16} />
-          <span style={{ fontSize: 13 }}>Search projects, communities…</span>
+        <div className="spims-topbar-search" style={{ position: 'relative' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 9,
+              background: 'var(--bg)',
+              border: '1px solid var(--line)',
+              borderRadius: 10,
+              padding: '8px 14px',
+              width: 220,
+              color: 'var(--muted)',
+            }}
+          >
+            <Icon name="search" size={16} />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onFocus={() => {
+                clearTimeout(blurTimeout.current);
+                setFocused(true);
+              }}
+              onBlur={() => {
+                blurTimeout.current = setTimeout(() => setFocused(false), 150);
+              }}
+              placeholder="Search projects, communities…"
+              style={{ border: 'none', outline: 'none', background: 'transparent', fontSize: 13, fontFamily: 'inherit', color: 'var(--ink)', width: '100%' }}
+            />
+          </div>
+          {showDropdown && (
+            <div
+              style={{
+                position: 'absolute',
+                top: '110%',
+                left: 0,
+                right: 0,
+                background: '#fff',
+                border: '1px solid var(--line)',
+                borderRadius: 12,
+                boxShadow: '0 20px 50px -15px rgba(17,28,85,0.35)',
+                overflow: 'hidden',
+                zIndex: 50,
+                minWidth: 280,
+              }}
+            >
+              {matchedProjects.length === 0 && matchedCommunities.length === 0 && (
+                <div style={{ padding: '14px 16px', fontSize: 13, color: 'var(--muted)' }}>No matches for "{query}"</div>
+              )}
+              {matchedProjects.length > 0 && (
+                <div>
+                  <div style={{ padding: '8px 16px', fontSize: 10.5, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--muted)', background: '#fafafe' }}>
+                    Projects
+                  </div>
+                  {matchedProjects.map((p) => (
+                    <div
+                      key={p.id}
+                      className="rowh"
+                      onMouseDown={() => selectProject(p.id)}
+                      style={{ padding: '10px 16px', cursor: 'pointer', fontSize: 13.5 }}
+                    >
+                      <div style={{ fontWeight: 600, color: 'var(--navy)' }}>{p.name}</div>
+                      <div style={{ fontSize: 11.5, color: 'var(--muted)' }}>{p.code} · {p.pillar}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {matchedCommunities.length > 0 && (
+                <div>
+                  <div style={{ padding: '8px 16px', fontSize: 10.5, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--muted)', background: '#fafafe' }}>
+                    Communities
+                  </div>
+                  {matchedCommunities.map((c) => (
+                    <div key={c.id} className="rowh" onMouseDown={selectCommunity} style={{ padding: '10px 16px', cursor: 'pointer', fontSize: 13.5 }}>
+                      <div style={{ fontWeight: 600, color: 'var(--navy)' }}>{c.name}</div>
+                      <div style={{ fontSize: 11.5, color: 'var(--muted)' }}>{c.lga}, {c.state}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
         <div
           className="spims-topbar-fy"

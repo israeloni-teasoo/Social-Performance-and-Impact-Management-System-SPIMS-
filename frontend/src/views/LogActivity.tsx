@@ -1,5 +1,7 @@
+import { useRef, useState } from 'react';
 import { Icon } from '../components/Icon';
 import { formField, h1, input, primaryBtn, subtitle } from '../ui';
+import type { ToastTone } from '../useToastQueue';
 
 const ACTIVITY_TYPES = [
   'Training / workshop',
@@ -11,7 +13,22 @@ const ACTIVITY_TYPES = [
   'Distribution / handover',
 ];
 
-export function LogActivity({ goMyTasks }: { goMyTasks: () => void }) {
+export function LogActivity({ goMyTasks, pushToast }: { goMyTasks: () => void; pushToast: (message: string, tone?: ToastTone) => void }) {
+  const [activityType, setActivityType] = useState('Training / workshop');
+  const [photoCount, setPhotoCount] = useState(2);
+  const [docCount, setDocCount] = useState(1);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+  const docInputRef = useRef<HTMLInputElement>(null);
+
+  const handleSaveOffline = () => {
+    pushToast('Activity saved offline — it will sync automatically when you regain signal.', 'info');
+  };
+
+  const handleSubmit = () => {
+    pushToast('Activity logged and submitted for manager approval.', 'success');
+    goMyTasks();
+  };
+
   return (
     <div style={{ maxWidth: 780, margin: '0 auto' }}>
       <h1 style={h1}>Log Activity</h1>
@@ -29,14 +46,28 @@ export function LogActivity({ goMyTasks }: { goMyTasks: () => void }) {
 
         <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--navy)', display: 'block', marginBottom: 10 }}>Activity type</label>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 9, marginBottom: 22 }}>
-          {ACTIVITY_TYPES.map((at) => (
-            <span
-              key={at}
-              style={{ fontSize: 13.5, fontWeight: 500, padding: '11px 16px', borderRadius: 11, border: '1px solid var(--line)', background: '#fbfbfd', color: 'var(--ink)', cursor: 'pointer' }}
-            >
-              {at}
-            </span>
-          ))}
+          {ACTIVITY_TYPES.map((at) => {
+            const active = activityType === at;
+            return (
+              <button
+                key={at}
+                onClick={() => setActivityType(at)}
+                style={{
+                  fontFamily: 'inherit',
+                  fontSize: 13.5,
+                  fontWeight: 500,
+                  padding: '11px 16px',
+                  borderRadius: 11,
+                  border: active ? '1px solid var(--accent)' : '1px solid var(--line)',
+                  background: active ? 'rgba(227,26,56,0.08)' : '#fbfbfd',
+                  color: active ? 'var(--accent)' : 'var(--ink)',
+                  cursor: 'pointer',
+                }}
+              >
+                {at}
+              </button>
+            );
+          })}
         </div>
 
         <div className="form-grid-2" style={{ marginBottom: 22 }}>
@@ -87,23 +118,60 @@ export function LogActivity({ goMyTasks }: { goMyTasks: () => void }) {
 
         <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--navy)', display: 'block', marginBottom: 10 }}>Evidence</label>
         <div style={{ display: 'flex', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
-          <div style={{ flex: 1, minWidth: 200, border: '1.5px dashed #C7CADB', borderRadius: 12, padding: 22, textAlign: 'center', color: 'var(--muted)', background: '#fbfbfd' }}>
+          <input
+            ref={photoInputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            style={{ display: 'none' }}
+            onChange={(e) => {
+              const n = e.target.files?.length ?? 0;
+              if (n > 0) {
+                setPhotoCount((c) => c + n);
+                pushToast(`${n} photo${n > 1 ? 's' : ''} attached.`, 'success');
+              }
+            }}
+          />
+          <button
+            onClick={() => photoInputRef.current?.click()}
+            style={{ flex: 1, minWidth: 200, border: '1.5px dashed #C7CADB', borderRadius: 12, padding: 22, textAlign: 'center', color: 'var(--muted)', background: '#fbfbfd', cursor: 'pointer', fontFamily: 'inherit' }}
+          >
             <Icon name="evidence" size={22} style={{ marginBottom: 6 }} />
             <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>Add photos</div>
-            <div style={{ fontSize: 11.5 }}>2 attached</div>
-          </div>
-          <div style={{ flex: 1, minWidth: 200, border: '1.5px dashed #C7CADB', borderRadius: 12, padding: 22, textAlign: 'center', color: 'var(--muted)', background: '#fbfbfd' }}>
+            <div style={{ fontSize: 11.5 }}>{photoCount} attached</div>
+          </button>
+          <input
+            ref={docInputRef}
+            type="file"
+            accept=".pdf,.doc,.docx,image/*"
+            multiple
+            style={{ display: 'none' }}
+            onChange={(e) => {
+              const n = e.target.files?.length ?? 0;
+              if (n > 0) {
+                setDocCount((c) => c + n);
+                pushToast(`${n} file${n > 1 ? 's' : ''} attached.`, 'success');
+              }
+            }}
+          />
+          <button
+            onClick={() => docInputRef.current?.click()}
+            style={{ flex: 1, minWidth: 200, border: '1.5px dashed #C7CADB', borderRadius: 12, padding: 22, textAlign: 'center', color: 'var(--muted)', background: '#fbfbfd', cursor: 'pointer', fontFamily: 'inherit' }}
+          >
             <Icon name="doc" size={22} style={{ marginBottom: 6 }} />
             <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>Attendance sheet</div>
-            <div style={{ fontSize: 11.5 }}>1 attached</div>
-          </div>
+            <div style={{ fontSize: 11.5 }}>{docCount} attached</div>
+          </button>
         </div>
 
         <div className="btn-row-stack">
-          <button style={{ flex: 1, fontFamily: 'inherit', fontSize: 15, fontWeight: 600, color: 'var(--navy)', background: '#fff', border: '1px solid var(--line)', borderRadius: 12, padding: 15, cursor: 'pointer' }}>
+          <button
+            onClick={handleSaveOffline}
+            style={{ flex: 1, fontFamily: 'inherit', fontSize: 15, fontWeight: 600, color: 'var(--navy)', background: '#fff', border: '1px solid var(--line)', borderRadius: 12, padding: 15, cursor: 'pointer' }}
+          >
             Save offline
           </button>
-          <button onClick={goMyTasks} style={{ ...primaryBtn, flex: 1.4, fontSize: 15, borderRadius: 12, padding: 15 }}>
+          <button onClick={handleSubmit} style={{ ...primaryBtn, flex: 1.4, fontSize: 15, borderRadius: 12, padding: 15 }}>
             Save &amp; submit for approval →
           </button>
         </div>

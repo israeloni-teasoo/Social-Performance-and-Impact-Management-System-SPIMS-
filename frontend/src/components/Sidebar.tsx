@@ -67,6 +67,8 @@ export function Sidebar({
   view,
   setView,
   gOpen,
+  approvalsCount,
+  tasksCount,
   orgName,
   userName,
   userRole,
@@ -77,6 +79,8 @@ export function Sidebar({
   view: View;
   setView: (v: View) => void;
   gOpen: number;
+  approvalsCount: number;
+  tasksCount: number;
   orgName: string;
   userName: string;
   userRole: string;
@@ -146,7 +150,7 @@ export function Sidebar({
             <NavButton icon="portfolio" label="My Projects" active={view === 'myprojects'} onClick={() => setView('myprojects')} />
             <NavButton icon="newproject" label="New Project" active={view === 'newproject'} onClick={() => setView('newproject')} />
             <div style={SECTION_LABEL}>Review &amp; report</div>
-            <NavButton icon="approvals" label="Approvals" active={view === 'approvals'} onClick={() => setView('approvals')} badge={4} />
+            <NavButton icon="approvals" label="Approvals" active={view === 'approvals'} onClick={() => setView('approvals')} badge={approvalsCount} />
             <NavButton icon="reports" label="Reports & Exports" active={view === 'reports'} onClick={() => setView('reports')} />
           </div>
         )}
@@ -154,7 +158,7 @@ export function Sidebar({
         {role === 'field' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             <div style={SECTION_LABEL}>Field work</div>
-            <NavButton icon="mytasks" label="My Tasks" active={view === 'mytasks'} onClick={() => setView('mytasks')} badge={4} />
+            <NavButton icon="mytasks" label="My Tasks" active={view === 'mytasks'} onClick={() => setView('mytasks')} badge={tasksCount} />
             <NavButton icon="logactivity" label="Log Activity" active={view === 'logactivity'} onClick={() => setView('logactivity')} />
             <NavButton icon="loggrievance" label="Log Grievance" active={view === 'loggrievance'} onClick={() => setView('loggrievance')} />
             <div style={SECTION_LABEL}>Repository</div>

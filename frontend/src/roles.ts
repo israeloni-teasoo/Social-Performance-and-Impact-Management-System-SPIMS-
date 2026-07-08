@@ -36,4 +36,5 @@ export const CRUMBS: Record<View, string> = {
   cases: 'Grievance Cases',
   loggrievance: 'Log Grievance',
   stakeholders: 'Stakeholder Register',
+  projectdetail: 'Project Detail',
 };

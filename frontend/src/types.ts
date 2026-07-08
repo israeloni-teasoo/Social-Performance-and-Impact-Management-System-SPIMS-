@@ -16,7 +16,8 @@ export type View =
   | 'evidence'
   | 'cases'
   | 'loggrievance'
-  | 'stakeholders';
+  | 'stakeholders'
+  | 'projectdetail';
 
 export interface Project {
   id: string;
@@ -122,6 +123,42 @@ export interface Grievance {
   resolvedDate: string | null;
   satisfaction: string | null;
   timeline: GrievanceTimelineEntry[];
+}
+
+export interface ImpactMethodology {
+  metric: string;
+  calculation: string;
+  source: string;
+  note: string;
+}
+
+export interface BaselinePoint {
+  label: string;
+  value: string;
+  pct: number;
+}
+
+export interface DualLensTag {
+  tag: 'Local' | 'Global' | 'SDG';
+  text: string;
+}
+
+export interface ProjectImpact {
+  projectCode: string;
+  inputs: string;
+  activities: string;
+  outputHeadline: string;
+  outcome: string;
+  impactHeadline: string;
+  impactDetail: string;
+  methodology: ImpactMethodology;
+  baseline: BaselinePoint[];
+  baselineCaption: string;
+  dualLens: DualLensTag[];
+  costPerOutcome: string;
+  sroi: string;
+  contactPerson: string;
+  communitiesImpacted: string[];
 }
 
 export interface NewGrievanceInput {

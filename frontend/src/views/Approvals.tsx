@@ -1,7 +1,15 @@
 import { APPROVAL_TYPE_COLORS, h1 } from '../ui';
 import type { Approval } from '../types';
 
-export function Approvals({ approvals }: { approvals: Approval[] }) {
+export function Approvals({
+  approvals,
+  onApprove,
+  onReturn,
+}: {
+  approvals: Approval[];
+  onApprove: (id: string) => void;
+  onReturn: (id: string) => void;
+}) {
   return (
     <div>
       <h1 style={h1}>Approvals Queue</h1>
@@ -35,6 +43,11 @@ export function Approvals({ approvals }: { approvals: Approval[] }) {
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        {approvals.length === 0 && (
+          <div style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: 14, padding: '32px 22px', textAlign: 'center', color: 'var(--muted)', fontSize: 13.5 }}>
+            Nothing waiting on your review — the queue is clear.
+          </div>
+        )}
         {approvals.map((a) => {
           const [typeBg, typeFg] = APPROVAL_TYPE_COLORS[a.type] ?? ['#eee', '#555'];
           return (
@@ -83,11 +96,13 @@ export function Approvals({ approvals }: { approvals: Approval[] }) {
               </div>
               <div style={{ display: 'flex', gap: 10, flexShrink: 0 }}>
                 <button
+                  onClick={() => onReturn(a.id)}
                   style={{ fontFamily: 'inherit', fontSize: 12.5, fontWeight: 600, color: 'var(--muted)', background: '#fff', border: '1px solid var(--line)', borderRadius: 9, padding: '9px 16px', cursor: 'pointer' }}
                 >
                   Return
                 </button>
                 <button
+                  onClick={() => onApprove(a.id)}
                   style={{ fontFamily: 'inherit', fontSize: 12.5, fontWeight: 600, color: '#fff', background: '#1F8A5B', border: 'none', borderRadius: 9, padding: '9px 18px', cursor: 'pointer' }}
                 >
                   Approve

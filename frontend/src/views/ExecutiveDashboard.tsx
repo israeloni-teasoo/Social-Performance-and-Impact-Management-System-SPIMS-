@@ -1,6 +1,39 @@
+import { useState } from 'react';
 import { card } from '../ui';
 
+type Lens = 'both' | 'local' | 'global';
+
+const COMPLIANCE_ITEMS = [
+  { icon: '✓', iconColor: '#1F8A5B', text: 'PIA HCDT — 3% OpEx funded', lens: 'local' as const },
+  { icon: '87%', iconColor: '#2B4C9B', text: 'NCDMB local content', lens: 'local' as const },
+  { icon: '92%', iconColor: '#2B4C9B', text: 'NUPRC grievance SLA', lens: 'local' as const },
+  { icon: '!', iconColor: '#C0491E', text: '4 IFRS S1 gaps open', lens: 'global' as const },
+  { icon: '96%', iconColor: '#1F8A5B', text: 'GRI 403 disclosure complete', lens: 'global' as const },
+  { icon: '✓', iconColor: '#1F8A5B', text: 'SDG mapping current', lens: 'global' as const },
+];
+
+const OUTCOME_ROWS = [
+  { delta: '+12%', desc: 'literacy in STEP schools', localTag: 'NCDMB human-capital', globalTag: 'SDG 4' },
+  { delta: '−8%', desc: 'youth unemployment (YEP LGAs)', localTag: 'NCDMB local content', globalTag: 'SDG 8' },
+  { delta: '+22K', desc: 'people with clean-water access', localTag: 'PIA HCDT', globalTag: 'SDG 6' },
+];
+
 export function ExecutiveDashboard({ targetYear }: { targetYear: number }) {
+  const [lens, setLens] = useState<Lens>('both');
+  const visibleCompliance = lens === 'both' ? COMPLIANCE_ITEMS : COMPLIANCE_ITEMS.filter((c) => c.lens === lens);
+
+  const tabStyle = (active: boolean) => ({
+    fontSize: 12.5,
+    fontWeight: 600,
+    padding: '8px 16px',
+    borderRadius: 8,
+    background: active ? 'var(--navy)' : 'transparent',
+    color: active ? '#fff' : 'var(--muted)',
+    border: 'none',
+    fontFamily: 'inherit',
+    cursor: 'pointer',
+  });
+
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 24 , flexWrap: 'wrap', gap: 16 }}>
@@ -13,11 +46,15 @@ export function ExecutiveDashboard({ targetYear }: { targetYear: number }) {
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8, background: '#fff', border: '1px solid var(--line)', borderRadius: 11, padding: 4 }}>
-          <span style={{ fontSize: 12.5, fontWeight: 600, padding: '8px 16px', borderRadius: 8, background: 'var(--navy)', color: '#fff' }}>
+          <button onClick={() => setLens('both')} style={tabStyle(lens === 'both')}>
             Local + Global
-          </span>
-          <span style={{ fontSize: 12.5, fontWeight: 600, padding: '8px 16px', borderRadius: 8, color: 'var(--muted)' }}>Local</span>
-          <span style={{ fontSize: 12.5, fontWeight: 600, padding: '8px 16px', borderRadius: 8, color: 'var(--muted)' }}>Global</span>
+          </button>
+          <button onClick={() => setLens('local')} style={tabStyle(lens === 'local')}>
+            Local
+          </button>
+          <button onClick={() => setLens('global')} style={tabStyle(lens === 'global')}>
+            Global
+          </button>
         </div>
       </div>
 
@@ -182,14 +219,15 @@ export function ExecutiveDashboard({ targetYear }: { targetYear: number }) {
             What changed <span style={{ fontWeight: 500, fontSize: 12, color: 'var(--muted)' }}>· outcomes</span>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            {[
-              { delta: '+12%', desc: 'literacy in STEP schools' },
-              { delta: '−8%', desc: 'youth unemployment (YEP LGAs)' },
-              { delta: '+22K', desc: 'people with clean-water access' },
-            ].map((row) => (
-              <div key={row.desc} style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
+            {OUTCOME_ROWS.map((row) => (
+              <div key={row.desc} style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
                 <span style={{ fontSize: 22, fontWeight: 800, color: '#1F8A5B' }}>{row.delta}</span>
                 <span style={{ fontSize: 13, color: 'var(--ink)' }}>{row.desc}</span>
+                {lens !== 'both' && (
+                  <span style={{ fontSize: 10.5, fontWeight: 700, padding: '2px 8px', borderRadius: 20, background: lens === 'local' ? 'rgba(43,76,155,0.1)' : 'rgba(31,138,91,0.12)', color: lens === 'local' ? '#2B4C9B' : '#1F8A5B' }}>
+                    {lens === 'local' ? row.localTag : row.globalTag}
+                  </span>
+                )}
               </div>
             ))}
           </div>
@@ -207,18 +245,19 @@ export function ExecutiveDashboard({ targetYear }: { targetYear: number }) {
               <div style={{ fontSize: 11.5, color: '#9EA1C0' }}>Satisfaction</div>
             </div>
           </div>
-          <div
-            style={{
-              marginTop: 16,
-              paddingTop: 14,
-              borderTop: '1px solid rgba(255,255,255,0.12)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-            }}
-          >
-            <span style={{ fontSize: 12.5, color: '#C7C9DA' }}>ESG · Social score</span>
-            <span style={{ fontSize: 15, fontWeight: 800, background: 'var(--accent)', padding: '3px 12px', borderRadius: 8 }}>B+</span>
+          <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid rgba(255,255,255,0.12)', display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {lens !== 'global' && (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: 12.5, color: '#C7C9DA' }}>NCDMB · Local content</span>
+                <span style={{ fontSize: 15, fontWeight: 800, background: '#2B4C9B', padding: '3px 12px', borderRadius: 8 }}>87%</span>
+              </div>
+            )}
+            {lens !== 'local' && (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: 12.5, color: '#C7C9DA' }}>ESG · Social score</span>
+                <span style={{ fontSize: 15, fontWeight: 800, background: 'var(--accent)', padding: '3px 12px', borderRadius: 8 }}>B+</span>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -228,15 +267,12 @@ export function ExecutiveDashboard({ targetYear }: { targetYear: number }) {
         <div style={card}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
             <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--navy)' }}>Are we compliant?</div>
-            <span style={{ fontSize: 12, fontWeight: 600, color: '#1F8A5B' }}>24 / 28 commitments met</span>
+            <span style={{ fontSize: 12, fontWeight: 600, color: '#1F8A5B' }}>
+              {lens === 'both' ? '24 / 28' : lens === 'local' ? '3 / 3' : '2 / 3'} commitments met
+            </span>
           </div>
           <div className="grid-compliance-inner">
-            {[
-              { icon: '✓', iconColor: '#1F8A5B', text: 'PIA HCDT — 3% OpEx funded' },
-              { icon: '87%', iconColor: '#2B4C9B', text: 'NCDMB local content' },
-              { icon: '92%', iconColor: '#2B4C9B', text: 'NUPRC grievance SLA' },
-              { icon: '!', iconColor: '#C0491E', text: '4 IFRS S1 gaps open' },
-            ].map((row) => (
+            {visibleCompliance.map((row) => (
               <div
                 key={row.text}
                 style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'var(--bg)', borderRadius: 10, padding: '11px 14px' }}

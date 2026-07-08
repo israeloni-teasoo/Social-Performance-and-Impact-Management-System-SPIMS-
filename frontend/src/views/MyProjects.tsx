@@ -2,14 +2,14 @@ import { Icon } from '../components/Icon';
 import { h1, PILLAR_COLORS, pill, primaryBtn, secondaryBtn, STATUS_COLORS, tableHeaderRow, tableRow } from '../ui';
 import type { Project } from '../types';
 
-export function MyProjects({ projects, goNewProject }: { projects: Project[]; goNewProject: () => void }) {
+export function MyProjects({ projects, goNewProject, onOpen }: { projects: Project[]; goNewProject: () => void; onOpen: (id: string) => void }) {
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 22 , flexWrap: 'wrap', gap: 16 }}>
         <div>
           <h1 style={h1}>My Projects</h1>
           <p style={{ fontSize: 14.5, color: 'var(--muted)', margin: 0 }}>
-            Projects you own across Edo &amp; Delta. Update delivery, log spend and submit for approval.
+            Projects you own across Edo &amp; Delta. Click a project for its detail and impact chain, or update delivery and submit for approval.
           </p>
         </div>
         <button onClick={goNewProject} style={{ ...primaryBtn, display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -31,7 +31,12 @@ export function MyProjects({ projects, goNewProject }: { projects: Project[]; go
           const [pillarBg, pillarFg] = PILLAR_COLORS[p.pillar] ?? ['#eee', '#555'];
           const [statusBg, statusFg] = STATUS_COLORS[p.status] ?? ['#eee', '#555'];
           return (
-            <div key={p.id} className="rowh" style={{ ...tableRow, display: 'grid', gridTemplateColumns: '2.4fr 1.1fr 1fr 1.3fr 1fr 0.9fr' }}>
+            <div
+              key={p.id}
+              className="rowh"
+              onClick={() => onOpen(p.id)}
+              style={{ ...tableRow, display: 'grid', gridTemplateColumns: '2.4fr 1.1fr 1fr 1.3fr 1fr 0.9fr', cursor: 'pointer' }}
+            >
               <div>
                 <div style={{ fontWeight: 600, color: 'var(--navy)' }}>{p.name}</div>
                 <div style={{ fontSize: 11.5, color: 'var(--muted)' }}>
@@ -52,7 +57,13 @@ export function MyProjects({ projects, goNewProject }: { projects: Project[]; go
                 <span style={pill(statusBg, statusFg)}>{p.status}</span>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <button onClick={goNewProject} style={{ ...secondaryBtn, fontSize: 12.5, padding: '7px 14px' }}>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onOpen(p.id);
+                  }}
+                  style={{ ...secondaryBtn, fontSize: 12.5, padding: '7px 14px' }}
+                >
                   Manage
                 </button>
               </div>
