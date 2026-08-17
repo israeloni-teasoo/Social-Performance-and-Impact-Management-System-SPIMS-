@@ -145,6 +145,12 @@ export interface DualLensTag {
   text: string;
 }
 
+export interface ImpactScenario {
+  horizon: string;
+  conservative: string;
+  highImpact: string;
+}
+
 export interface ProjectImpact {
   projectCode: string;
   inputs: string;
@@ -154,6 +160,9 @@ export interface ProjectImpact {
   impactHeadline: string;
   impactDetail: string;
   methodology: ImpactMethodology;
+  /** Optional conservative-vs-high-impact projection table for "what it means" figures that compound over time. */
+  impactScenarios?: ImpactScenario[];
+  impactScenarioBasis?: string;
   baseline: BaselinePoint[];
   baselineCaption: string;
   dualLens: DualLensTag[];

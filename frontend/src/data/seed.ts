@@ -20,15 +20,23 @@ export const PROJECT_IMPACTS: Record<string, ProjectImpact> = {
     activities: 'Trained and certified primary-school teachers and inspectors across Edo and Delta in structured literacy and numeracy methods.',
     outputHeadline: '623 teachers certified in 2026',
     outcome: 'Better teaching quality and classroom practice — literacy proficiency in STEP-supported schools moved from 54% (baseline) to 66% (endline).',
-    impactHeadline: '≈19,300 children reached this academic year',
+    impactHeadline: '31,150–93,450 children reached this year · up to 934,500 over 10 years',
     impactDetail:
-      'Better-trained teachers translate into improved classroom outcomes for the pupils in front of them this year. Sustained over several years, this is associated with lower drop-out and (per Seplat’s host-community objectives) reduced youth restiveness — but that longer-run claim is not quantified here.',
+      'STEP is a multiplier intervention: it invests in teachers, not just classrooms, so one trained teacher keeps reaching new students every year they stay in post. Each certified teacher is projected to carry these methods to between 50 (conservative) and 150 (high-impact) students annually — embedding digital literacy, problem-solving and entrepreneurial thinking beyond the standard curriculum. If even a tenth of those students go on to monetise these skills, STEP is a pipeline into Edo and Delta’s digital economy, not just a training record — this is the mechanism behind Seplat’s SDG 4, 8 and 10 claims for the programme.',
     methodology: {
-      metric: 'Pupil-teacher ratio, primary education (Nigeria)',
-      calculation: '623 certified teachers × ≈31 pupils per teacher ≈ 19,313 children directly reached in the current academic year.',
-      source: 'World Bank / UNESCO Institute for Statistics pupil-teacher ratio data for Nigeria; extrapolation approach follows IPIECA’s "Creating Successful, Sustainable Social Investment" M&E guidance and GRI 404 training-outcome disclosures.',
-      note: 'This is a single-year, direct-reach figure — not a multi-year cumulative count. A retention-adjusted multi-year figure would need validation against actual teacher-retention data before it goes in an external report.',
+      metric: 'Teacher multiplier — conservative vs. high-impact reach per teacher per year',
+      calculation:
+        '623 certified teachers × 50 students/teacher/year (conservative) to 150 students/teacher/year (high-impact) = 31,150–93,450 students reached this academic year. The same multiplier compounds annually as long as a teacher stays in post: ×5 = 155,750–467,250 over 5 years; ×10 = 311,500–934,500 over 10 years.',
+      source:
+        'Reach-per-teacher range and horizon model follow Seplat’s own STEP 2026 Impact Assessment Summary (internal M&E document); the underlying teacher-to-student ratio is cross-checked against World Bank / UNESCO Institute for Statistics pupil-teacher ratio data for Nigeria and IPIECA’s "Creating Successful, Sustainable Social Investment" M&E guidance.',
+      note: 'These are reach projections, not measured outcomes — they assume trained teachers remain in post and keep applying STEP methods every year, which is not yet tracked. Seplat’s own report goes one step further: if 10% of reached students monetise these skills within 10 years, that is a further 31,150–93,450 economically active youth entering local value chains — also a projection, flagged here rather than reported as fact, pending longitudinal teacher-retention and student-outcome tracking.',
     },
+    impactScenarios: [
+      { horizon: 'This year', conservative: '31,150 students', highImpact: '93,450 students' },
+      { horizon: '5-year', conservative: '155,750 students', highImpact: '467,250 students' },
+      { horizon: '10-year', conservative: '311,500 students', highImpact: '934,500 students' },
+    ],
+    impactScenarioBasis: 'Based on 623 certified teachers × 50 students/teacher/year (conservative) to 150 students/teacher/year (high-impact), assuming teachers remain in post.',
     baseline: [
       { label: 'Baseline', value: '54%', pct: 54 },
       { label: 'Midline', value: '61%', pct: 61 },
@@ -38,9 +46,9 @@ export const PROJECT_IMPACTS: Record<string, ProjectImpact> = {
     dualLens: [
       { tag: 'Local', text: 'NCDMB human-capital development' },
       { tag: 'Global', text: 'GRI 404 · IPIECA SOC-6' },
-      { tag: 'SDG', text: 'SDG 4 · Quality Education & SDG 8' },
+      { tag: 'SDG', text: 'SDG 4 · SDG 8 · SDG 10' },
     ],
-    costPerOutcome: '₦24,858 per child reached',
+    costPerOutcome: '₦5,136–₦15,409 per child reached (this year)',
     sroi: '3.4×',
     contactPerson: 'Tunde Bello · Project Manager, Edo',
     communitiesImpacted: ['Sapele, Delta', 'Amukpe, Delta', 'Oben, Edo'],

@@ -190,6 +190,43 @@ export function ProjectDetail({
                 ⚠ {impact.methodology.note}
               </div>
             </div>
+
+            {impact.impactScenarios && impact.impactScenarios.length > 0 && (
+              <div style={{ marginTop: 18, paddingTop: 18, borderTop: '1px solid var(--line)' }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--navy)', marginBottom: 4 }}>
+                  What it means, translated into figures
+                </div>
+                {impact.impactScenarioBasis && (
+                  <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 12 }}>{impact.impactScenarioBasis}</div>
+                )}
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 420 }}>
+                    <thead>
+                      <tr>
+                        <th style={{ textAlign: 'left', fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.05em', padding: '0 0 8px', fontWeight: 700 }}>
+                          Time horizon
+                        </th>
+                        <th style={{ textAlign: 'left', fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.05em', padding: '0 0 8px', fontWeight: 700 }}>
+                          Conservative
+                        </th>
+                        <th style={{ textAlign: 'left', fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.05em', padding: '0 0 8px', fontWeight: 700 }}>
+                          High-impact
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {impact.impactScenarios.map((s) => (
+                        <tr key={s.horizon} style={{ borderTop: '1px solid var(--line)' }}>
+                          <td style={{ padding: '8px 0', fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>{s.horizon}</td>
+                          <td style={{ padding: '8px 0', fontSize: 13, color: 'var(--ink)' }}>{s.conservative}</td>
+                          <td style={{ padding: '8px 0', fontSize: 13, fontWeight: 700, color: 'var(--accent)' }}>{s.highImpact}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="grid-impact-lower">

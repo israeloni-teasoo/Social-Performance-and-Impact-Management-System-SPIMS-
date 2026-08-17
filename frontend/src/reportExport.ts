@@ -174,6 +174,16 @@ function projectBodyLines(project: Project, impact: ProjectImpact | undefined): 
       ...wrap(`Source: ${impact.methodology.source}`, 88),
       ...wrap(`Note: ${impact.methodology.note}`, 88),
       '',
+    );
+    if (impact.impactScenarios && impact.impactScenarios.length > 0) {
+      lines.push('WHAT IT MEANS, TRANSLATED INTO FIGURES');
+      if (impact.impactScenarioBasis) lines.push(...wrap(toAscii(impact.impactScenarioBasis), 88));
+      for (const s of impact.impactScenarios) {
+        lines.push(`${s.horizon}: ${toAscii(s.conservative)} (conservative) to ${toAscii(s.highImpact)} (high-impact)`);
+      }
+      lines.push('');
+    }
+    lines.push(
       `Cost per outcome: ${impact.costPerOutcome} · Est. SROI: ${impact.sroi}`,
       `Communities impacted: ${impact.communitiesImpacted.join(', ')}`,
       `Project manager: ${impact.contactPerson}`,
@@ -213,6 +223,13 @@ export function exportProjectReport(project: Project, impact: ProjectImpact | un
         ['Methodology calculation', impact.methodology.calculation],
         ['Methodology source', impact.methodology.source],
         ['Methodology note', impact.methodology.note],
+      );
+      if (impact.impactScenarios) {
+        for (const s of impact.impactScenarios) {
+          rows.push([`Reach — ${s.horizon}`, `${s.conservative} (conservative) to ${s.highImpact} (high-impact)`]);
+        }
+      }
+      rows.push(
         ['Cost per outcome', impact.costPerOutcome],
         ['Est. SROI', impact.sroi],
         ['Communities impacted', impact.communitiesImpacted.join('; ')],
