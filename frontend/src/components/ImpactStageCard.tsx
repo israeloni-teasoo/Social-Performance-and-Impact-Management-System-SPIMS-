@@ -5,13 +5,19 @@ export function ImpactStageCard({
   label,
   title,
   detail,
+  bigFigure,
+  bigFigureLabel,
+  bullets,
   variant,
   badge,
 }: {
   index: string;
   label: string;
   title: string;
-  detail: string;
+  detail?: string;
+  bigFigure?: string;
+  bigFigureLabel?: string;
+  bullets?: string[];
   variant: StageVariant;
   badge?: string;
 }) {
@@ -47,7 +53,23 @@ export function ImpactStageCard({
         {index} · {label}
       </div>
       <div style={{ fontSize: 18, fontWeight: 700, margin: '10px 0 12px' }}>{title}</div>
-      <div style={{ fontSize: 13, lineHeight: 1.45, color: styles.detailColor, borderTop: styles.detailBorder, paddingTop: 12 }}>{detail}</div>
+      {bigFigure ? (
+        <div style={{ borderTop: styles.detailBorder, paddingTop: 12 }}>
+          <div style={{ fontSize: 34, fontWeight: 800, lineHeight: 1.1 }}>{bigFigure}</div>
+          {bigFigureLabel && <div style={{ fontSize: 12, color: styles.labelColor, marginTop: 4, marginBottom: bullets?.length ? 12 : 0 }}>{bigFigureLabel}</div>}
+          {bullets && bullets.length > 0 && (
+            <ul style={{ margin: 0, paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {bullets.map((b, i) => (
+                <li key={i} style={{ fontSize: 12.5, lineHeight: 1.4, color: styles.detailColor }}>
+                  {b}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      ) : (
+        <div style={{ fontSize: 13, lineHeight: 1.45, color: styles.detailColor, borderTop: styles.detailBorder, paddingTop: 12 }}>{detail}</div>
+      )}
     </div>
   );
 }

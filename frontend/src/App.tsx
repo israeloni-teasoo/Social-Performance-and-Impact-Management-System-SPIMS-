@@ -7,11 +7,14 @@ import { COMMUNITIES, EVIDENCE_ITEMS, INDICATORS, PROJECT_IMPACTS, PROJECTS, REP
 import { CRUMBS, DEFAULT_VIEW_FOR_ROLE, ROLE_USERS } from './roles';
 import type { Role, View } from './types';
 import { useApprovalsStore } from './useApprovalsStore';
+import { useDepartmentsStore } from './useDepartmentsStore';
 import { useGrievanceStore } from './useGrievanceStore';
 import { useStakeholdersStore } from './useStakeholdersStore';
+import { useTargetsStore } from './useTargetsStore';
 import { useToastQueue } from './useToastQueue';
 import { Approvals } from './views/Approvals';
 import { Communities } from './views/Communities';
+import { Departments } from './views/Departments';
 import { Evidence } from './views/Evidence';
 import { ExecutiveDashboard } from './views/ExecutiveDashboard';
 import { GrievanceCases } from './views/GrievanceCases';
@@ -29,6 +32,7 @@ import { ProjectPortfolio } from './views/ProjectPortfolio';
 import { Reports } from './views/Reports';
 import { StakeholderRegister } from './views/StakeholderRegister';
 import { StandardsLibrary } from './views/StandardsLibrary';
+import { Targets } from './views/Targets';
 
 const TARGET_YEAR = 2030;
 const ORG_NAME = 'Seplat Energy Plc';
@@ -45,6 +49,8 @@ export default function App() {
   const { grievances, logGrievance, assign, addNote, resolve, closeCase, escalate } = useGrievanceStore(role);
   const { approvals, approve, returnItem } = useApprovalsStore(pushToast);
   const { stakeholders, addStakeholder } = useStakeholdersStore(pushToast);
+  const { departments, addDepartment, toggleStatus } = useDepartmentsStore(pushToast);
+  const { targets, addTarget, closeTarget } = useTargetsStore(pushToast);
 
   const setRole = (r: Role) => {
     setRoleState(r);
@@ -123,6 +129,8 @@ export default function App() {
           {view === 'cases' && <GrievanceCases grievances={grievances} onOpen={setSelectedId} goLogGrievance={() => setView('loggrievance')} />}
           {view === 'loggrievance' && <LogGrievance onCancel={() => setView('cases')} onSubmit={handleLogGrievance} />}
           {view === 'stakeholders' && <StakeholderRegister stakeholders={stakeholders} onAdd={addStakeholder} />}
+          {view === 'targets' && <Targets targets={targets} departments={departments} onAdd={addTarget} onClose={closeTarget} pushToast={pushToast} />}
+          {view === 'departments' && <Departments departments={departments} targets={targets} onAdd={addDepartment} onToggleStatus={toggleStatus} />}
           {view === 'help' && <HelpPage />}
           {view === 'projectdetail' && selectedProject && (
             <ProjectDetail

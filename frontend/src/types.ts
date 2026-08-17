@@ -19,7 +19,9 @@ export type View =
   | 'stakeholders'
   | 'projectdetail'
   | 'standards'
-  | 'help';
+  | 'help'
+  | 'departments'
+  | 'targets';
 
 export interface Project {
   id: string;
@@ -158,7 +160,12 @@ export interface ProjectImpact {
   outputHeadline: string;
   outcome: string;
   impactHeadline: string;
-  impactDetail: string;
+  /** Single big number for the Impact stage card, e.g. "934,500" or "≈4,000". */
+  impactFigure: string;
+  /** Short caption under the big number, e.g. "potential students reached over 10 years". */
+  impactFigureLabel: string;
+  /** What that figure means, as short scannable bullets rather than a paragraph. */
+  impactPoints: string[];
   methodology: ImpactMethodology;
   /** Optional conservative-vs-high-impact projection table for "what it means" figures that compound over time. */
   impactScenarios?: ImpactScenario[];
@@ -170,6 +177,50 @@ export interface ProjectImpact {
   sroi: string;
   contactPerson: string;
   communitiesImpacted: string[];
+}
+
+export interface Department {
+  id: string;
+  name: string;
+  /** Aligns to a pillar name where applicable (e.g. "Education") for shared colour-coding, or a standalone function like "Stakeholder Relations". */
+  function: string;
+  lead: string;
+  status: 'Active' | 'Inactive';
+  createdAt: string;
+}
+
+export interface NewDepartmentInput {
+  name: string;
+  function: string;
+  lead: string;
+}
+
+export interface TargetAllocation {
+  departmentId: string;
+  allocated: number;
+}
+
+export interface Target {
+  id: string;
+  name: string;
+  metric: string;
+  unit: 'people' | 'naira' | 'percent' | 'communities';
+  periodLabel: string;
+  totalTarget: number;
+  currentValue: number;
+  allocations: TargetAllocation[];
+  status: 'Active' | 'Draft' | 'Closed';
+  createdAt: string;
+}
+
+export interface NewTargetInput {
+  name: string;
+  metric: string;
+  unit: Target['unit'];
+  periodLabel: string;
+  totalTarget: number;
+  currentValue: number;
+  allocations: TargetAllocation[];
 }
 
 export interface NewGrievanceInput {

@@ -142,6 +142,10 @@ export function Sidebar({
             <NavButton icon="indicators" label="Indicator Library" active={view === 'indicators'} onClick={() => setView('indicators')} />
             <NavButton icon="standards" label="Standards Library" active={view === 'standards'} onClick={() => setView('standards')} />
             <NavButton icon="reports" label="Reports & Exports" active={view === 'reports'} onClick={() => setView('reports')} />
+
+            <div style={SECTION_LABEL}>Configure</div>
+            <NavButton icon="target" label="Targets" active={view === 'targets'} onClick={() => setView('targets')} />
+            <NavButton icon="departments" label="Departments" active={view === 'departments'} onClick={() => setView('departments')} />
           </div>
         )}
 

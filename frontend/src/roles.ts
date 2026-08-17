@@ -39,4 +39,6 @@ export const CRUMBS: Record<View, string> = {
   projectdetail: 'Project Detail',
   standards: 'Standards Library',
   help: 'How SPIMS Works',
+  departments: 'Departments',
+  targets: 'Targets',
 };

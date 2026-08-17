@@ -1,4 +1,4 @@
-import type { Approval, Community, EvidenceItem, FieldTask, Grievance, Indicator, Project, ProjectImpact, Report, Stakeholder } from '../types';
+import type { Approval, Community, Department, EvidenceItem, FieldTask, Grievance, Indicator, Project, ProjectImpact, Report, Stakeholder, Target } from '../types';
 
 export const PROJECTS: Project[] = [
   { id: 'STEP', code: 'STEP', name: 'Teachers Empowerment (STEP)', output: '623 teachers certified', pillar: 'Education', state: 'Edo · Delta', budget: '₦480M', utilPct: '90%', progress: '90%', progPct: '90%', status: 'On track' },
@@ -21,8 +21,14 @@ export const PROJECT_IMPACTS: Record<string, ProjectImpact> = {
     outputHeadline: '623 teachers certified in 2026',
     outcome: 'Better teaching quality and classroom practice — literacy proficiency in STEP-supported schools moved from 54% (baseline) to 66% (endline).',
     impactHeadline: '31,150–93,450 children reached this year · up to 934,500 over 10 years',
-    impactDetail:
-      'STEP is a multiplier intervention: it invests in teachers, not just classrooms, so one trained teacher keeps reaching new students every year they stay in post. Each certified teacher is projected to carry these methods to between 50 (conservative) and 150 (high-impact) students annually — embedding digital literacy, problem-solving and entrepreneurial thinking beyond the standard curriculum. If even a tenth of those students go on to monetise these skills, STEP is a pipeline into Edo and Delta’s digital economy, not just a training record — this is the mechanism behind Seplat’s SDG 4, 8 and 10 claims for the programme.',
+    impactFigure: '934,500',
+    impactFigureLabel: 'potential students reached over 10 years (high-impact scenario)',
+    impactPoints: [
+      'Improved digital literacy and IT competence among rural students',
+      'Early exposure to entrepreneurship and financial literacy',
+      'Enhanced employability and self-employment readiness',
+      'A teacher trained once keeps compounding this reach every year they stay in post',
+    ],
     methodology: {
       metric: 'Teacher multiplier — conservative vs. high-impact reach per teacher per year',
       calculation:
@@ -60,8 +66,13 @@ export const PROJECT_IMPACTS: Record<string, ProjectImpact> = {
     outputHeadline: '51,955 students engaged in 2026',
     outcome: 'Increased curriculum engagement and exam-oriented study habits among participating students.',
     impactHeadline: '51,955 students — direct reach, no extrapolation needed',
-    impactDetail:
-      'Unlike STEP, PEARLs’ output figure already counts unique student participants directly, not an intermediate output that needs extrapolating to reach a beneficiary count. The methodology note here is deliberately different from STEP’s: no multiplier is applied because none is needed.',
+    impactFigure: '51,955',
+    impactFigureLabel: 'students directly engaged — a headcount, not an extrapolation',
+    impactPoints: [
+      'Higher curriculum engagement and exam-oriented study habits',
+      'Healthy academic competition sustained across three successive cohorts',
+      'A visible, high-performing pipeline feeding STEAM Labs and follow-on scholarships',
+    ],
     methodology: {
       metric: 'Direct participant count',
       calculation: '51,955 registered student participants across the competition cycle — a headcount, not an extrapolation.',
@@ -91,8 +102,13 @@ export const PROJECT_IMPACTS: Record<string, ProjectImpact> = {
     outputHeadline: '23,447 people screened in 2026',
     outcome: 'Early identification of correctable vision impairment and referral into treatment pathways.',
     impactHeadline: '≈4,000 people identified with a treatable vision condition',
-    impactDetail:
-      'Nigeria’s National Blindness & Visual Impairment Survey found 84% of blindness nationally is avoidable, with uncorrected refractive error and cataract the leading causes — screening at scale is how those cases get found before they progress.',
+    impactFigure: '≈4,000',
+    impactFigureLabel: 'people identified with a treatable vision condition',
+    impactPoints: [
+      'Early identification of correctable vision impairment before it progresses',
+      'Referral into treatment pathways via partner state health facilities',
+      '84% of blindness nationally is avoidable, per Nigeria’s National Blindness & Visual Impairment Survey',
+    ],
     methodology: {
       metric: 'Share of screened population identified with a correctable condition',
       calculation: '23,447 screened × ≈17% (illustrative population eye-screening benchmark) ≈ 3,986 people identified needing corrective or clinical follow-up.',
@@ -122,7 +138,13 @@ export const PROJECT_IMPACTS: Record<string, ProjectImpact> = {
     outputHeadline: '12 boreholes completed',
     outcome: 'Reduced walking distance to potable water and reduced dependence on unsafe surface-water sources.',
     impactHeadline: '≈3,000 people with improved water access',
-    impactDetail: 'Rural boreholes are shared community infrastructure — the beneficiary count comes from typical households served per site, not from a per-teacher or per-patient style count.',
+    impactFigure: '≈3,000',
+    impactFigureLabel: 'people with improved water access',
+    impactPoints: [
+      'Reduced walking distance to potable water',
+      'Lower dependence on unsafe surface-water sources',
+      'Community-led water committees sustaining the asset after handover',
+    ],
     methodology: {
       metric: 'Households served per rural borehole × national average household size',
       calculation: '12 boreholes × ≈50 households per site (typical Nigerian rural water-scheme planning norm) × 5 persons/household (national average) ≈ 3,000 people.',
@@ -152,7 +174,13 @@ export const PROJECT_IMPACTS: Record<string, ProjectImpact> = {
     outputHeadline: '3 sites energised',
     outcome: 'New household and small-business access to reliable electricity, replacing generator/kerosene use.',
     impactHeadline: '≈2,250 people gaining electricity access',
-    impactDetail: 'As with the water scheme, the beneficiary count is derived from households connected per site rather than a direct headcount.',
+    impactFigure: '≈2,250',
+    impactFigureLabel: 'people gaining electricity access',
+    impactPoints: [
+      'Households and small businesses gain reliable power, replacing generator/kerosene use',
+      'Local technicians trained to maintain the mini-grid after commissioning',
+      'Foundation for new evening economic activity in host communities',
+    ],
     methodology: {
       metric: 'Households connected per mini-grid site × national average household size',
       calculation: '3 sites × ≈150 households connected per site (typical scale for a Nigerian community mini-grid) × 5 persons/household ≈ 2,250 people.',
@@ -182,7 +210,13 @@ export const PROJECT_IMPACTS: Record<string, ProjectImpact> = {
     outputHeadline: '129+ youth trained in 2026',
     outcome: 'New and scaled youth-owned micro-enterprises across host communities.',
     impactHeadline: '≈194 additional jobs created (illustrative)',
-    impactDetail: 'The jobs figure extrapolates from trained founders to the jobs their ventures create — a standard SME job-creation multiplier, not a direct headcount.',
+    impactFigure: '≈194',
+    impactFigureLabel: 'additional jobs created (illustrative)',
+    impactPoints: [
+      'New and scaled youth-owned micro-enterprises across host communities',
+      'Household income diversified beyond oil & gas-adjacent work',
+      'A trained-founder pipeline feeding the Entrepreneurship Fellowship',
+    ],
     methodology: {
       metric: 'Average additional jobs created per supported micro-enterprise',
       calculation: '129 trained youth × ≈1.5 additional jobs per venture (typical MSME job-creation multiplier used in Nigerian development-sector programmes) ≈ 194 additional jobs.',
@@ -212,7 +246,13 @@ export const PROJECT_IMPACTS: Record<string, ProjectImpact> = {
     outputHeadline: '55 fellows graduated',
     outcome: 'Higher-growth ventures with continued mentor access post-programme.',
     impactHeadline: '≈83 additional jobs created (illustrative)',
-    impactDetail: 'Same job-creation extrapolation approach as YEP, applied to a smaller, more selective cohort.',
+    impactFigure: '≈83',
+    impactFigureLabel: 'additional jobs created (illustrative)',
+    impactPoints: [
+      'Higher-growth ventures with continued mentor access post-programme',
+      '85% of Cohort 3 ventures still trading after 12 months — above typical early-stage survival rates',
+      'A more selective, higher-support complement to YEP',
+    ],
     methodology: {
       metric: 'Average additional jobs created per fellowship venture',
       calculation: '55 fellows × ≈1.5 additional jobs per venture (same illustrative MSME multiplier used for YEP) ≈ 83 additional jobs.',
@@ -242,7 +282,13 @@ export const PROJECT_IMPACTS: Record<string, ProjectImpact> = {
     outputHeadline: '2 labs built, scholarships awarded',
     outcome: 'Increased hands-on access to science, technology, engineering, arts and maths equipment.',
     impactHeadline: '≈2,000 students gaining lab access (illustrative)',
-    impactDetail: 'Each lab is shared infrastructure serving its whole host school, so the beneficiary count comes from typical school enrollment, not a per-student intake count.',
+    impactFigure: '≈2,000',
+    impactFigureLabel: 'students gaining lab access (illustrative)',
+    impactPoints: [
+      'Hands-on access to science, technology, engineering, arts and maths equipment',
+      'Scholarships removing the cost barrier to sustained participation',
+      'A feeder pipeline into STEM/STEAM tertiary pathways',
+    ],
     methodology: {
       metric: 'Average student enrollment per host secondary school',
       calculation: '2 labs × ≈1,000 students per host school (typical Nigerian secondary-school enrollment) ≈ 2,000 students with lab access.',
@@ -383,5 +429,77 @@ export const INITIAL_GRIEVANCES: Grievance[] = [
       { id: 'g-109-t3', ts: '11 Jun · 15:00', actor: 'Blessing Aganbi · Community Relations', action: 'Resolved · hours extended' },
       { id: 'g-109-t4', ts: '14 Jun · 10:00', actor: 'Blessing Aganbi · Community Relations', action: 'Case closed · satisfaction: Very satisfied' },
     ],
+  },
+];
+
+export const DEPARTMENTS: Department[] = [
+  { id: 'dept-edu', name: 'Education & Skills', function: 'Education', lead: 'Dr. Ifeoma Nwosu', status: 'Active', createdAt: 'Jan 2024' },
+  { id: 'dept-health', name: 'Health & Wellbeing', function: 'Health', lead: 'Dr. Chidi Okafor', status: 'Active', createdAt: 'Jan 2024' },
+  { id: 'dept-infra', name: 'Infrastructure & Works', function: 'Infrastructure', lead: 'Eng. Musa Bello', status: 'Active', createdAt: 'Mar 2024' },
+  { id: 'dept-econ', name: 'Economic Empowerment', function: 'Economic Emp.', lead: 'Amaka Eze', status: 'Active', createdAt: 'Mar 2024' },
+  { id: 'dept-relations', name: 'Community & Government Relations', function: 'Stakeholder Relations', lead: 'Blessing Aganbi', status: 'Active', createdAt: 'Jan 2024' },
+];
+
+// Targets are set by executives for a period and allocated across departments — the same
+// FY26 figures shown on the Executive Dashboard, made traceable to who owns delivering them.
+export const TARGETS: Target[] = [
+  {
+    id: 'tgt-1',
+    name: 'Beneficiaries Reached',
+    metric: 'People reached across all programmes',
+    unit: 'people',
+    periodLabel: 'FY2026',
+    totalTarget: 350000,
+    currentValue: 312000,
+    status: 'Active',
+    createdAt: '02 Jan 2026',
+    allocations: [
+      { departmentId: 'dept-edu', allocated: 160000 },
+      { departmentId: 'dept-health', allocated: 70000 },
+      { departmentId: 'dept-infra', allocated: 55000 },
+      { departmentId: 'dept-econ', allocated: 45000 },
+      { departmentId: 'dept-relations', allocated: 20000 },
+    ],
+  },
+  {
+    id: 'tgt-2',
+    name: 'Social Investment Spend',
+    metric: 'Community & social investment spend, by budget category',
+    unit: 'naira',
+    periodLabel: 'FY2026',
+    totalTarget: 5_200_000_000,
+    currentValue: 4_680_000_000,
+    status: 'Active',
+    createdAt: '02 Jan 2026',
+    allocations: [
+      { departmentId: 'dept-edu', allocated: 2_340_000_000 },
+      { departmentId: 'dept-health', allocated: 1_144_000_000 },
+      { departmentId: 'dept-infra', allocated: 1_040_000_000 },
+      { departmentId: 'dept-econ', allocated: 676_000_000 },
+    ],
+  },
+  {
+    id: 'tgt-3',
+    name: 'Host Communities Covered',
+    metric: 'Host communities with active SPIMS programming',
+    unit: 'communities',
+    periodLabel: 'FY2026',
+    totalTarget: 45,
+    currentValue: 42,
+    status: 'Active',
+    createdAt: '02 Jan 2026',
+    allocations: [{ departmentId: 'dept-relations', allocated: 45 }],
+  },
+  {
+    id: 'tgt-4',
+    name: 'NCDMB Local Content Compliance',
+    metric: 'Nigerian content share of applicable spend',
+    unit: 'percent',
+    periodLabel: 'FY2026',
+    totalTarget: 90,
+    currentValue: 87,
+    status: 'Active',
+    createdAt: '02 Jan 2026',
+    allocations: [{ departmentId: 'dept-econ', allocated: 90 }],
   },
 ];

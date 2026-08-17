@@ -144,7 +144,16 @@ export function ProjectDetail({
             <StageCard index="02" label="Activities" title="What we do" detail={impact.activities} variant="plain" badge="Entered by team" />
             <StageCard index="03" label="Outputs" title="What we deliver" detail={impact.outputHeadline} variant="navyFill" badge="System-aggregated" />
             <StageCard index="04" label="Outcomes" title="What changes" detail={impact.outcome} variant="accentBorder" badge="Calculated" />
-            <StageCard index="05" label="Impact" title="What it means" detail={impact.impactDetail} variant="accentFill" badge="Calculated" />
+            <StageCard
+              index="05"
+              label="Impact"
+              title="What it means"
+              bigFigure={impact.impactFigure}
+              bigFigureLabel={impact.impactFigureLabel}
+              bullets={impact.impactPoints}
+              variant="accentFill"
+              badge="Calculated"
+            />
           </div>
 
           <div

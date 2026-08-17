@@ -78,6 +78,16 @@ export const HELP_TOPICS: HelpTopic[] = [
     ],
   },
   {
+    id: 'targets-departments',
+    tag: 'Roles',
+    question: 'How do Targets and Departments work?',
+    answer: [
+      'Executives use the Targets page to set a goal for a year or period — e.g. beneficiaries reached, social investment spend, communities covered, or a compliance percentage — and allocate portions of it across the departments accountable for delivering it.',
+      'Departments is where those departments and functions get onboarded in the first place: name, function area, and lead. A department has to exist before a target can be allocated to it.',
+      'Progress bars on each target compare current progress to the total target; the department breakdown shows how that total was split, so it is clear who owns which slice. As with the rest of SPIMS, current-progress figures are illustrative Phase 1 placeholders until they are wired to live field data.',
+    ],
+  },
+  {
     id: 'data-honesty',
     tag: 'Data',
     question: 'Why do so many numbers say "illustrative" or "Phase 1"?',
