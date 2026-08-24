@@ -1,32 +1,60 @@
+import { useState } from 'react';
 import { MethodologyTip } from './ImpactExplainers';
 import type { ProjectImpact } from '../types';
 
 /** The "05 · Impact — what it means" stage, promoted out of the equal-height stage-card grid so its
  * figures and bullets have room to breathe instead of stretching the other four cards to match. */
 export function ImpactPanel({ impact }: { impact: ProjectImpact }) {
-  const thisYear = impact.impactScenarios?.[0];
+  const scenarios = impact.impactScenarios ?? [];
+  const [horizonIndex, setHorizonIndex] = useState(0);
+  const active = scenarios[horizonIndex];
 
   return (
     <div style={{ background: 'var(--accent)', color: '#fff', borderRadius: 16, padding: '26px 28px', marginBottom: 22 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-        <span style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#FFD2D9' }}>05 · Impact</span>
-        <MethodologyTip impact={impact} />
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 4 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#FFD2D9' }}>05 · Impact</span>
+          <MethodologyTip impact={impact} />
+        </div>
+        {scenarios.length > 1 && (
+          <div style={{ display: 'flex', gap: 4, background: 'rgba(255,255,255,0.14)', borderRadius: 9, padding: 3 }}>
+            {scenarios.map((s, i) => (
+              <button
+                key={s.horizon}
+                onClick={() => setHorizonIndex(i)}
+                style={{
+                  fontFamily: 'inherit',
+                  fontSize: 11.5,
+                  fontWeight: 600,
+                  padding: '6px 12px',
+                  borderRadius: 7,
+                  border: 'none',
+                  cursor: 'pointer',
+                  background: i === horizonIndex ? '#fff' : 'transparent',
+                  color: i === horizonIndex ? 'var(--accent)' : '#fff',
+                }}
+              >
+                {s.horizon}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
       <div style={{ fontSize: 19, fontWeight: 700, marginBottom: 18 }}>What it means</div>
 
-      {thisYear ? (
+      {active ? (
         <div style={{ display: 'flex', gap: 36, flexWrap: 'wrap', marginBottom: 20 }}>
           <div>
             <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#FFD2D9', marginBottom: 4 }}>
-              Conservative · {thisYear.horizon}
+              Conservative · {active.horizon}
             </div>
-            <div style={{ fontSize: 32, fontWeight: 800, lineHeight: 1.1 }}>{thisYear.conservative}</div>
+            <div style={{ fontSize: 32, fontWeight: 800, lineHeight: 1.1 }}>{active.conservative}</div>
           </div>
           <div>
             <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#FFD2D9', marginBottom: 4 }}>
-              High-impact · {thisYear.horizon}
+              High-impact · {active.horizon}
             </div>
-            <div style={{ fontSize: 32, fontWeight: 800, lineHeight: 1.1 }}>{thisYear.highImpact}</div>
+            <div style={{ fontSize: 32, fontWeight: 800, lineHeight: 1.1 }}>{active.highImpact}</div>
           </div>
         </div>
       ) : (

@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { HELP_TOPICS } from '../data/helpTopics';
 import type { HelpTopic } from '../data/helpTopics';
 import { h1, pill, subtitle } from '../ui';
+import { IndicatorLibrary } from './IndicatorLibrary';
 import { StandardsLibrary } from './StandardsLibrary';
-import type { Project } from '../types';
+import type { Indicator, Project } from '../types';
 
 const TAG_COLORS: Record<HelpTopic['tag'], [string, string]> = {
   Data: ['rgba(43,76,155,0.12)', '#2B4C9B'],
@@ -12,9 +13,17 @@ const TAG_COLORS: Record<HelpTopic['tag'], [string, string]> = {
   Impact: ['rgba(227,26,56,0.12)', '#E31A38'],
 };
 
-type Tab = 'guide' | 'standards';
+type Tab = 'guide' | 'standards' | 'indicators';
 
-export function HelpPage({ projects, goProjectDetail }: { projects: Project[]; goProjectDetail: (id: string) => void }) {
+export function HelpPage({
+  projects,
+  goProjectDetail,
+  indicators,
+}: {
+  projects: Project[];
+  goProjectDetail: (id: string) => void;
+  indicators: Indicator[];
+}) {
   const [tab, setTab] = useState<Tab>('guide');
   const [openId, setOpenId] = useState<string | null>(HELP_TOPICS[0].id);
 
@@ -43,6 +52,9 @@ export function HelpPage({ projects, goProjectDetail }: { projects: Project[]; g
         </button>
         <button onClick={() => setTab('standards')} style={tabStyle(tab === 'standards')}>
           Standards Library
+        </button>
+        <button onClick={() => setTab('indicators')} style={tabStyle(tab === 'indicators')}>
+          Indicator Library
         </button>
       </div>
 
@@ -88,8 +100,10 @@ export function HelpPage({ projects, goProjectDetail }: { projects: Project[]; g
             );
           })}
         </div>
-      ) : (
+      ) : tab === 'standards' ? (
         <StandardsLibrary projects={projects} goProjectDetail={goProjectDetail} />
+      ) : (
+        <IndicatorLibrary indicators={indicators} />
       )}
     </div>
   );

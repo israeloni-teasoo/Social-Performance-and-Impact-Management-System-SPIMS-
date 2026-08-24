@@ -24,7 +24,7 @@ export const CRUMBS: Record<View, string> = {
   portfolio: 'Project Portfolio',
   impact: 'Impact Chain',
   communities: 'Communities',
-  indicators: 'Indicator Library',
+  communitydetail: 'Community Detail',
   grievances: 'Grievances',
   reports: 'Reports & Exports',
   myprojects: 'My Projects',

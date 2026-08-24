@@ -363,10 +363,50 @@ export const TASKS: FieldTask[] = [
 ];
 
 export const APPROVALS: Approval[] = [
-  { id: 'appr-1', who: 'Grace Idemudia', item: 'Activity log — teacher training (42 attendees)', project: 'STEP · Sapele', when: '2h ago', type: 'Activity' },
-  { id: 'appr-2', who: 'John Efe', item: 'Beneficiary count — 318 people screened', project: 'Eye Can See · Oben', when: '5h ago', type: 'Beneficiaries' },
-  { id: 'appr-3', who: 'Grace Idemudia', item: 'Spend record — ₦2.4M training venue', project: 'STEP · Sapele', when: 'Yesterday', type: 'Spend' },
-  { id: 'appr-4', who: 'Mary Uche', item: 'Evidence — 8 photos + attendance sheet', project: 'YEP · Orogun', when: 'Yesterday', type: 'Evidence' },
+  {
+    id: 'appr-1', who: 'Grace Idemudia', item: 'Activity log — teacher training (42 attendees)', project: 'STEP · Sapele', when: '2h ago', type: 'Activity',
+    details: [
+      'Activity type: Training / workshop',
+      'Date: 06 Jul 2026 · Location: Sapele Grammar School (5.8904, 5.6767)',
+      'Beneficiaries reached: 42 total — 24 female, 18 male, 31 youth, 1 PWD',
+      'Site notes: Full-day literacy methods training delivered. Strong turnout; two teachers requested follow-up materials.',
+      'Evidence attached: 2 photos, 1 attendance sheet',
+    ],
+    comments: [],
+  },
+  {
+    id: 'appr-2', who: 'John Efe', item: 'Beneficiary count — 318 people screened', project: 'Eye Can See · Oben', when: '5h ago', type: 'Beneficiaries',
+    details: [
+      'Activity type: Site visit — mobile eye clinic',
+      'Date: 05 Jul 2026 · Location: Oben Health Centre',
+      'Beneficiaries reached: 318 total — 172 female, 146 male',
+      'Site notes: Two-day outreach clinic; 41 referred for further treatment.',
+      'Evidence attached: 5 photos, 1 clinical intake summary',
+    ],
+    comments: [],
+  },
+  {
+    id: 'appr-3', who: 'Grace Idemudia', item: 'Spend record — ₦2.4M training venue', project: 'STEP · Sapele', when: 'Yesterday', type: 'Spend',
+    details: [
+      'Spend category: Venue hire & catering',
+      'Amount: ₦2,400,000 · Vendor: Sapele Grammar School facilities office',
+      'Date: 03 Jul 2026',
+      'Linked to: Q3 teacher-training session (activity log appr-1)',
+      'Evidence attached: 1 invoice, 1 payment receipt',
+    ],
+    comments: [],
+  },
+  {
+    id: 'appr-4', who: 'Mary Uche', item: 'Evidence — 8 photos + attendance sheet', project: 'YEP · Orogun', when: 'Yesterday', type: 'Evidence',
+    details: [
+      'Activity type: Community meeting — cohort graduation',
+      'Date: 02 Jul 2026 · Location: Orogun Town Hall',
+      'Beneficiaries reached: 27 graduating founders',
+      'Site notes: Cohort 3 graduation ceremony; seed-grant certificates issued.',
+      'Evidence attached: 8 photos, 1 attendance sheet',
+    ],
+    comments: [],
+  },
 ];
 
 export const EVIDENCE_ITEMS: EvidenceItem[] = [

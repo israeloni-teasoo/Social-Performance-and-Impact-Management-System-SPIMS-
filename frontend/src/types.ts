@@ -5,7 +5,7 @@ export type View =
   | 'portfolio'
   | 'impact'
   | 'communities'
-  | 'indicators'
+  | 'communitydetail'
   | 'grievances'
   | 'reports'
   | 'myprojects'
@@ -115,6 +115,13 @@ export interface NewTeamMemberInput {
   roleTitle: string;
 }
 
+export interface ApprovalComment {
+  id: string;
+  author: string;
+  text: string;
+  createdAt: string;
+}
+
 export interface Approval {
   id: string;
   who: string;
@@ -122,6 +129,8 @@ export interface Approval {
   project: string;
   when: string;
   type: string;
+  details: string[];
+  comments: ApprovalComment[];
 }
 
 export interface EvidenceItem {

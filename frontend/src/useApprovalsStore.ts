@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { APPROVALS } from './data/seed';
 import type { Approval } from './types';
 
-const STORAGE_KEY = 'spims_approvals_v1';
+const STORAGE_KEY = 'spims_approvals_v2';
 
 function load(): Approval[] {
   try {
@@ -25,6 +25,8 @@ function save(list: Approval[]) {
   }
 }
 
+let idCounter = 0;
+
 export function useApprovalsStore(onNotify: (message: string, tone?: 'success' | 'info' | 'warning') => void) {
   const [approvals, setApprovals] = useState<Approval[]>(() => load());
 
@@ -44,5 +46,28 @@ export function useApprovalsStore(onNotify: (message: string, tone?: 'success' |
     if (item) onNotify(`Returned "${item.item}" to ${item.who} for revision.`, 'warning');
   };
 
-  return { approvals, approve, returnItem };
+  const addComment = (id: string, author: string, text: string) => {
+    idCounter += 1;
+    setApprovals((list) =>
+      list.map((a) =>
+        a.id === id
+          ? {
+              ...a,
+              comments: [
+                ...a.comments,
+                {
+                  id: `ac-${Date.now()}-${idCounter}`,
+                  author,
+                  text: text.trim(),
+                  createdAt: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }),
+                },
+              ],
+            }
+          : a,
+      ),
+    );
+    onNotify('Comment added.', 'success');
+  };
+
+  return { approvals, approve, returnItem, addComment };
 }

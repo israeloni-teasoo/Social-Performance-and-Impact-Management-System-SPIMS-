@@ -1,14 +1,19 @@
 import { card, h1, subtitle } from '../ui';
 import type { Community } from '../types';
 
-export function Communities({ communities }: { communities: Community[] }) {
+export function Communities({ communities, onOpen }: { communities: Community[]; onOpen: (id: string) => void }) {
   return (
     <div>
       <h1 style={h1}>Communities</h1>
-      <p style={subtitle}>Host community profiles — leadership, needs and the projects running in each.</p>
+      <p style={subtitle}>Host community profiles — leadership, needs and the projects running in each. Click a card for the full profile.</p>
       <div className="grid-3">
         {communities.map((c) => (
-          <div key={c.id} className="card-lift" style={card}>
+          <button
+            key={c.id}
+            onClick={() => onOpen(c.id)}
+            className="card-lift"
+            style={{ ...card, textAlign: 'left', cursor: 'pointer', fontFamily: 'inherit', width: '100%' }}
+          >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 }}>
               <div>
                 <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--navy)' }}>{c.name}</div>
@@ -33,7 +38,7 @@ export function Communities({ communities }: { communities: Community[] }) {
             <div style={{ fontSize: 12.5, color: 'var(--ink)', marginTop: 14, lineHeight: 1.4 }}>
               <span style={{ color: 'var(--muted)' }}>CDC:</span> {c.cdc}
             </div>
-          </div>
+          </button>
         ))}
       </div>
     </div>

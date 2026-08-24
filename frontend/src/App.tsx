@@ -16,13 +16,13 @@ import { useTeamStore } from './useTeamStore';
 import { useToastQueue } from './useToastQueue';
 import { Approvals } from './views/Approvals';
 import { Communities } from './views/Communities';
+import { CommunityDetail } from './views/CommunityDetail';
 import { Evidence } from './views/Evidence';
 import { ExecutiveDashboard } from './views/ExecutiveDashboard';
 import { GrievanceCases } from './views/GrievanceCases';
 import { GrievancesExec } from './views/GrievancesExec';
 import { HelpPage } from './views/HelpPage';
 import { ImpactChain } from './views/ImpactChain';
-import { IndicatorLibrary } from './views/IndicatorLibrary';
 import { LogActivity } from './views/LogActivity';
 import { LogGrievance } from './views/LogGrievance';
 import { MyProjects } from './views/MyProjects';
@@ -45,10 +45,11 @@ export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [projectDetailReturnView, setProjectDetailReturnView] = useState<View>('portfolio');
+  const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(null);
 
   const { toasts, push: pushToast, dismiss: dismissToast } = useToastQueue();
   const { grievances, logGrievance, assign, addNote, resolve, closeCase, escalate } = useGrievanceStore(role);
-  const { approvals, approve, returnItem } = useApprovalsStore(pushToast);
+  const { approvals, approve, returnItem, addComment: addApprovalComment } = useApprovalsStore(pushToast);
   const { stakeholders, addStakeholder } = useStakeholdersStore(pushToast);
   const { targets, addTarget, closeTarget } = useTargetsStore(pushToast);
   const { members, inviteMember } = useTeamStore(pushToast);
@@ -73,6 +74,11 @@ export default function App() {
     setView('projectdetail');
   };
 
+  const goCommunityDetail = (communityId: string) => {
+    setSelectedCommunityId(communityId);
+    setView('communitydetail');
+  };
+
   const handleLogGrievance = (input: Parameters<typeof logGrievance>[0]) => {
     const created = logGrievance(input);
     setView('cases');
@@ -83,6 +89,7 @@ export default function App() {
   const gOpen = grievances.filter((g) => g.status === 'Open' || g.status === 'Investigating').length;
   const user = ROLE_USERS[role];
   const selectedProject = PROJECTS.find((p) => p.id === selectedProjectId) ?? null;
+  const selectedCommunity = COMMUNITIES.find((c) => c.id === selectedCommunityId) ?? null;
   const myTasks = tasks.filter((t) => t.assigneeId === 'tm-1');
 
   return (
@@ -112,15 +119,32 @@ export default function App() {
           projects={PROJECTS}
           communities={COMMUNITIES}
           goProjectDetail={(id) => goProjectDetail(id, DEFAULT_VIEW_FOR_ROLE[role] === 'myprojects' ? 'myprojects' : 'portfolio')}
-          goCommunities={() => setView('communities')}
+          goCommunityDetail={goCommunityDetail}
         />
 
         <main className="spims-scroll" style={{ flex: 1, overflowY: 'auto', padding: '30px 34px 48px' }}>
           {view === 'dashboard' && <ExecutiveDashboard targetYear={TARGET_YEAR} />}
           {view === 'portfolio' && <ProjectPortfolio projects={PROJECTS} onOpen={(id) => goProjectDetail(id, 'portfolio')} />}
-          {view === 'impact' && <ImpactChain projects={PROJECTS} />}
-          {view === 'communities' && <Communities communities={COMMUNITIES} />}
-          {view === 'indicators' && <IndicatorLibrary indicators={INDICATORS} />}
+          {view === 'impact' && (
+            <ImpactChain
+              projects={PROJECTS}
+              impacts={PROJECT_IMPACTS}
+              communities={COMMUNITIES}
+              grievances={grievances}
+              goProjectDetail={(id) => goProjectDetail(id, 'impact')}
+            />
+          )}
+          {view === 'communities' && <Communities communities={COMMUNITIES} onOpen={goCommunityDetail} />}
+          {view === 'communitydetail' && selectedCommunity && (
+            <CommunityDetail
+              community={selectedCommunity}
+              projects={PROJECTS}
+              impacts={PROJECT_IMPACTS}
+              grievances={grievances}
+              goBack={() => setView('communities')}
+              goProjectDetail={(id) => goProjectDetail(id, 'communitydetail')}
+            />
+          )}
           {view === 'grievances' && <GrievancesExec grievances={grievances} onOpen={setSelectedId} />}
           {view === 'reports' && (
             <Reports
@@ -136,7 +160,9 @@ export default function App() {
           )}
           {view === 'myprojects' && <MyProjects projects={PROJECTS} goNewProject={() => setView('newproject')} onOpen={(id) => goProjectDetail(id, 'myprojects')} />}
           {view === 'newproject' && <NewProject goApprovals={() => setView('approvals')} pushToast={pushToast} />}
-          {view === 'approvals' && <Approvals approvals={approvals} onApprove={approve} onReturn={returnItem} />}
+          {view === 'approvals' && (
+            <Approvals approvals={approvals} onApprove={approve} onReturn={returnItem} onComment={(id, text) => addApprovalComment(id, user.name, text)} />
+          )}
           {view === 'mytasks' && <MyTasks tasks={myTasks} goLogActivity={() => setView('logactivity')} onSetStatus={setTaskStatus} />}
           {view === 'logactivity' && <LogActivity goMyTasks={() => setView('mytasks')} pushToast={pushToast} />}
           {view === 'evidence' && <Evidence items={EVIDENCE_ITEMS} goLogActivity={() => setView('logactivity')} />}
@@ -145,7 +171,7 @@ export default function App() {
           {view === 'stakeholders' && <StakeholderRegister stakeholders={stakeholders} onAdd={addStakeholder} />}
           {view === 'targets' && <Targets targets={targets} onAdd={addTarget} onClose={closeTarget} pushToast={pushToast} />}
           {view === 'team' && <Team members={members} tasks={tasks} projects={PROJECTS} onInvite={inviteMember} onAssignTask={assignTask} />}
-          {view === 'help' && <HelpPage projects={PROJECTS} goProjectDetail={(id) => goProjectDetail(id, 'help')} />}
+          {view === 'help' && <HelpPage projects={PROJECTS} indicators={INDICATORS} goProjectDetail={(id) => goProjectDetail(id, 'help')} />}
           {view === 'projectdetail' && selectedProject && (
             <ProjectDetail
               project={selectedProject}

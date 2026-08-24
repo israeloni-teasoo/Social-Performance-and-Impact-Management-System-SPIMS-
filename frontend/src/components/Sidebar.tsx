@@ -139,7 +139,6 @@ export function Sidebar({
             <NavButton icon="grievances" label="Grievances" active={view === 'grievances'} onClick={() => setView('grievances')} />
 
             <div style={SECTION_LABEL}>Report &amp; Comply</div>
-            <NavButton icon="indicators" label="Indicator Library" active={view === 'indicators'} onClick={() => setView('indicators')} />
             <NavButton icon="reports" label="Reports & Exports" active={view === 'reports'} onClick={() => setView('reports')} />
 
             <div style={SECTION_LABEL}>Configure</div>

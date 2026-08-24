@@ -33,7 +33,7 @@ export function Topbar({
   projects,
   communities,
   goProjectDetail,
-  goCommunities,
+  goCommunityDetail,
 }: {
   orgName: string;
   crumb: string;
@@ -43,7 +43,7 @@ export function Topbar({
   projects: Project[];
   communities: Community[];
   goProjectDetail: (id: string) => void;
-  goCommunities: () => void;
+  goCommunityDetail: (id: string) => void;
 }) {
   const [query, setQuery] = useState('');
   const [focused, setFocused] = useState(false);
@@ -59,8 +59,8 @@ export function Topbar({
     setQuery('');
     setFocused(false);
   };
-  const selectCommunity = () => {
-    goCommunities();
+  const selectCommunity = (id: string) => {
+    goCommunityDetail(id);
     setQuery('');
     setFocused(false);
   };
@@ -197,7 +197,7 @@ export function Topbar({
                     Communities
                   </div>
                   {matchedCommunities.map((c) => (
-                    <div key={c.id} className="rowh" onMouseDown={selectCommunity} style={{ padding: '10px 16px', cursor: 'pointer', fontSize: 13.5 }}>
+                    <div key={c.id} className="rowh" onMouseDown={() => selectCommunity(c.id)} style={{ padding: '10px 16px', cursor: 'pointer', fontSize: 13.5 }}>
                       <div style={{ fontWeight: 600, color: 'var(--navy)' }}>{c.name}</div>
                       <div style={{ fontSize: 11.5, color: 'var(--muted)' }}>{c.lga}, {c.state}</div>
                     </div>

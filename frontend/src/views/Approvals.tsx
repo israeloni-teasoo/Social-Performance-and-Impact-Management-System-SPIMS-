@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { ApprovalDetailModal } from '../components/ApprovalDetailModal';
 import { APPROVAL_TYPE_COLORS, h1 } from '../ui';
 import type { Approval } from '../types';
 
@@ -5,42 +7,27 @@ export function Approvals({
   approvals,
   onApprove,
   onReturn,
+  onComment,
 }: {
   approvals: Approval[];
   onApprove: (id: string) => void;
   onReturn: (id: string) => void;
+  onComment: (id: string, text: string) => void;
 }) {
+  const [openId, setOpenId] = useState<string | null>(null);
+  const open = approvals.find((a) => a.id === openId) ?? null;
+
+  const decide = (fn: (id: string) => void, id: string) => {
+    fn(id);
+    setOpenId(null);
+  };
+
   return (
     <div>
       <h1 style={h1}>Approvals Queue</h1>
       <p style={{ fontSize: 14.5, color: 'var(--muted)', margin: '0 0 20px' }}>
-        Field submissions waiting on your review. Approved records flow straight into the KPIs and reports.
+        Field submissions waiting on your review. Click one to see what was submitted, leave a comment, then approve or return it.
       </p>
-
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 14,
-          background: '#fff',
-          border: '1px solid var(--line)',
-          borderRadius: 14,
-          padding: '16px 22px',
-          marginBottom: 20,
-          fontSize: 13,
-          fontWeight: 600,
-          color: 'var(--muted)',
-          flexWrap: 'wrap',
-        }}
-      >
-        <span style={{ color: '#2B4C9B' }}>Field officer logs</span>
-        <span style={{ color: 'var(--line)' }}>→</span>
-        <span style={{ color: 'var(--accent)' }}>Manager reviews &amp; approves</span>
-        <span style={{ color: 'var(--line)' }}>→</span>
-        <span style={{ color: '#1F8A5B' }}>Feeds indicators &amp; audit trail</span>
-        <span style={{ color: 'var(--line)' }}>→</span>
-        <span style={{ color: 'var(--navy)' }}>Executive dashboard &amp; reports</span>
-      </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         {approvals.length === 0 && (
@@ -51,9 +38,24 @@ export function Approvals({
         {approvals.map((a) => {
           const [typeBg, typeFg] = APPROVAL_TYPE_COLORS[a.type] ?? ['#eee', '#555'];
           return (
-            <div
+            <button
               key={a.id}
-              style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: 14, padding: '18px 22px', display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}
+              onClick={() => setOpenId(a.id)}
+              className="rowh"
+              style={{
+                background: '#fff',
+                border: '1px solid var(--line)',
+                borderRadius: 14,
+                padding: '18px 22px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 20,
+                flexWrap: 'wrap',
+                cursor: 'pointer',
+                fontFamily: 'inherit',
+                textAlign: 'left',
+                width: '100%',
+              }}
             >
               <div
                 style={{
@@ -65,15 +67,19 @@ export function Approvals({
                   alignItems: 'center',
                   justifyContent: 'center',
                   fontWeight: 700,
-                  fontSize: 12,
+                  fontSize: 13,
                   color: 'var(--navy)',
                   flexShrink: 0,
                 }}
               >
-                {a.who}
+                {a.who
+                  .split(' ')
+                  .map((n) => n[0])
+                  .join('')
+                  .slice(0, 2)}
               </div>
               <div style={{ flex: '1 1 220px', minWidth: 200 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4, flexWrap: 'wrap' }}>
                   <span
                     style={{
                       fontSize: 10.5,
@@ -89,29 +95,29 @@ export function Approvals({
                     {a.type}
                   </span>
                   <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--navy)' }}>{a.item}</span>
+                  {a.comments.length > 0 && (
+                    <span style={{ fontSize: 11.5, color: 'var(--muted)' }}>{a.comments.length} comment{a.comments.length === 1 ? '' : 's'}</span>
+                  )}
                 </div>
                 <div style={{ fontSize: 12.5, color: 'var(--muted)' }}>
-                  {a.project} · submitted {a.when}
+                  {a.project} · {a.who} · submitted {a.when}
                 </div>
               </div>
-              <div style={{ display: 'flex', gap: 10, flexShrink: 0 }}>
-                <button
-                  onClick={() => onReturn(a.id)}
-                  style={{ fontFamily: 'inherit', fontSize: 12.5, fontWeight: 600, color: 'var(--muted)', background: '#fff', border: '1px solid var(--line)', borderRadius: 9, padding: '9px 16px', cursor: 'pointer' }}
-                >
-                  Return
-                </button>
-                <button
-                  onClick={() => onApprove(a.id)}
-                  style={{ fontFamily: 'inherit', fontSize: 12.5, fontWeight: 600, color: '#fff', background: '#1F8A5B', border: 'none', borderRadius: 9, padding: '9px 18px', cursor: 'pointer' }}
-                >
-                  Approve
-                </button>
-              </div>
-            </div>
+              <span style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--accent)', flexShrink: 0 }}>View →</span>
+            </button>
           );
         })}
       </div>
+
+      {open && (
+        <ApprovalDetailModal
+          approval={open}
+          onClose={() => setOpenId(null)}
+          onApprove={(id) => decide(onApprove, id)}
+          onReturn={(id) => decide(onReturn, id)}
+          onComment={onComment}
+        />
+      )}
     </div>
   );
 }
