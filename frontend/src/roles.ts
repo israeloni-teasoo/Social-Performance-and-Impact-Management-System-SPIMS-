@@ -37,8 +37,7 @@ export const CRUMBS: Record<View, string> = {
   loggrievance: 'Log Grievance',
   stakeholders: 'Stakeholder Register',
   projectdetail: 'Project Detail',
-  standards: 'Standards Library',
-  help: 'How SPIMS Works',
-  departments: 'Departments',
+  help: 'Help & Standards',
   targets: 'Targets',
+  team: 'My Team',
 };

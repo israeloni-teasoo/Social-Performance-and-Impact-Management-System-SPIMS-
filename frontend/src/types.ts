@@ -18,10 +18,9 @@ export type View =
   | 'loggrievance'
   | 'stakeholders'
   | 'projectdetail'
-  | 'standards'
   | 'help'
-  | 'departments'
-  | 'targets';
+  | 'targets'
+  | 'team';
 
 export interface Project {
   id: string;
@@ -64,6 +63,15 @@ export interface Report {
   updated: string;
 }
 
+export interface ReportComment {
+  id: string;
+  reportId: string;
+  author: string;
+  text: string;
+  requestsCorrection: boolean;
+  createdAt: string;
+}
+
 export interface Stakeholder {
   id: string;
   name: string;
@@ -80,6 +88,31 @@ export interface FieldTask {
   project: string;
   due: string;
   dueColor: string;
+  assigneeId?: string;
+  status?: 'Not started' | 'In progress' | 'Done';
+  createdBy?: string;
+}
+
+export interface NewTaskInput {
+  title: string;
+  project: string;
+  due: string;
+  assigneeId: string;
+}
+
+export interface TeamMember {
+  id: string;
+  name: string;
+  email: string;
+  roleTitle: string;
+  status: 'Active' | 'Invited';
+  joinedAt: string;
+}
+
+export interface NewTeamMemberInput {
+  name: string;
+  email: string;
+  roleTitle: string;
 }
 
 export interface Approval {
@@ -179,37 +212,17 @@ export interface ProjectImpact {
   communitiesImpacted: string[];
 }
 
-export interface Department {
-  id: string;
-  name: string;
-  /** Aligns to a pillar name where applicable (e.g. "Education") for shared colour-coding, or a standalone function like "Stakeholder Relations". */
-  function: string;
-  lead: string;
-  status: 'Active' | 'Inactive';
-  createdAt: string;
-}
-
-export interface NewDepartmentInput {
-  name: string;
-  function: string;
-  lead: string;
-}
-
-export interface TargetAllocation {
-  departmentId: string;
-  allocated: number;
-}
-
 export interface Target {
   id: string;
   name: string;
   metric: string;
   unit: 'people' | 'naira' | 'percent' | 'communities';
-  periodLabel: string;
+  /** Month inputs, e.g. "2026-01" — supports targets that span more than one year. */
+  periodStart: string;
+  periodEnd: string;
   totalTarget: number;
   currentValue: number;
-  allocations: TargetAllocation[];
-  status: 'Active' | 'Draft' | 'Closed';
+  status: 'Active' | 'Closed';
   createdAt: string;
 }
 
@@ -217,10 +230,10 @@ export interface NewTargetInput {
   name: string;
   metric: string;
   unit: Target['unit'];
-  periodLabel: string;
+  periodStart: string;
+  periodEnd: string;
   totalTarget: number;
   currentValue: number;
-  allocations: TargetAllocation[];
 }
 
 export interface NewGrievanceInput {

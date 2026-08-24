@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { ImpactStageCard } from '../components/ImpactStageCard';
+import { ProvenanceTip } from '../components/ImpactExplainers';
+import { ImpactPanel } from '../components/ImpactPanel';
 import { PROJECT_IMPACTS } from '../data/seed';
 import { h1 } from '../ui';
 import type { Project } from '../types';
@@ -48,59 +50,18 @@ export function ImpactChain({ projects }: { projects: Project[] }) {
 
       {impact && (
         <>
-          <div className="grid-impact-cols" style={{ marginBottom: 22 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+            <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--navy)' }}>Where does this data come from?</div>
+            <ProvenanceTip />
+          </div>
+          <div className="grid-impact-cols" style={{ marginBottom: 18 }}>
             <ImpactStageCard index="01" label="Inputs" title="What we invest" detail={impact.inputs} variant="plain" />
             <ImpactStageCard index="02" label="Activities" title="What we do" detail={impact.activities} variant="plain" />
             <ImpactStageCard index="03" label="Outputs" title="What we deliver" detail={impact.outputHeadline} variant="navyFill" badge="Reported today" />
             <ImpactStageCard index="04" label="Outcomes" title="What changes" detail={impact.outcome} variant="accentBorder" />
-            <ImpactStageCard
-              index="05"
-              label="Impact"
-              title="What it means"
-              bigFigure={impact.impactFigure}
-              bigFigureLabel={impact.impactFigureLabel}
-              bullets={impact.impactPoints}
-              variant="accentFill"
-              badge="Platform adds"
-            />
           </div>
 
-          <div style={{ background: '#fbfbfd', border: '1px solid var(--line)', borderRadius: 16, padding: '22px 24px', marginBottom: 22 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-              <span style={{ fontSize: 22 }}>🧮</span>
-              <div>
-                <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--navy)' }}>How this impact figure was calculated</div>
-                <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--accent)' }}>{impact.impactHeadline}</div>
-              </div>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 10, fontSize: 13.5, color: 'var(--ink)', lineHeight: 1.55 }}>
-              <div>
-                <span style={{ color: 'var(--muted)', fontWeight: 600 }}>Metric used: </span>
-                {impact.methodology.metric}
-              </div>
-              <div>
-                <span style={{ color: 'var(--muted)', fontWeight: 600 }}>Calculation: </span>
-                {impact.methodology.calculation}
-              </div>
-              <div>
-                <span style={{ color: 'var(--muted)', fontWeight: 600 }}>Source: </span>
-                {impact.methodology.source}
-              </div>
-              <div
-                style={{
-                  marginTop: 6,
-                  padding: '10px 14px',
-                  background: 'rgba(192,73,30,0.08)',
-                  border: '1px solid rgba(192,73,30,0.2)',
-                  borderRadius: 10,
-                  color: '#8A5A0B',
-                  fontSize: 12.5,
-                }}
-              >
-                ⚠ {impact.methodology.note}
-              </div>
-            </div>
-          </div>
+          <ImpactPanel impact={impact} />
 
           <div className="grid-impact-lower">
             <div style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: 16, padding: '22px 24px' }}>

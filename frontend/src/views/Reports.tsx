@@ -1,22 +1,31 @@
 import { useState } from 'react';
 import { ReportPreviewModal } from '../components/ReportPreviewModal';
 import { exportReport } from '../reportExport';
-import { card, h1, REPORT_LENS_COLORS, subtitle } from '../ui';
-import type { Project, ProjectImpact, Report } from '../types';
+import { card, h1, pill, REPORT_LENS_COLORS, subtitle } from '../ui';
+import type { Project, ProjectImpact, Report, ReportComment, Role } from '../types';
 import type { ToastTone } from '../useToastQueue';
 
 export function Reports({
   reports,
   projects,
   impacts,
+  role,
+  userName,
+  comments,
+  onComment,
   pushToast,
 }: {
   reports: Report[];
   projects: Project[];
   impacts: Record<string, ProjectImpact>;
+  role: Role;
+  userName: string;
+  comments: ReportComment[];
+  onComment: (reportId: string, author: string, text: string, requestsCorrection: boolean) => void;
   pushToast: (message: string, tone?: ToastTone) => void;
 }) {
   const [previewing, setPreviewing] = useState<Report | null>(null);
+  const canComment = role === 'manager';
 
   const handleFormat = (report: Report, format: 'pdf' | 'excel' | 'word' | 'powerpoint') => {
     if (format === 'powerpoint') {
@@ -26,6 +35,8 @@ export function Reports({
     const filename = exportReport(report, format);
     pushToast(`Downloaded ${filename}.`, 'success');
   };
+
+  const needsRevision = (reportId: string) => comments.some((c) => c.reportId === reportId && c.requestsCorrection);
 
   return (
     <div>
@@ -68,7 +79,7 @@ export function Reports({
           const [tagBg, tagFg] = REPORT_LENS_COLORS[r.lens] ?? ['#eee', '#555'];
           return (
             <div key={r.id} className="card-lift" style={{ ...card, display: 'flex', flexDirection: 'column' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, flexWrap: 'wrap', gap: 6 }}>
                 <span
                   style={{
                     fontSize: 10.5,
@@ -83,7 +94,7 @@ export function Reports({
                 >
                   {r.lens}
                 </span>
-                <span style={{ fontSize: 11.5, color: 'var(--muted)' }}>{r.updated}</span>
+                {needsRevision(r.id) ? <span style={pill('rgba(192,73,30,0.14)', '#C0491E')}>Needs revision</span> : <span style={{ fontSize: 11.5, color: 'var(--muted)' }}>{r.updated}</span>}
               </div>
               <div style={{ fontSize: 17, fontWeight: 700, color: 'var(--navy)', marginBottom: 6 }}>{r.name}</div>
               <p style={{ fontSize: 13, color: 'var(--ink)', lineHeight: 1.45, margin: '0 0 18px', flex: 1 }}>{r.desc}</p>
@@ -111,7 +122,16 @@ export function Reports({
       </div>
 
       {previewing && (
-        <ReportPreviewModal report={previewing} projects={projects} impacts={impacts} onClose={() => setPreviewing(null)} onFormat={handleFormat} />
+        <ReportPreviewModal
+          report={previewing}
+          projects={projects}
+          impacts={impacts}
+          comments={comments.filter((c) => c.reportId === previewing.id)}
+          canComment={canComment}
+          onClose={() => setPreviewing(null)}
+          onFormat={handleFormat}
+          onComment={(text, requestsCorrection) => onComment(previewing.id, userName, text, requestsCorrection)}
+        />
       )}
     </div>
   );

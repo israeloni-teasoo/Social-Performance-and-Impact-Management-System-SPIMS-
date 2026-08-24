@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import type { CSSProperties } from 'react';
 import { STANDARDS } from '../data/standards';
-import { h1, subtitle } from '../ui';
 import type { Project } from '../types';
 
 type Filter = 'all' | 'local' | 'global' | 'sdg';
@@ -30,8 +29,7 @@ export function StandardsLibrary({ projects, goProjectDetail }: { projects: Proj
 
   return (
     <div>
-      <h1 style={h1}>Standards Library</h1>
-      <p style={subtitle}>
+      <p style={{ fontSize: 14.5, color: 'var(--muted)', margin: '0 0 20px' }}>
         Every local and global standard SPIMS reports against — what it covers, and a worked example of how it's actually applied to a real project.
       </p>
 

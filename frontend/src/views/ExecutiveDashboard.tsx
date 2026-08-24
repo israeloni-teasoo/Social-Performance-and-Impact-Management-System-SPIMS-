@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { InfoTip } from '../components/Tooltip';
 import { card } from '../ui';
 
 type Lens = 'both' | 'local' | 'global';
@@ -63,8 +64,11 @@ export function ExecutiveDashboard({ targetYear }: { targetYear: number }) {
           <h1 style={{ fontSize: 30, fontWeight: 800, letterSpacing: '-0.02em', margin: '0 0 6px', color: 'var(--navy)' }}>
             Executive Dashboard
           </h1>
-          <p style={{ fontSize: 14.5, color: 'var(--muted)', margin: 0 }}>
-            Company-wide social performance — the whole story, at a glance. <span style={{ color: '#B84' }}>Illustrative data.</span>
+          <p style={{ fontSize: 14.5, color: 'var(--muted)', margin: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
+            Company-wide social performance — the whole story, at a glance.
+            <InfoTip label="About this data">
+              This build isn't connected to Seplat's real field data yet — figures shown are illustrative, pending verified data.
+            </InfoTip>
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8, background: '#fff', border: '1px solid var(--line)', borderRadius: 11, padding: 4 }}>

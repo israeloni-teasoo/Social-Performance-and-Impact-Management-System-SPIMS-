@@ -1,4 +1,4 @@
-import type { Approval, Community, Department, EvidenceItem, FieldTask, Grievance, Indicator, Project, ProjectImpact, Report, Stakeholder, Target } from '../types';
+import type { Approval, Community, EvidenceItem, FieldTask, Grievance, Indicator, Project, ProjectImpact, Report, Stakeholder, Target, TeamMember } from '../types';
 
 export const PROJECTS: Project[] = [
   { id: 'STEP', code: 'STEP', name: 'Teachers Empowerment (STEP)', output: '623 teachers certified', pillar: 'Education', state: 'Edo · Delta', budget: '₦480M', utilPct: '90%', progress: '90%', progPct: '90%', status: 'On track' },
@@ -349,11 +349,17 @@ export const STAKEHOLDERS: Stakeholder[] = [
   { id: 'sh-6', name: 'HRH the Ogie of Oben', type: 'Traditional institution', community: 'Oben, Edo', engagements: 4, commitments: 'On track', status: 'Active' },
 ];
 
+export const TEAM_MEMBERS: TeamMember[] = [
+  { id: 'tm-1', name: 'Grace Idemudia', email: 'grace.idemudia@seplat.com', roleTitle: 'Field Officer · Sapele', status: 'Active', joinedAt: '14 Jan 2025' },
+  { id: 'tm-2', name: 'John Efe', email: 'john.efe@seplat.com', roleTitle: 'Field Officer · Oben', status: 'Active', joinedAt: '03 Mar 2025' },
+  { id: 'tm-3', name: 'Ngozi Chukwu', email: 'ngozi.chukwu@seplat.com', roleTitle: 'Field Officer · Orogun', status: 'Invited', joinedAt: 'Invited 2d ago' },
+];
+
 export const TASKS: FieldTask[] = [
-  { id: 'task-1', title: 'Log Q3 teacher-training session', project: 'STEP · Sapele', due: 'Due today', dueColor: '#C0491E' },
-  { id: 'task-2', title: 'Beneficiary count — eye screening', project: 'Eye Can See · Oben', due: 'Due tomorrow', dueColor: '#8A8DA6' },
-  { id: 'task-3', title: 'Upload borehole handover photos', project: 'Water Scheme · Ovhor', due: 'Due in 3 days', dueColor: '#8A8DA6' },
-  { id: 'task-4', title: 'Community meeting minutes', project: 'YEP · Orogun', due: 'Overdue · 1 day', dueColor: '#E31A38' },
+  { id: 'task-1', title: 'Log Q3 teacher-training session', project: 'STEP · Sapele', due: 'Due today', dueColor: '#C0491E', assigneeId: 'tm-1', status: 'Not started', createdBy: 'Tunde Bello · Project Manager' },
+  { id: 'task-2', title: 'Beneficiary count — eye screening', project: 'Eye Can See · Oben', due: 'Due tomorrow', dueColor: '#8A8DA6', assigneeId: 'tm-2', status: 'Not started', createdBy: 'Tunde Bello · Project Manager' },
+  { id: 'task-3', title: 'Upload borehole handover photos', project: 'Water Scheme · Ovhor', due: 'Due in 3 days', dueColor: '#8A8DA6', assigneeId: 'tm-1', status: 'In progress', createdBy: 'Tunde Bello · Project Manager' },
+  { id: 'task-4', title: 'Community meeting minutes', project: 'YEP · Orogun', due: 'Overdue · 1 day', dueColor: '#E31A38', assigneeId: 'tm-2', status: 'Not started', createdBy: 'Tunde Bello · Project Manager' },
 ];
 
 export const APPROVALS: Approval[] = [
@@ -432,74 +438,55 @@ export const INITIAL_GRIEVANCES: Grievance[] = [
   },
 ];
 
-export const DEPARTMENTS: Department[] = [
-  { id: 'dept-edu', name: 'Education & Skills', function: 'Education', lead: 'Dr. Ifeoma Nwosu', status: 'Active', createdAt: 'Jan 2024' },
-  { id: 'dept-health', name: 'Health & Wellbeing', function: 'Health', lead: 'Dr. Chidi Okafor', status: 'Active', createdAt: 'Jan 2024' },
-  { id: 'dept-infra', name: 'Infrastructure & Works', function: 'Infrastructure', lead: 'Eng. Musa Bello', status: 'Active', createdAt: 'Mar 2024' },
-  { id: 'dept-econ', name: 'Economic Empowerment', function: 'Economic Emp.', lead: 'Amaka Eze', status: 'Active', createdAt: 'Mar 2024' },
-  { id: 'dept-relations', name: 'Community & Government Relations', function: 'Stakeholder Relations', lead: 'Blessing Aganbi', status: 'Active', createdAt: 'Jan 2024' },
-];
-
-// Targets are set by executives for a period and allocated across departments — the same
-// FY26 figures shown on the Executive Dashboard, made traceable to who owns delivering them.
+// Targets are set by executives for a period — the same FY26 figures already shown on the
+// Executive Dashboard, made trackable against a deadline rather than just reported as a snapshot.
 export const TARGETS: Target[] = [
   {
     id: 'tgt-1',
     name: 'Beneficiaries Reached',
     metric: 'People reached across all programmes',
     unit: 'people',
-    periodLabel: 'FY2026',
+    periodStart: '2026-01',
+    periodEnd: '2026-12',
     totalTarget: 350000,
     currentValue: 312000,
     status: 'Active',
     createdAt: '02 Jan 2026',
-    allocations: [
-      { departmentId: 'dept-edu', allocated: 160000 },
-      { departmentId: 'dept-health', allocated: 70000 },
-      { departmentId: 'dept-infra', allocated: 55000 },
-      { departmentId: 'dept-econ', allocated: 45000 },
-      { departmentId: 'dept-relations', allocated: 20000 },
-    ],
   },
   {
     id: 'tgt-2',
     name: 'Social Investment Spend',
     metric: 'Community & social investment spend, by budget category',
     unit: 'naira',
-    periodLabel: 'FY2026',
+    periodStart: '2026-01',
+    periodEnd: '2026-12',
     totalTarget: 5_200_000_000,
     currentValue: 4_680_000_000,
     status: 'Active',
     createdAt: '02 Jan 2026',
-    allocations: [
-      { departmentId: 'dept-edu', allocated: 2_340_000_000 },
-      { departmentId: 'dept-health', allocated: 1_144_000_000 },
-      { departmentId: 'dept-infra', allocated: 1_040_000_000 },
-      { departmentId: 'dept-econ', allocated: 676_000_000 },
-    ],
   },
   {
     id: 'tgt-3',
     name: 'Host Communities Covered',
     metric: 'Host communities with active SPIMS programming',
     unit: 'communities',
-    periodLabel: 'FY2026',
-    totalTarget: 45,
+    periodStart: '2026-01',
+    periodEnd: '2027-12',
+    totalTarget: 50,
     currentValue: 42,
     status: 'Active',
     createdAt: '02 Jan 2026',
-    allocations: [{ departmentId: 'dept-relations', allocated: 45 }],
   },
   {
     id: 'tgt-4',
     name: 'NCDMB Local Content Compliance',
     metric: 'Nigerian content share of applicable spend',
     unit: 'percent',
-    periodLabel: 'FY2026',
+    periodStart: '2026-01',
+    periodEnd: '2026-12',
     totalTarget: 90,
     currentValue: 87,
     status: 'Active',
     createdAt: '02 Jan 2026',
-    allocations: [{ departmentId: 'dept-econ', allocated: 90 }],
   },
 ];

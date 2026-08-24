@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { ImpactStageCard as StageCard } from '../components/ImpactStageCard';
+import { ProvenanceTip } from '../components/ImpactExplainers';
+import { ImpactPanel } from '../components/ImpactPanel';
 import { exportProjectReport } from '../reportExport';
 import { h1, PILLAR_COLORS, pill, primaryBtn, STATUS_COLORS } from '../ui';
 import type { Project, ProjectImpact } from '../types';
@@ -116,127 +118,18 @@ export function ProjectDetail({
 
       {impact ? (
         <>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
             <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--navy)' }}>Impact chain</div>
-            <span style={{ fontSize: 11.5, color: 'var(--muted)' }}>Where does this data come from?</span>
+            <ProvenanceTip />
           </div>
-          <div
-            style={{
-              display: 'flex',
-              gap: 18,
-              flexWrap: 'wrap',
-              fontSize: 12,
-              color: 'var(--ink)',
-              background: '#fbfbfd',
-              border: '1px solid var(--line)',
-              borderRadius: 12,
-              padding: '12px 16px',
-              marginBottom: 14,
-            }}
-          >
-            <span><strong style={{ color: '#2B4C9B' }}>Inputs &amp; Activities</strong> — entered by the field officer / project manager when the project is set up.</span>
-            <span><strong style={{ color: 'var(--navy)' }}>Outputs</strong> — aggregated automatically from approved field activity logs (Log Activity → manager approval).</span>
-            <span><strong style={{ color: 'var(--accent)' }}>Outcomes &amp; Impact</strong> — calculated by applying the stated methodology below to those outputs; not a live sensor feed.</span>
-            <span>⚠ All figures shown are Phase 1 illustrative placeholders pending confirmed field data from Seplat's M&amp;E team — see note below.</span>
-          </div>
-          <div className="grid-impact-cols" style={{ marginBottom: 22 }}>
+          <div className="grid-impact-cols" style={{ marginBottom: 18 }}>
             <StageCard index="01" label="Inputs" title="What we invest" detail={impact.inputs} variant="plain" badge="Entered by team" />
             <StageCard index="02" label="Activities" title="What we do" detail={impact.activities} variant="plain" badge="Entered by team" />
             <StageCard index="03" label="Outputs" title="What we deliver" detail={impact.outputHeadline} variant="navyFill" badge="System-aggregated" />
             <StageCard index="04" label="Outcomes" title="What changes" detail={impact.outcome} variant="accentBorder" badge="Calculated" />
-            <StageCard
-              index="05"
-              label="Impact"
-              title="What it means"
-              bigFigure={impact.impactFigure}
-              bigFigureLabel={impact.impactFigureLabel}
-              bullets={impact.impactPoints}
-              variant="accentFill"
-              badge="Calculated"
-            />
           </div>
 
-          <div
-            style={{
-              background: '#fbfbfd',
-              border: '1px solid var(--line)',
-              borderRadius: 16,
-              padding: '22px 24px',
-              marginBottom: 22,
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-              <span style={{ fontSize: 22 }}>🧮</span>
-              <div>
-                <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--navy)' }}>How this impact figure was calculated</div>
-                <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--accent)' }}>{impact.impactHeadline}</div>
-              </div>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 10, fontSize: 13.5, color: 'var(--ink)', lineHeight: 1.55 }}>
-              <div>
-                <span style={{ color: 'var(--muted)', fontWeight: 600 }}>Metric used: </span>
-                {impact.methodology.metric}
-              </div>
-              <div>
-                <span style={{ color: 'var(--muted)', fontWeight: 600 }}>Calculation: </span>
-                {impact.methodology.calculation}
-              </div>
-              <div>
-                <span style={{ color: 'var(--muted)', fontWeight: 600 }}>Source: </span>
-                {impact.methodology.source}
-              </div>
-              <div
-                style={{
-                  marginTop: 6,
-                  padding: '10px 14px',
-                  background: 'rgba(192,73,30,0.08)',
-                  border: '1px solid rgba(192,73,30,0.2)',
-                  borderRadius: 10,
-                  color: '#8A5A0B',
-                  fontSize: 12.5,
-                }}
-              >
-                ⚠ {impact.methodology.note}
-              </div>
-            </div>
-
-            {impact.impactScenarios && impact.impactScenarios.length > 0 && (
-              <div style={{ marginTop: 18, paddingTop: 18, borderTop: '1px solid var(--line)' }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--navy)', marginBottom: 4 }}>
-                  What it means, translated into figures
-                </div>
-                {impact.impactScenarioBasis && (
-                  <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 12 }}>{impact.impactScenarioBasis}</div>
-                )}
-                <div style={{ overflowX: 'auto' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 420 }}>
-                    <thead>
-                      <tr>
-                        <th style={{ textAlign: 'left', fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.05em', padding: '0 0 8px', fontWeight: 700 }}>
-                          Time horizon
-                        </th>
-                        <th style={{ textAlign: 'left', fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.05em', padding: '0 0 8px', fontWeight: 700 }}>
-                          Conservative
-                        </th>
-                        <th style={{ textAlign: 'left', fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.05em', padding: '0 0 8px', fontWeight: 700 }}>
-                          High-impact
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {impact.impactScenarios.map((s) => (
-                        <tr key={s.horizon} style={{ borderTop: '1px solid var(--line)' }}>
-                          <td style={{ padding: '8px 0', fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>{s.horizon}</td>
-                          <td style={{ padding: '8px 0', fontSize: 13, color: 'var(--ink)' }}>{s.conservative}</td>
-                          <td style={{ padding: '8px 0', fontSize: 13, fontWeight: 700, color: 'var(--accent)' }}>{s.highImpact}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-          </div>
+          <ImpactPanel impact={impact} />
 
           <div className="grid-impact-lower">
             <div style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: 16, padding: '22px 24px' }}>

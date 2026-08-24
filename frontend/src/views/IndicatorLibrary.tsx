@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { InfoTip } from '../components/Tooltip';
 import type { Indicator } from '../types';
 
 type Lens = 'both' | 'local' | 'global';
@@ -27,8 +28,9 @@ export function IndicatorLibrary({ indicators }: { indicators: Indicator[] }) {
           <h1 style={{ fontSize: 30, fontWeight: 800, letterSpacing: '-0.02em', margin: '0 0 6px', color: 'var(--navy)' }}>
             Indicator Library
           </h1>
-          <p style={{ fontSize: 14.5, color: 'var(--muted)', margin: 0 }}>
+          <p style={{ fontSize: 14.5, color: 'var(--muted)', margin: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
             Capture each metric once — report it against the local mandate and global capital-market frameworks.
+            <InfoTip label="About this mapping">Illustrative mapping — the full indicator library is confirmed with Seplat during Phase 1.</InfoTip>
           </p>
         </div>
         <div style={{ display: 'flex', gap: 6, background: '#fff', border: '1px solid var(--line)', borderRadius: 11, padding: 4 }}>
@@ -77,9 +79,6 @@ export function IndicatorLibrary({ indicators }: { indicators: Indicator[] }) {
           ))}
         </div>
       </div>
-      <p style={{ fontSize: 13, color: 'var(--muted)', margin: '14px 0 0' }}>
-        Illustrative mapping — the full indicator library is confirmed with Seplat during Phase 1.
-      </p>
     </div>
   );
 }

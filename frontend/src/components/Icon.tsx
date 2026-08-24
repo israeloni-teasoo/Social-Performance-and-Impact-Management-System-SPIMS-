@@ -123,10 +123,12 @@ const PATHS: Record<string, ReactElement> = {
       <path d="M12 17.5v.01" />
     </>
   ),
-  departments: (
+  team: (
     <>
-      <rect x="4" y="3" width="16" height="18" rx="1.5" />
-      <path d="M9 8h.01M9 12h.01M9 16h.01M15 8h.01M15 12h.01M15 16h.01" />
+      <circle cx="8.5" cy="8" r="3" />
+      <path d="M2.5 20a6 6 0 0 1 12 0" />
+      <circle cx="17" cy="8.5" r="2.4" />
+      <path d="M15.5 20a5.2 5.2 0 0 1 6-5" />
     </>
   ),
   target: (

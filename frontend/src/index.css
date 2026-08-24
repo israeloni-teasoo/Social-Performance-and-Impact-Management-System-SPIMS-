@@ -177,7 +177,7 @@ button {
 }
 .grid-impact-cols {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 12px;
 }
 .grid-impact-lower {
@@ -186,13 +186,9 @@ button {
   gap: 18px;
 }
 
-@media (max-width: 1200px) {
-  .grid-impact-cols {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
 @media (max-width: 1024px) {
-  .grid-4 {
+  .grid-4,
+  .grid-impact-cols {
     grid-template-columns: repeat(2, 1fr);
   }
   .grid-3 {
@@ -208,18 +204,11 @@ button {
 }
 @media (max-width: 640px) {
   .grid-4,
-  .grid-3 {
-    grid-template-columns: 1fr;
-  }
+  .grid-3,
   .grid-impact-cols {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
   }
   .grid-compliance-inner {
-    grid-template-columns: 1fr;
-  }
-}
-@media (max-width: 420px) {
-  .grid-impact-cols {
     grid-template-columns: 1fr;
   }
 }

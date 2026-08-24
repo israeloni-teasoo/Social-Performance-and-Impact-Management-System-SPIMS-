@@ -25,7 +25,7 @@ export const HELP_TOPICS: HelpTopic[] = [
       'It is a mix, and the Project Detail page now labels each stage so this is never ambiguous:',
       'Inputs and Activities are entered by the project manager or field officer when the project is set up and logged (see Log Activity).',
       'Outputs are aggregated automatically by SPIMS from approved field activity logs — once a manager approves a logged activity, its numbers roll up into the Outputs stage.',
-      'Outcomes and Impact are calculated, not measured live — SPIMS applies the stated methodology (shown in the "How this impact figure was calculated" box) to the Outputs. There is no sensor or survey feeding this in real time.',
+      'Outcomes and Impact are calculated, not measured live — SPIMS applies the stated methodology (tap the ⓘ next to "05 · Impact" to see it) to the Outputs. There is no sensor or survey feeding this in real time.',
       'Every project also carries a note flagging that current figures are Phase 1 illustrative placeholders until Seplat\'s M&E team supplies verified field data.',
     ],
   },
@@ -78,13 +78,31 @@ export const HELP_TOPICS: HelpTopic[] = [
     ],
   },
   {
-    id: 'targets-departments',
+    id: 'targets',
     tag: 'Roles',
-    question: 'How do Targets and Departments work?',
+    question: 'How do Targets work?',
     answer: [
-      'Executives use the Targets page to set a goal for a year or period — e.g. beneficiaries reached, social investment spend, communities covered, or a compliance percentage — and allocate portions of it across the departments accountable for delivering it.',
-      'Departments is where those departments and functions get onboarded in the first place: name, function area, and lead. A department has to exist before a target can be allocated to it.',
-      'Progress bars on each target compare current progress to the total target; the department breakdown shows how that total was split, so it is clear who owns which slice. As with the rest of SPIMS, current-progress figures are illustrative Phase 1 placeholders until they are wired to live field data.',
+      'Executives use the Targets page to set a goal for a year or period — e.g. beneficiaries reached, social investment spend, communities covered, or a compliance percentage — and track progress against it.',
+      'A target\'s period can span more than one calendar year — some programmes run across multiple years, so the period is a start and end month rather than a fixed financial year.',
+      'The progress bar compares current progress to the total target. As with the rest of SPIMS, current-progress figures are illustrative Phase 1 placeholders until they are wired to live field data.',
+    ],
+  },
+  {
+    id: 'team-tasks',
+    tag: 'Roles',
+    question: 'Who creates the tasks that show up on a Field Officer\'s My Tasks page?',
+    answer: [
+      'The Project Manager does, from the My Team page. A manager invites field officers onto their team, then assigns each task there — title, project, due date, and who it\'s assigned to.',
+      'Once assigned, a task appears on that field officer\'s My Tasks list. The field officer can mark it Not started, In progress, or Done — the manager sees that same status update live on My Team, alongside how many tasks each person has and how many they\'ve completed.',
+    ],
+  },
+  {
+    id: 'report-comments',
+    tag: 'Reports',
+    question: 'Can a manager ask for a report to be corrected?',
+    answer: [
+      'Yes. When a Project Manager previews a report, a Comments section at the bottom lets them leave a note — e.g. flagging a figure that looks wrong — and optionally tick "Request a correction / update".',
+      'A report with an open correction request shows a "Needs revision" badge on the Reports & Exports page so it\'s visible at a glance. Comments are visible to anyone who opens the preview.',
     ],
   },
   {

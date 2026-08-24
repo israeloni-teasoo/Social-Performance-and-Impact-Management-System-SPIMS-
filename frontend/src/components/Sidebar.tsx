@@ -140,12 +140,10 @@ export function Sidebar({
 
             <div style={SECTION_LABEL}>Report &amp; Comply</div>
             <NavButton icon="indicators" label="Indicator Library" active={view === 'indicators'} onClick={() => setView('indicators')} />
-            <NavButton icon="standards" label="Standards Library" active={view === 'standards'} onClick={() => setView('standards')} />
             <NavButton icon="reports" label="Reports & Exports" active={view === 'reports'} onClick={() => setView('reports')} />
 
             <div style={SECTION_LABEL}>Configure</div>
             <NavButton icon="target" label="Targets" active={view === 'targets'} onClick={() => setView('targets')} />
-            <NavButton icon="departments" label="Departments" active={view === 'departments'} onClick={() => setView('departments')} />
           </div>
         )}
 
@@ -157,6 +155,8 @@ export function Sidebar({
             <div style={SECTION_LABEL}>Review &amp; report</div>
             <NavButton icon="approvals" label="Approvals" active={view === 'approvals'} onClick={() => setView('approvals')} badge={approvalsCount} />
             <NavButton icon="reports" label="Reports & Exports" active={view === 'reports'} onClick={() => setView('reports')} />
+            <div style={SECTION_LABEL}>Team</div>
+            <NavButton icon="team" label="My Team" active={view === 'team'} onClick={() => setView('team')} />
           </div>
         )}
 
@@ -183,7 +183,7 @@ export function Sidebar({
         )}
 
         <div style={{ marginTop: 'auto', paddingTop: 12 }}>
-          <NavButton icon="help" label="How SPIMS Works" active={view === 'help'} onClick={() => setView('help')} />
+          <NavButton icon="help" label="Help & Standards" active={view === 'help'} onClick={() => setView('help')} />
         </div>
       </nav>
 

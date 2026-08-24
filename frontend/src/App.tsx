@@ -3,18 +3,19 @@ import { CaseModal } from './components/CaseModal';
 import { Sidebar } from './components/Sidebar';
 import { ToastStack } from './components/ToastStack';
 import { Topbar } from './components/Topbar';
-import { COMMUNITIES, EVIDENCE_ITEMS, INDICATORS, PROJECT_IMPACTS, PROJECTS, REPORTS, TASKS } from './data/seed';
+import { COMMUNITIES, EVIDENCE_ITEMS, INDICATORS, PROJECT_IMPACTS, PROJECTS, REPORTS } from './data/seed';
 import { CRUMBS, DEFAULT_VIEW_FOR_ROLE, ROLE_USERS } from './roles';
 import type { Role, View } from './types';
 import { useApprovalsStore } from './useApprovalsStore';
-import { useDepartmentsStore } from './useDepartmentsStore';
 import { useGrievanceStore } from './useGrievanceStore';
+import { useReportCommentsStore } from './useReportCommentsStore';
 import { useStakeholdersStore } from './useStakeholdersStore';
 import { useTargetsStore } from './useTargetsStore';
+import { useTasksStore } from './useTasksStore';
+import { useTeamStore } from './useTeamStore';
 import { useToastQueue } from './useToastQueue';
 import { Approvals } from './views/Approvals';
 import { Communities } from './views/Communities';
-import { Departments } from './views/Departments';
 import { Evidence } from './views/Evidence';
 import { ExecutiveDashboard } from './views/ExecutiveDashboard';
 import { GrievanceCases } from './views/GrievanceCases';
@@ -31,8 +32,8 @@ import { ProjectDetail } from './views/ProjectDetail';
 import { ProjectPortfolio } from './views/ProjectPortfolio';
 import { Reports } from './views/Reports';
 import { StakeholderRegister } from './views/StakeholderRegister';
-import { StandardsLibrary } from './views/StandardsLibrary';
 import { Targets } from './views/Targets';
+import { Team } from './views/Team';
 
 const TARGET_YEAR = 2030;
 const ORG_NAME = 'Seplat Energy Plc';
@@ -49,8 +50,10 @@ export default function App() {
   const { grievances, logGrievance, assign, addNote, resolve, closeCase, escalate } = useGrievanceStore(role);
   const { approvals, approve, returnItem } = useApprovalsStore(pushToast);
   const { stakeholders, addStakeholder } = useStakeholdersStore(pushToast);
-  const { departments, addDepartment, toggleStatus } = useDepartmentsStore(pushToast);
   const { targets, addTarget, closeTarget } = useTargetsStore(pushToast);
+  const { members, inviteMember } = useTeamStore(pushToast);
+  const { tasks, assignTask, setTaskStatus } = useTasksStore(pushToast);
+  const { comments, addComment } = useReportCommentsStore(pushToast);
 
   const setRole = (r: Role) => {
     setRoleState(r);
@@ -80,6 +83,7 @@ export default function App() {
   const gOpen = grievances.filter((g) => g.status === 'Open' || g.status === 'Investigating').length;
   const user = ROLE_USERS[role];
   const selectedProject = PROJECTS.find((p) => p.id === selectedProjectId) ?? null;
+  const myTasks = tasks.filter((t) => t.assigneeId === 'tm-1');
 
   return (
     <div className="spims-shell" style={{ fontFamily: "'Poppins',sans-serif", background: 'var(--bg)', color: 'var(--ink)' }}>
@@ -90,7 +94,7 @@ export default function App() {
         setView={setView}
         gOpen={gOpen}
         approvalsCount={approvals.length}
-        tasksCount={TASKS.length}
+        tasksCount={myTasks.length}
         orgName={ORG_NAME}
         userName={user.name}
         userRole={user.role}
@@ -117,21 +121,31 @@ export default function App() {
           {view === 'impact' && <ImpactChain projects={PROJECTS} />}
           {view === 'communities' && <Communities communities={COMMUNITIES} />}
           {view === 'indicators' && <IndicatorLibrary indicators={INDICATORS} />}
-          {view === 'standards' && <StandardsLibrary projects={PROJECTS} goProjectDetail={(id) => goProjectDetail(id, 'standards')} />}
           {view === 'grievances' && <GrievancesExec grievances={grievances} onOpen={setSelectedId} />}
-          {view === 'reports' && <Reports reports={REPORTS} projects={PROJECTS} impacts={PROJECT_IMPACTS} pushToast={pushToast} />}
+          {view === 'reports' && (
+            <Reports
+              reports={REPORTS}
+              projects={PROJECTS}
+              impacts={PROJECT_IMPACTS}
+              role={role}
+              userName={user.name}
+              comments={comments}
+              onComment={addComment}
+              pushToast={pushToast}
+            />
+          )}
           {view === 'myprojects' && <MyProjects projects={PROJECTS} goNewProject={() => setView('newproject')} onOpen={(id) => goProjectDetail(id, 'myprojects')} />}
           {view === 'newproject' && <NewProject goApprovals={() => setView('approvals')} pushToast={pushToast} />}
           {view === 'approvals' && <Approvals approvals={approvals} onApprove={approve} onReturn={returnItem} />}
-          {view === 'mytasks' && <MyTasks tasks={TASKS} goLogActivity={() => setView('logactivity')} />}
+          {view === 'mytasks' && <MyTasks tasks={myTasks} goLogActivity={() => setView('logactivity')} onSetStatus={setTaskStatus} />}
           {view === 'logactivity' && <LogActivity goMyTasks={() => setView('mytasks')} pushToast={pushToast} />}
           {view === 'evidence' && <Evidence items={EVIDENCE_ITEMS} goLogActivity={() => setView('logactivity')} />}
           {view === 'cases' && <GrievanceCases grievances={grievances} onOpen={setSelectedId} goLogGrievance={() => setView('loggrievance')} />}
           {view === 'loggrievance' && <LogGrievance onCancel={() => setView('cases')} onSubmit={handleLogGrievance} />}
           {view === 'stakeholders' && <StakeholderRegister stakeholders={stakeholders} onAdd={addStakeholder} />}
-          {view === 'targets' && <Targets targets={targets} departments={departments} onAdd={addTarget} onClose={closeTarget} pushToast={pushToast} />}
-          {view === 'departments' && <Departments departments={departments} targets={targets} onAdd={addDepartment} onToggleStatus={toggleStatus} />}
-          {view === 'help' && <HelpPage />}
+          {view === 'targets' && <Targets targets={targets} onAdd={addTarget} onClose={closeTarget} pushToast={pushToast} />}
+          {view === 'team' && <Team members={members} tasks={tasks} projects={PROJECTS} onInvite={inviteMember} onAssignTask={assignTask} />}
+          {view === 'help' && <HelpPage projects={PROJECTS} goProjectDetail={(id) => goProjectDetail(id, 'help')} />}
           {view === 'projectdetail' && selectedProject && (
             <ProjectDetail
               project={selectedProject}
