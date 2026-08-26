@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CaseModal } from './components/CaseModal';
 import { Sidebar } from './components/Sidebar';
 import { ToastStack } from './components/ToastStack';
 import { Topbar } from './components/Topbar';
 import { COMMUNITIES, EVIDENCE_ITEMS, INDICATORS, PROJECT_IMPACTS, PROJECTS, REPORTS } from './data/seed';
 import { CRUMBS, DEFAULT_VIEW_FOR_ROLE, ROLE_USERS } from './roles';
-import type { Role, View } from './types';
+import type { View } from './types';
 import { useApprovalsStore } from './useApprovalsStore';
 import { useGrievanceStore } from './useGrievanceStore';
 import { useReportCommentsStore } from './useReportCommentsStore';
@@ -34,12 +34,14 @@ import { Reports } from './views/Reports';
 import { StakeholderRegister } from './views/StakeholderRegister';
 import { Targets } from './views/Targets';
 import { Team } from './views/Team';
+import { useAuth } from './useAuth';
+import { Login } from './views/Login';
 
 const TARGET_YEAR = 2030;
 const ORG_NAME = 'Seplat Energy Plc';
 
 export default function App() {
-  const [role, setRoleState] = useState<Role>('exec');
+  const { role, login, logout } = useAuth();
   const [view, setViewState] = useState<View>('dashboard');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -48,7 +50,7 @@ export default function App() {
   const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(null);
 
   const { toasts, push: pushToast, dismiss: dismissToast } = useToastQueue();
-  const { grievances, logGrievance, assign, addNote, resolve, closeCase, escalate } = useGrievanceStore(role);
+  const { grievances, logGrievance, assign, addNote, resolve, closeCase, escalate } = useGrievanceStore(role ?? 'exec');
   const { approvals, approve, returnItem, addComment: addApprovalComment } = useApprovalsStore(pushToast);
   const { stakeholders, addStakeholder } = useStakeholdersStore(pushToast);
   const { targets, addTarget, closeTarget } = useTargetsStore(pushToast);
@@ -56,12 +58,14 @@ export default function App() {
   const { tasks, assignTask, setTaskStatus } = useTasksStore(pushToast);
   const { comments, addComment } = useReportCommentsStore(pushToast);
 
-  const setRole = (r: Role) => {
-    setRoleState(r);
-    setViewState(DEFAULT_VIEW_FOR_ROLE[r]);
-    setSelectedId(null);
-    setSidebarOpen(false);
-  };
+  useEffect(() => {
+    if (role) {
+      setViewState(DEFAULT_VIEW_FOR_ROLE[role]);
+      setSelectedId(null);
+      setSidebarOpen(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [role]);
 
   const setView = (v: View) => {
     setViewState(v);
@@ -84,6 +88,8 @@ export default function App() {
     setView('cases');
     setSelectedId(created.id);
   };
+
+  if (!role) return <Login onLogin={login} />;
 
   const selected = grievances.find((g) => g.id === selectedId) ?? null;
   const gOpen = grievances.filter((g) => g.status === 'Open' || g.status === 'Investigating').length;
@@ -113,8 +119,9 @@ export default function App() {
         <Topbar
           orgName={ORG_NAME}
           crumb={CRUMBS[view]}
-          role={role}
-          setRole={setRole}
+          userName={user.name}
+          userRole={user.role}
+          onLogout={logout}
           onMenuClick={() => setSidebarOpen((o) => !o)}
           projects={PROJECTS}
           communities={COMMUNITIES}

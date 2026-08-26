@@ -1,35 +1,14 @@
 import { useRef, useState } from 'react';
-import type { CSSProperties } from 'react';
-import type { Community, Project, Role } from '../types';
+import type { Community, Project } from '../types';
 import { Icon } from './Icon';
-
-const ROLE_BUTTONS: { key: Role; label: string }[] = [
-  { key: 'exec', label: 'Executive' },
-  { key: 'manager', label: 'Manager' },
-  { key: 'field', label: 'Field' },
-  { key: 'relations', label: 'Relations' },
-];
-
-function roleBtnStyle(active: boolean): CSSProperties {
-  return {
-    fontFamily: 'inherit',
-    fontSize: 12.5,
-    fontWeight: 600,
-    padding: '7px 13px',
-    border: 'none',
-    borderRadius: 7,
-    cursor: 'pointer',
-    background: active ? '#111C55' : 'transparent',
-    color: active ? '#fff' : '#8A8DA6',
-  };
-}
 
 export function Topbar({
   orgName,
   crumb,
-  role,
-  setRole,
+  userName,
+  userRole,
   onMenuClick,
+  onLogout,
   projects,
   communities,
   goProjectDetail,
@@ -37,9 +16,10 @@ export function Topbar({
 }: {
   orgName: string;
   crumb: string;
-  role: Role;
-  setRole: (r: Role) => void;
+  userName: string;
+  userRole: string;
   onMenuClick: () => void;
+  onLogout: () => void;
   projects: Project[];
   communities: Community[];
   goProjectDetail: (id: string) => void;
@@ -110,21 +90,6 @@ export function Topbar({
         </span>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-          <span
-            className="spims-topbar-viewingas-label"
-            style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--muted)' }}
-          >
-            Viewing as
-          </span>
-          <div style={{ display: 'flex', gap: 3, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 10, padding: 4, flexWrap: 'wrap' }}>
-            {ROLE_BUTTONS.map((r) => (
-              <button key={r.key} onClick={() => setRole(r.key)} style={roleBtnStyle(role === r.key)}>
-                {r.label}
-              </button>
-            ))}
-          </div>
-        </div>
         <div className="spims-topbar-search" style={{ position: 'relative' }}>
           <div
             style={{
@@ -225,6 +190,29 @@ export function Topbar({
         >
           <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#1F8A5B', display: 'inline-block' }}></span>
           FY 2026 · ₦ Naira
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ textAlign: 'right', lineHeight: 1.2 }} className="spims-topbar-user">
+            <div style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--navy)' }}>{userName}</div>
+            <div style={{ fontSize: 11, color: 'var(--muted)' }}>{userRole}</div>
+          </div>
+          <button
+            onClick={onLogout}
+            style={{
+              fontFamily: 'inherit',
+              fontSize: 12.5,
+              fontWeight: 600,
+              color: 'var(--muted)',
+              background: '#fff',
+              border: '1px solid var(--line)',
+              borderRadius: 9,
+              padding: '8px 14px',
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            Log out
+          </button>
         </div>
       </div>
     </header>

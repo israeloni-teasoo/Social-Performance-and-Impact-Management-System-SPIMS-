@@ -117,10 +117,7 @@ export function Sidebar({
           S
         </div>
         <div style={{ lineHeight: 1.1 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-            <span style={{ fontSize: 18, fontWeight: 800, color: '#fff', letterSpacing: '-0.01em' }}>SPIMS</span>
-            <span style={{ fontSize: 10, fontWeight: 700, color: '#B9CBEB', background: 'rgba(255,255,255,0.1)', borderRadius: 20, padding: '1px 7px' }}>v2</span>
-          </div>
+          <div style={{ fontSize: 18, fontWeight: 800, color: '#fff', letterSpacing: '-0.01em' }}>SPIMS</div>
           <div style={{ fontSize: 10.5, fontWeight: 500, color: '#7C7FA0', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
             Social Perf. &amp; Impact
           </div>
