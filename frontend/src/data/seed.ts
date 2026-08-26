@@ -332,7 +332,7 @@ export const INDICATORS: Indicator[] = [
 ];
 
 export const REPORTS: Report[] = [
-  { id: 'rep-1', name: 'Board Social Performance Pack', lens: 'Board', desc: 'Quarterly KPI summary, aspiration progress and risk register for the Seplat board.', updated: 'Updated 2d ago' },
+  { id: 'rep-1', name: 'Social Performance Report', lens: 'Board', desc: 'Annual report structured to match Seplat’s published Social Performance Report — Overview, Our Impact, Our Communities, Our People.', updated: 'Updated 2d ago' },
   { id: 'rep-2', name: 'ESG / Sustainability Report', lens: 'Global', desc: 'GRI 400, IFRS S1 and IPIECA social disclosures — investor-grade, LSE-ready.', updated: 'Updated 5d ago' },
   { id: 'rep-3', name: 'NCDMB Compliance Return', lens: 'Local', desc: 'Nigerian content, community employment and human-capital development return.', updated: 'Updated 1w ago' },
   { id: 'rep-4', name: 'PIA HCDT Statement', lens: 'Local', desc: 'Host Community Development Trust 3% OpEx allocation and spend reconciliation.', updated: 'Updated 1w ago' },

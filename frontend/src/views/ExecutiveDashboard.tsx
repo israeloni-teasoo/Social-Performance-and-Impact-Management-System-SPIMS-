@@ -4,16 +4,22 @@ import { card } from '../ui';
 const COMPLIANCE_ITEMS = [
   { icon: '✓', iconColor: '#1F8A5B', text: 'PIA HCDT — 3% OpEx funded' },
   { icon: '87%', iconColor: '#2B4C9B', text: 'NCDMB local content' },
-  { icon: '92%', iconColor: '#2B4C9B', text: 'NUPRC grievance SLA' },
   { icon: '!', iconColor: '#C0491E', text: '4 IFRS S1 gaps open' },
   { icon: '96%', iconColor: '#1F8A5B', text: 'GRI 403 disclosure complete' },
   { icon: '✓', iconColor: '#1F8A5B', text: 'SDG mapping current' },
 ];
 
 const OUTCOME_ROWS = [
-  { delta: '+12%', desc: 'literacy in STEP schools', localTag: 'NCDMB human-capital', globalTag: 'SDG 4' },
-  { delta: '−8%', desc: 'youth unemployment (YEP LGAs)', localTag: 'NCDMB local content', globalTag: 'SDG 8' },
-  { delta: '+22K', desc: 'people with clean-water access', localTag: 'PIA HCDT', globalTag: 'SDG 6' },
+  { delta: '+12%', desc: 'literacy in STEP-supported schools', localTag: 'NCDMB human-capital', globalTag: 'SDG 4' },
+  { delta: '−8%', desc: 'youth unemployment in YEP-covered LGAs', localTag: 'NCDMB local content', globalTag: 'SDG 8' },
+  { delta: '+22K', desc: 'people gained clean-water access', localTag: 'PIA HCDT', globalTag: 'SDG 6' },
+];
+
+const AT_A_GLANCE = [
+  { label: 'Social investment · FY26', value: '₦4.68B', sub: '90% of ₦5.2B budget' },
+  { label: 'Beneficiaries reached', value: '312K', sub: '▲ 18% vs FY25' },
+  { label: 'Active projects', value: '47', sub: '38 on track · 6 at risk · 3 delayed' },
+  { label: 'Host communities', value: '42', sub: 'Edo · Delta · Imo' },
 ];
 
 export function ExecutiveDashboard({ targetYear }: { targetYear: number }) {
@@ -24,47 +30,76 @@ export function ExecutiveDashboard({ targetYear }: { targetYear: number }) {
           Executive Dashboard
         </h1>
         <p style={{ fontSize: 14.5, color: 'var(--muted)', margin: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
-          Company-wide social performance — the whole story, at a glance.
+          What changed, and what it means — the numbers you already have, one click away if you need them.
           <InfoTip label="About this data">
             This build isn't connected to Seplat's real field data yet — figures shown are illustrative, pending verified data.
           </InfoTip>
         </p>
       </div>
 
-      {/* KPI row */}
-      <div className="grid-4" style={{ marginBottom: 18 }}>
-        <div className="card-lift" style={{ background: 'var(--navy)', color: '#fff', borderRadius: 16, padding: '22px 24px' }}>
-          <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#9EA1C0' }}>
-            Social investment · FY26
-          </div>
-          <div style={{ fontSize: 38, fontWeight: 800, letterSpacing: '-0.02em', margin: '8px 0 4px' }}>
-            ₦4.68<span style={{ fontSize: 20, fontWeight: 700 }}>B</span>
-          </div>
-          <div style={{ fontSize: 12.5, color: '#C7C9DA' }}>90% of ₦5.2B budget utilised · $64M since 2010</div>
+      {/* HERO: What changed */}
+      <div style={{ background: 'linear-gradient(160deg,#1a2a63,#111c55)', borderRadius: 18, padding: '26px 28px', marginBottom: 22 }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
+          <div style={{ fontSize: 19, fontWeight: 800, color: '#fff' }}>What changed</div>
+          <div style={{ fontSize: 12.5, color: '#9EA1C0' }}>The outcomes behind this year's investment — not just the spend</div>
         </div>
-        <div className="card-lift" style={card}>
-          <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--muted)' }}>
-            Beneficiaries reached
+        <div className="grid-3" style={{ gap: 16 }}>
+          {OUTCOME_ROWS.map((row) => (
+            <div key={row.desc} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 14, padding: '18px 20px' }}>
+              <div style={{ fontSize: 34, fontWeight: 800, color: '#fff', lineHeight: 1.1, marginBottom: 8 }}>{row.delta}</div>
+              <div style={{ fontSize: 13.5, color: '#E4E6F5', marginBottom: 12 }}>{row.desc}</div>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <span style={{ fontSize: 10.5, fontWeight: 700, padding: '3px 9px', borderRadius: 20, background: 'rgba(43,76,155,0.35)', color: '#B9CBEB' }}>{row.localTag}</span>
+                <span style={{ fontSize: 10.5, fontWeight: 700, padding: '3px 9px', borderRadius: 20, background: 'rgba(31,138,91,0.3)', color: '#9EE8C4' }}>{row.globalTag}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div style={{ display: 'flex', gap: 26, marginTop: 20, paddingTop: 18, borderTop: '1px solid rgba(255,255,255,0.12)' }}>
+          <div>
+            <div style={{ fontSize: 26, fontWeight: 800, color: '#fff' }}>3.4×</div>
+            <div style={{ fontSize: 11.5, color: '#9EA1C0' }}>SROI ratio</div>
           </div>
-          <div style={{ fontSize: 38, fontWeight: 800, letterSpacing: '-0.02em', margin: '8px 0 4px', color: 'var(--accent)' }}>312K</div>
-          <div style={{ fontSize: 12.5, color: 'var(--muted)' }}>
-            <span style={{ color: '#1F8A5B', fontWeight: 600 }}>▲ 18%</span> vs FY25
+          <div>
+            <div style={{ fontSize: 26, fontWeight: 800, color: '#fff' }}>78%</div>
+            <div style={{ fontSize: 11.5, color: '#9EA1C0' }}>Community satisfaction</div>
+          </div>
+          <div>
+            <div style={{ fontSize: 26, fontWeight: 800, color: '#fff' }}>52%</div>
+            <div style={{ fontSize: 11.5, color: '#9EA1C0' }}>{targetYear} social aspiration achieved</div>
           </div>
         </div>
-        <div className="card-lift" style={card}>
-          <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--muted)' }}>
-            Active projects
+      </div>
+
+      {/* compact at-a-glance strip — financials/beneficiaries, already known to the C-suite */}
+      <div
+        style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: 0,
+          background: '#fff',
+          border: '1px solid var(--line)',
+          borderRadius: 14,
+          marginBottom: 22,
+          overflow: 'hidden',
+        }}
+      >
+        {AT_A_GLANCE.map((item, i) => (
+          <div
+            key={item.label}
+            style={{
+              flex: '1 1 200px',
+              padding: '14px 20px',
+              borderLeft: i === 0 ? 'none' : '1px solid var(--line)',
+            }}
+          >
+            <div style={{ fontSize: 10.5, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{item.label}</div>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 2 }}>
+              <span style={{ fontSize: 19, fontWeight: 800, color: 'var(--navy)' }}>{item.value}</span>
+              <span style={{ fontSize: 11.5, color: 'var(--muted)' }}>{item.sub}</span>
+            </div>
           </div>
-          <div style={{ fontSize: 38, fontWeight: 800, letterSpacing: '-0.02em', margin: '8px 0 4px', color: 'var(--navy)' }}>47</div>
-          <div style={{ fontSize: 12.5, color: 'var(--muted)' }}>38 on track · 6 at risk · 3 delayed</div>
-        </div>
-        <div className="card-lift" style={card}>
-          <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--muted)' }}>
-            Host communities
-          </div>
-          <div style={{ fontSize: 38, fontWeight: 800, letterSpacing: '-0.02em', margin: '8px 0 4px', color: 'var(--navy)' }}>42</div>
-          <div style={{ fontSize: 12.5, color: 'var(--muted)' }}>Edo · Delta · Imo</div>
-        </div>
+        ))}
       </div>
 
       {/* middle grid */}
@@ -163,7 +198,7 @@ export function ExecutiveDashboard({ targetYear }: { targetYear: number }) {
       </div>
 
       {/* lower grid */}
-      <div className="grid-dash-lower">
+      <div className="grid-2" style={{ marginBottom: 18, gap: 18 }}>
         <div style={card}>
           <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--navy)', marginBottom: 18 }}>Who benefited</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 15 }}>
@@ -188,59 +223,10 @@ export function ExecutiveDashboard({ targetYear }: { targetYear: number }) {
         </div>
 
         <div style={card}>
-          <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--navy)', marginBottom: 18 }}>
-            What changed <span style={{ fontWeight: 500, fontSize: 12, color: 'var(--muted)' }}>· outcomes</span>
+          <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--navy)', marginBottom: 16 }}>
+            Are we compliant? <span style={{ fontWeight: 500, fontSize: 12, color: 'var(--muted)' }}>· local + global view</span>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            {OUTCOME_ROWS.map((row) => (
-              <div key={row.desc} style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
-                <span style={{ fontSize: 22, fontWeight: 800, color: '#1F8A5B' }}>{row.delta}</span>
-                <span style={{ fontSize: 13, color: 'var(--ink)' }}>{row.desc}</span>
-                <span style={{ fontSize: 10.5, fontWeight: 700, padding: '2px 8px', borderRadius: 20, background: 'rgba(43,76,155,0.1)', color: '#2B4C9B' }}>
-                  {row.localTag}
-                </span>
-                <span style={{ fontSize: 10.5, fontWeight: 700, padding: '2px 8px', borderRadius: 20, background: 'rgba(31,138,91,0.12)', color: '#1F8A5B' }}>
-                  {row.globalTag}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div style={{ background: 'linear-gradient(160deg,#1a2a63,#111c55)', color: '#fff', borderRadius: 16, padding: '22px 24px' }}>
-          <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 18 }}>Value created</div>
-          <div style={{ display: 'flex', gap: 22 }}>
-            <div>
-              <div style={{ fontSize: 30, fontWeight: 800, color: '#fff' }}>3.4×</div>
-              <div style={{ fontSize: 11.5, color: '#9EA1C0' }}>SROI ratio</div>
-            </div>
-            <div>
-              <div style={{ fontSize: 30, fontWeight: 800, color: '#fff' }}>78%</div>
-              <div style={{ fontSize: 11.5, color: '#9EA1C0' }}>Satisfaction</div>
-            </div>
-          </div>
-          <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid rgba(255,255,255,0.12)', display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: 12.5, color: '#C7C9DA' }}>NCDMB · Local content</span>
-              <span style={{ fontSize: 15, fontWeight: 800, background: '#2B4C9B', padding: '3px 12px', borderRadius: 8 }}>87%</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: 12.5, color: '#C7C9DA' }}>ESG · Social score</span>
-              <span style={{ fontSize: 15, fontWeight: 800, background: 'var(--accent)', padding: '3px 12px', borderRadius: 8 }}>B+</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* compliance + risk strip */}
-      <div className="grid-dash-compliance" style={{ marginTop: 18 }}>
-        <div style={card}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 8 }}>
-            <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--navy)' }}>
-              Are we compliant? <span style={{ fontWeight: 500, fontSize: 12, color: 'var(--muted)' }}>· local + global view</span>
-            </div>
-            <span style={{ fontSize: 12, fontWeight: 600, color: '#1F8A5B' }}>24 / 28 commitments met</span>
-          </div>
+          <div style={{ fontSize: 12, fontWeight: 600, color: '#1F8A5B', marginBottom: 14 }}>22 / 24 commitments met</div>
           <div className="grid-compliance-inner">
             {COMPLIANCE_ITEMS.map((row) => (
               <div
@@ -255,35 +241,33 @@ export function ExecutiveDashboard({ targetYear }: { targetYear: number }) {
             ))}
           </div>
         </div>
-        <div style={card}>
-          <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--navy)', marginBottom: 16 }}>What risks exist?</div>
-          {[
-            { n: 6, bg: 'rgba(227,26,56,0.1)', fg: 'var(--accent)', title: 'High-risk projects', sub: 'budget or delivery flagged' },
-            { n: 4, bg: 'rgba(192,73,30,0.1)', fg: '#C0491E', title: 'Grievances > 30 days', sub: 'breaching resolution SLA' },
-          ].map((row, i) => (
-            <div key={row.title} style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: i === 0 ? 12 : 0 }}>
-              <div
-                style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: 11,
-                  background: row.bg,
-                  color: row.fg,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontWeight: 800,
-                  fontSize: 18,
-                }}
-              >
-                {row.n}
-              </div>
-              <div>
-                <div style={{ fontSize: 13.5, fontWeight: 600 }}>{row.title}</div>
-                <div style={{ fontSize: 12, color: 'var(--muted)' }}>{row.sub}</div>
-              </div>
-            </div>
-          ))}
+      </div>
+
+      {/* risk strip */}
+      <div style={card}>
+        <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--navy)', marginBottom: 16 }}>What risks exist?</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div
+            style={{
+              width: 44,
+              height: 44,
+              borderRadius: 11,
+              background: 'rgba(227,26,56,0.1)',
+              color: 'var(--accent)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontWeight: 800,
+              fontSize: 18,
+              flexShrink: 0,
+            }}
+          >
+            6
+          </div>
+          <div>
+            <div style={{ fontSize: 13.5, fontWeight: 600 }}>High-risk projects</div>
+            <div style={{ fontSize: 12, color: 'var(--muted)' }}>budget or delivery flagged</div>
+          </div>
         </div>
       </div>
     </div>

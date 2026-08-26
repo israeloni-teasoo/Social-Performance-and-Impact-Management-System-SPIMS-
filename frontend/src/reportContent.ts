@@ -12,28 +12,49 @@ export function buildReportSections(report: Report, projects: Project[], impacts
   const byCode = (code: string) => projects.find((p) => p.code === code);
 
   switch (report.name) {
-    case 'Board Social Performance Pack':
+    case 'Social Performance Report':
       return [
         {
-          heading: 'FY26 KPI summary',
+          heading: 'Overview — Seplat at a glance',
           lines: [
             'Social investment: ₦4.68B (90% of ₦5.2B FY26 budget) · $64M invested since 2010',
-            'Beneficiaries reached: 312K (▲18% vs FY25)',
             'Active projects: 47 — 38 on track, 6 at risk, 3 delayed',
             'Host communities: 42 across Edo, Delta and Imo',
+            '52% of the 2030 social aspiration achieved — Economic Empowerment flagged as the priority gap.',
           ],
         },
         {
-          heading: '2030 aspiration progress',
-          lines: ['52% of the 2030 social aspiration achieved — on track across 4 pillars, with Economic Empowerment flagged as the priority gap.'],
+          heading: 'Our Impact — what changed',
+          lines: [
+            '+12% literacy in STEP-supported schools',
+            '−8% youth unemployment in YEP-covered LGAs',
+            '+22K people gained clean-water access',
+            'SROI ratio: 3.4× · Community satisfaction: 78%',
+          ],
         },
         {
-          heading: 'Risk register',
-          lines: ['6 high-risk projects — budget or delivery flagged', '4 grievances breaching the 30-day resolution SLA'],
+          heading: 'Our Impact — material issues we report against',
+          lines: STANDARDS.filter((s) => s.category === 'local' || s.category === 'global').map((s) => `${s.code} — ${s.summary}`),
         },
         {
-          heading: 'Value created',
-          lines: ['SROI ratio: 3.4×', 'Community satisfaction: 78%', 'ESG · Social score: B+'],
+          heading: 'Our Communities — flagship corporate social investment programmes',
+          lines: projects.map((p) => {
+            const imp = impacts[p.code];
+            return imp ? `${p.name} — ${imp.outputHeadline}` : `${p.name} — ${p.output}`;
+          }),
+        },
+        {
+          heading: 'Our Communities — Host Community Development Trust (PIA)',
+          lines: [
+            'Status: funded and reconciled for FY26.',
+            `${byCode('WATER')?.name ?? 'Community Water Scheme'} is funded directly from this allocation — ${impacts.WATER?.outputHeadline ?? ''}, budget ${byCode('WATER')?.budget ?? ''}.`,
+          ],
+        },
+        {
+          heading: 'Our People — health, safety, culture, environment, governance',
+          lines: [
+            'Not yet tracked in SPIMS Phase 1 — this section populates once HR, HSE and environmental data sources are connected (headcount, safety incident rate, D&I metrics, emissions).',
+          ],
         },
       ];
 

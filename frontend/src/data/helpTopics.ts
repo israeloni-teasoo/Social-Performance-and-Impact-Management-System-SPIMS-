@@ -44,9 +44,10 @@ export const HELP_TOPICS: HelpTopic[] = [
     tag: 'Reports',
     question: 'Who uploads a report? Is there a standard template? Can I get a report for a single project?',
     answer: [
-      'Nobody uploads reports by hand. Every report on the Reports & Exports page is auto-compiled from live SPIMS data using one standardized template per audience (Board, ESG/Global, NCDMB/Local compliance, PIA HCDT, SDG contribution, Community feedback).',
+      'Nobody uploads reports by hand. Every report on the Reports & Exports page is auto-compiled from live SPIMS data using one standardized template per audience (Social Performance Report, ESG/Global, NCDMB/Local compliance, PIA HCDT, SDG contribution, Community feedback).',
       'Click "Preview report" to read the full compiled content in the browser before downloading — this is the same content that goes into the PDF/Excel/Word export.',
       'Yes — reports can also be scoped to a single project. Open any project\'s detail page and use "Download project report" to get a PDF, Excel, or Word export covering just that project\'s inputs, outputs, outcomes, impact and methodology.',
+      'PowerPoint export is planned for Phase 2, using Claude to generate slides that keep charts as real graphics instead of flattening everything to text.',
     ],
   },
   {

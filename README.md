@@ -40,12 +40,23 @@ All 16 views from the design, matching it pixel-for-pixel:
 - **Field Officer**: My Tasks, Log Activity, Evidence Repository.
 - **Community Relations**: Grievance Cases, Log Grievance, Stakeholder Register.
 
-## Known gaps (match the original design's stated scope)
+## Versions
 
-- Approvals "Approve"/"Return" buttons are presentational, as in the original — not wired to move items off the queue.
+- **`main`** — the current, actively developed build (v2 onward).
+- **`v1-archive`** branch — a frozen snapshot of v1 (the state reviewed with Seplat before the 26 Aug 2026 feedback round), preserved for reference/rollback. It is not deployed; `main` is what's live on GitHub Pages.
+
+## Roadmap
+
+- **PowerPoint export with real charts** (not flattened text) — planned for Phase 2, generated using Claude.
+- **ESG-Horizon "Social" module integration** — Teasoo's existing ESG-Horizon reporting/sustainability platform will eventually absorb this Social pillar; noted here for continuity, not yet started.
+- Report structure for the flagship "Social Performance Report" is aligned to Seplat's actual published annual report (Overview → Our Impact → Our Communities → Our People); the "Our People" section is intentionally a stub pending HR/HSE/environmental data sources SPIMS doesn't yet track.
+
+## Known gaps
+
 - Auth is the same "Viewing as" persona switch as the design (no login/session); there's no server-side access control since there's no server.
-- Reports "Generate report →" and Evidence "Upload" are presentational (no PDF/Excel/PPT export or file upload).
-- Data other than grievances (projects, spend, communities, etc.) is static seed data — editing it in the UI (e.g. "New Project", "Log Activity") doesn't persist, matching the original prototype's scope.
+- Evidence "Upload" is presentational (no real file upload/storage).
+- Data other than grievances, approvals, targets, team members, and tasks (projects, spend, communities, indicators, etc.) is static seed data — editing it elsewhere doesn't persist, though everything editable in the UI (grievances, approvals + comments, targets, team/task assignment, stakeholders, report comments) persists to the browser's `localStorage`.
+- PowerPoint export is a stub (see Roadmap above); PDF/Excel/Word exports are fully functional, hand-generated client-side with zero dependencies.
 
 ## A note on architecture
 

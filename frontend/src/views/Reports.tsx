@@ -29,7 +29,7 @@ export function Reports({
 
   const handleFormat = (report: Report, format: 'pdf' | 'excel' | 'word' | 'powerpoint') => {
     if (format === 'powerpoint') {
-      pushToast('PowerPoint export is coming in Phase 2 — use PDF or Word for now.', 'info');
+      pushToast('PowerPoint export — with charts kept as real graphics, not flattened text — is planned for Phase 2 using Claude to generate the slides. Use PDF or Word for now.', 'info');
       return;
     }
     const filename = exportReport(report, format);
