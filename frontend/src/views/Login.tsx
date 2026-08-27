@@ -2,15 +2,19 @@ import { useRef, useState } from 'react';
 import { DEMO_ACCOUNTS } from '../data/accounts';
 import { input, primaryBtn } from '../ui';
 
-export function Login({ onLogin }: { onLogin: (email: string, password: string) => boolean }) {
+export function Login({ onLogin }: { onLogin: (email: string, password: string) => Promise<boolean> }) {
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
-  const submit = (email?: string, password?: string) => {
+  const submit = async (email?: string, password?: string) => {
     const e = email ?? emailRef.current?.value ?? '';
     const p = password ?? passwordRef.current?.value ?? '';
-    if (!onLogin(e, p)) {
+    setSubmitting(true);
+    const ok = await onLogin(e, p);
+    setSubmitting(false);
+    if (!ok) {
       setError('Email or password not recognised. Try one of the demo accounts below.');
     }
   };
@@ -80,8 +84,12 @@ export function Login({ onLogin }: { onLogin: (email: string, password: string) 
 
             {error && <div style={{ fontSize: 12.5, color: 'var(--accent)', marginTop: 8, marginBottom: 4 }}>{error}</div>}
 
-            <button onClick={() => submit()} style={{ ...primaryBtn, width: '100%', marginTop: 16, padding: '13px 22px', fontSize: 14.5 }}>
-              Sign in →
+            <button
+              onClick={() => submit()}
+              disabled={submitting}
+              style={{ ...primaryBtn, width: '100%', marginTop: 16, padding: '13px 22px', fontSize: 14.5, opacity: submitting ? 0.7 : 1, cursor: submitting ? 'default' : 'pointer' }}
+            >
+              {submitting ? 'Signing in…' : 'Sign in →'}
             </button>
           </div>
         </div>

@@ -1,0 +1,218 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  exec
+  manager
+  field
+  relations
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         Role
+  roleLabel    String
+  initials     String
+  createdAt    DateTime @default(now())
+
+  approvalComments ApprovalComment[]
+  reportComments   ReportComment[]
+  bulkUploads      BulkUpload[]
+}
+
+model Project {
+  id       String @id
+  code     String @unique
+  name     String
+  output   String
+  pillar   String
+  state    String
+  budget   String
+  utilPct  String
+  progress String
+  progPct  String
+  status   String
+
+  impact       ProjectImpact?
+  fieldTasks   FieldTask[]
+  spendEntries SpendEntry[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ProjectImpact {
+  id          String  @id @default(cuid())
+  project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId   String  @unique
+  projectCode String
+
+  inputs            String
+  activities        String
+  outputHeadline    String
+  outcome           String
+  impactHeadline    String
+  impactFigure      String
+  impactFigureLabel String
+  impactPoints      Json // string[]
+  methodology       Json // { metric, calculation, source, note }
+  impactScenarios   Json? // ImpactScenario[]
+  impactScenarioBasis String?
+  baseline            Json // BaselinePoint[]
+  baselineCaption     String
+  dualLens            Json // DualLensTag[]
+  costPerOutcome      String
+  sroi                String
+  contactPerson       String
+  communitiesImpacted Json // string[]
+}
+
+model Community {
+  id       String @id
+  name     String
+  lga      String
+  state    String
+  pop      String
+  projects Int
+  spend    String
+  cdc      String
+}
+
+model Indicator {
+  id     String @id
+  metric String
+  local  String
+  global String
+  sdg    String
+}
+
+model Report {
+  id      String   @id
+  name    String
+  lens    String
+  desc    String
+  updated String
+
+  comments ReportComment[]
+}
+
+model ReportComment {
+  id                 String   @id @default(cuid())
+  report             Report   @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  reportId           String
+  author             User     @relation(fields: [authorId], references: [id])
+  authorId           String
+  text               String
+  requestsCorrection Boolean  @default(false)
+  createdAt          DateTime @default(now())
+}
+
+model Stakeholder {
+  id          String @id @default(cuid())
+  name        String
+  type        String
+  community   String
+  engagements Int
+  commitments String
+  status      String
+}
+
+model FieldTask {
+  id           String      @id @default(cuid())
+  title        String
+  project      Project?    @relation(fields: [projectId], references: [id])
+  projectId    String?
+  projectLabel String
+  due          String
+  dueColor     String
+  assignee     TeamMember? @relation(fields: [assigneeId], references: [id])
+  assigneeId   String?
+  status       String      @default("Not started")
+  createdBy    String?
+  createdAt    DateTime    @default(now())
+}
+
+model TeamMember {
+  id        String      @id @default(cuid())
+  name      String
+  email     String
+  roleTitle String
+  status    String      @default("Active")
+  joinedAt  String
+  tasks     FieldTask[]
+}
+
+model Approval {
+  id       String            @id @default(cuid())
+  who      String
+  item     String
+  project  String
+  when     String
+  type     String
+  details  Json // string[]
+  status   String            @default("Pending")
+  comments ApprovalComment[]
+}
+
+model ApprovalComment {
+  id         String   @id @default(cuid())
+  approval   Approval @relation(fields: [approvalId], references: [id], onDelete: Cascade)
+  approvalId String
+  author     User     @relation(fields: [authorId], references: [id])
+  authorId   String
+  text       String
+  createdAt  DateTime @default(now())
+}
+
+model EvidenceItem {
+  id    String @id @default(cuid())
+  label String
+  meta  String
+  kind  String
+}
+
+model Target {
+  id           String   @id @default(cuid())
+  name         String
+  metric       String
+  unit         String
+  periodStart  String
+  periodEnd    String
+  totalTarget  Float
+  currentValue Float
+  status       String   @default("Active")
+  createdAt    DateTime @default(now())
+}
+
+model SpendEntry {
+  id          String   @id @default(cuid())
+  project     Project  @relation(fields: [projectId], references: [id])
+  projectId   String
+  periodMonth String
+  pillar      String
+  amountNgn   Float
+  fundingSource String
+  notes       String?
+  createdAt   DateTime @default(now())
+}
+
+model BulkUpload {
+  id         String   @id @default(cuid())
+  filename   String
+  dataType   String
+  projectId  String?
+  rowCount   Int
+  status     String   @default("Received")
+  uploadedBy User     @relation(fields: [uploadedById], references: [id])
+  uploadedById String
+  createdAt  DateTime @default(now())
+}

@@ -2,8 +2,7 @@ import { useEffect, useState } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { ToastStack } from './components/ToastStack';
 import { Topbar } from './components/Topbar';
-import { COMMUNITIES, EVIDENCE_ITEMS, INDICATORS, PROJECT_IMPACTS, PROJECTS, REPORTS } from './data/seed';
-import { CRUMBS, DEFAULT_VIEW_FOR_ROLE, ROLE_USERS } from './roles';
+import { CRUMBS, DEFAULT_VIEW_FOR_ROLE } from './roles';
 import type { View } from './types';
 import { useApprovalsStore } from './useApprovalsStore';
 import { useReportCommentsStore } from './useReportCommentsStore';
@@ -31,13 +30,15 @@ import { StakeholderRegister } from './views/StakeholderRegister';
 import { Targets } from './views/Targets';
 import { Team } from './views/Team';
 import { useAuth } from './useAuth';
+import { useAppData } from './useAppData';
 import { Login } from './views/Login';
 
 const TARGET_YEAR = 2030;
 const ORG_NAME = 'Seplat Energy Plc';
 
 export default function App() {
-  const { role, login, logout } = useAuth();
+  const { user, loading, login, logout } = useAuth();
+  const { projects: PROJECTS, projectImpacts: PROJECT_IMPACTS, communities: COMMUNITIES, indicators: INDICATORS, reports: REPORTS, evidence: EVIDENCE_ITEMS, loading: dataLoading, error: dataError } = useAppData();
   const [view, setViewState] = useState<View>('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
@@ -53,12 +54,12 @@ export default function App() {
   const { comments, addComment } = useReportCommentsStore(pushToast);
 
   useEffect(() => {
-    if (role) {
-      setViewState(DEFAULT_VIEW_FOR_ROLE[role]);
+    if (user) {
+      setViewState(DEFAULT_VIEW_FOR_ROLE[user.role]);
       setSidebarOpen(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [role]);
+  }, [user?.id]);
 
   const setView = (v: View) => {
     setViewState(v);
@@ -76,9 +77,33 @@ export default function App() {
     setView('communitydetail');
   };
 
-  if (!role) return <Login onLogin={login} />;
+  if (loading) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)', fontFamily: "'Poppins',sans-serif" }}>
+        Loading SPIMS…
+      </div>
+    );
+  }
 
-  const user = ROLE_USERS[role];
+  if (!user) return <Login onLogin={login} />;
+
+  if (dataLoading) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)', fontFamily: "'Poppins',sans-serif" }}>
+        Loading SPIMS…
+      </div>
+    );
+  }
+
+  if (dataError) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent)', fontFamily: "'Poppins',sans-serif", padding: 24, textAlign: 'center' }}>
+        {dataError}
+      </div>
+    );
+  }
+
+  const role = user.role;
   const selectedProject = PROJECTS.find((p) => p.id === selectedProjectId) ?? null;
   const selectedCommunity = COMMUNITIES.find((c) => c.id === selectedCommunityId) ?? null;
   const myTasks = tasks.filter((t) => t.assigneeId === 'tm-1');
@@ -94,7 +119,7 @@ export default function App() {
         tasksCount={myTasks.length}
         orgName={ORG_NAME}
         userName={user.name}
-        userRole={user.role}
+        userRole={user.roleLabel}
         userInitials={user.initials}
         open={sidebarOpen}
       />
@@ -104,7 +129,7 @@ export default function App() {
           orgName={ORG_NAME}
           crumb={CRUMBS[view]}
           userName={user.name}
-          userRole={user.role}
+          userRole={user.roleLabel}
           onLogout={logout}
           onMenuClick={() => setSidebarOpen((o) => !o)}
           projects={PROJECTS}

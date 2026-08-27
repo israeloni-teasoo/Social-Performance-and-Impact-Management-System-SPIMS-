@@ -1,9 +1,15 @@
 import { useRef, useState } from 'react';
+import { api } from '../api';
 import { buildReportSections } from '../reportContent';
-import { REPORT_LENS_COLORS } from '../ui';
+import { REPORT_LENS_COLORS, secondaryBtn } from '../ui';
 import { InfoTip } from './Tooltip';
 import type { ReportSection } from '../reportContent';
 import type { Project, ProjectImpact, Report, ReportComment } from '../types';
+
+interface Slide {
+  title: string;
+  bullets: string[];
+}
 
 const FORMATS: { key: 'pdf' | 'excel' | 'word' | 'powerpoint'; label: string }[] = [
   { key: 'pdf', label: 'PDF' },
@@ -38,6 +44,9 @@ export function ReportPreviewModal({
   const [tagBg, tagFg] = REPORT_LENS_COLORS[report.lens] ?? ['#eee', '#555'];
   const [requestsCorrection, setRequestsCorrection] = useState(false);
   const commentRef = useRef<HTMLTextAreaElement>(null);
+  const [claudeSlides, setClaudeSlides] = useState<Slide[] | null>(null);
+  const [claudeLoading, setClaudeLoading] = useState(false);
+  const [claudeError, setClaudeError] = useState<string | null>(null);
 
   const toggleProject = (id: string) => {
     setSelectedIds((prev) => {
@@ -49,6 +58,19 @@ export function ReportPreviewModal({
   };
 
   const scopeNote = `Scope: ${fy} · ${scopedProjects.length} of ${projects.length} projects included${scopedProjects.length < projects.length ? ' (' + scopedProjects.map((p) => p.code).join(', ') + ')' : ''}.`;
+
+  const generateClaudePreview = async () => {
+    setClaudeLoading(true);
+    setClaudeError(null);
+    try {
+      const result = await api.post<{ slides: Slide[] }>('/api/reports/generate-preview', { reportName: report.name, lens: report.lens, scopeNote, sections });
+      setClaudeSlides(result.slides);
+    } catch (err) {
+      setClaudeError(err instanceof Error ? err.message : 'Could not generate a preview.');
+    } finally {
+      setClaudeLoading(false);
+    }
+  };
 
   const submitComment = () => {
     const text = commentRef.current?.value.trim();
@@ -198,6 +220,39 @@ export function ReportPreviewModal({
                 </button>
               ))}
             </div>
+          </div>
+
+          <div style={{ paddingTop: 12, borderTop: '1px solid var(--line)', marginBottom: 24 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10, marginBottom: claudeSlides || claudeError ? 14 : 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--navy)' }}>Slide preview</span>
+                <InfoTip label="About this preview" width={290}>
+                  Sends this report's compiled content to Claude to draft a slide-by-slide outline — a preview of what the planned PowerPoint export could look like, not the final deck (no charts, no file). Each click is a live, billed API call; nothing is saved.
+                </InfoTip>
+              </div>
+              <button onClick={generateClaudePreview} disabled={claudeLoading} style={{ ...secondaryBtn, opacity: claudeLoading ? 0.7 : 1 }}>
+                {claudeLoading ? 'Generating…' : 'Generate with Claude →'}
+              </button>
+            </div>
+            {claudeError && <div style={{ fontSize: 12.5, color: 'var(--accent)' }}>{claudeError}</div>}
+            {claudeSlides && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {claudeSlides.map((s, i) => (
+                  <div key={i} style={{ background: 'var(--bg)', borderRadius: 10, padding: '12px 14px' }}>
+                    <div style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--navy)', marginBottom: 6 }}>
+                      {i + 1}. {s.title}
+                    </div>
+                    <ul style={{ margin: 0, paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                      {s.bullets.map((b, j) => (
+                        <li key={j} style={{ fontSize: 12.5, color: 'var(--ink)', lineHeight: 1.5 }}>
+                          {b}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div style={{ paddingTop: 12, borderTop: '1px solid var(--line)' }}>

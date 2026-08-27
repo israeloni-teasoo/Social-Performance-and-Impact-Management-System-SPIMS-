@@ -1,72 +1,49 @@
 import { useEffect, useState } from 'react';
-import { APPROVALS } from './data/seed';
-import type { Approval } from './types';
+import { api } from './api';
+import type { Approval, ApprovalComment } from './types';
+import type { ToastTone } from './useToastQueue';
 
-const STORAGE_KEY = 'spims_approvals_v2';
-
-function load(): Approval[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw) as Approval[];
-      if (Array.isArray(parsed)) return parsed;
-    }
-  } catch {
-    // ignore corrupt storage
-  }
-  return APPROVALS;
-}
-
-function save(list: Approval[]) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-  } catch {
-    // storage unavailable — proceed without persistence
-  }
-}
-
-let idCounter = 0;
-
-export function useApprovalsStore(onNotify: (message: string, tone?: 'success' | 'info' | 'warning') => void) {
-  const [approvals, setApprovals] = useState<Approval[]>(() => load());
+export function useApprovalsStore(onNotify: (message: string, tone?: ToastTone) => void) {
+  const [approvals, setApprovals] = useState<Approval[]>([]);
 
   useEffect(() => {
-    save(approvals);
-  }, [approvals]);
+    api
+      .get<Approval[]>('/api/approvals')
+      .then(setApprovals)
+      .catch(() => onNotify('Could not load the approvals queue.', 'warning'));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const approve = (id: string) => {
+  const approve = async (id: string) => {
     const item = approvals.find((a) => a.id === id);
-    setApprovals((list) => list.filter((a) => a.id !== id));
-    if (item) onNotify(`Approved — "${item.item}" now feeds indicators and the executive dashboard.`, 'success');
+    try {
+      await api.post('/api/approvals/approve', { id });
+      setApprovals((list) => list.filter((a) => a.id !== id));
+      if (item) onNotify(`Approved — "${item.item}" now feeds indicators and the executive dashboard.`, 'success');
+    } catch {
+      onNotify('Could not approve that item — try again.', 'warning');
+    }
   };
 
-  const returnItem = (id: string) => {
+  const returnItem = async (id: string) => {
     const item = approvals.find((a) => a.id === id);
-    setApprovals((list) => list.filter((a) => a.id !== id));
-    if (item) onNotify(`Returned "${item.item}" to ${item.who} for revision.`, 'warning');
+    try {
+      await api.post('/api/approvals/return', { id });
+      setApprovals((list) => list.filter((a) => a.id !== id));
+      if (item) onNotify(`Returned "${item.item}" to ${item.who} for revision.`, 'warning');
+    } catch {
+      onNotify('Could not return that item — try again.', 'warning');
+    }
   };
 
-  const addComment = (id: string, author: string, text: string) => {
-    idCounter += 1;
-    setApprovals((list) =>
-      list.map((a) =>
-        a.id === id
-          ? {
-              ...a,
-              comments: [
-                ...a.comments,
-                {
-                  id: `ac-${Date.now()}-${idCounter}`,
-                  author,
-                  text: text.trim(),
-                  createdAt: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }),
-                },
-              ],
-            }
-          : a,
-      ),
-    );
-    onNotify('Comment added.', 'success');
+  const addComment = async (id: string, _author: string, text: string) => {
+    try {
+      const comment = await api.post<ApprovalComment>('/api/approvals/comment', { id, text });
+      setApprovals((list) => list.map((a) => (a.id === id ? { ...a, comments: [...a.comments, comment] } : a)));
+      onNotify('Comment added.', 'success');
+    } catch {
+      onNotify('Could not add that comment — try again.', 'warning');
+    }
   };
 
   return { approvals, approve, returnItem, addComment };

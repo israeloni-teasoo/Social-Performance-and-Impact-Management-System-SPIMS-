@@ -1,11 +1,12 @@
 import { useRef, useState } from 'react';
+import { api } from '../api';
 import { InfoTip } from '../components/Tooltip';
+import { BULK_UPLOAD_DATA_TYPES, UPLOAD_TEMPLATES } from '../data/uploadTemplates';
 import { buildCsvFromRows, downloadBlob } from '../reportExport';
 import { formField, h1, input, label, primaryBtn, secondaryBtn, sectionCardTitle, subtitle } from '../ui';
+import type { BulkUploadDataType, UploadTemplate } from '../data/uploadTemplates';
 import type { Project } from '../types';
 import type { ToastTone } from '../useToastQueue';
-
-const DATA_TYPES = ['Beneficiary counts', 'Activity logs', 'Financial spend', 'Project master data'] as const;
 
 interface UploadRecord {
   id: string;
@@ -13,64 +14,21 @@ interface UploadRecord {
   dataType: string;
   project: string;
   rowCount: number;
+  status: string;
 }
-
-interface UploadTemplate {
-  filename: string;
-  columns: string[];
-  example: string[];
-  note: string;
-}
-
-const TEMPLATES: Record<(typeof DATA_TYPES)[number], UploadTemplate> = {
-  'Beneficiary counts': {
-    filename: 'spims-template-beneficiary-counts.csv',
-    columns: ['project_code', 'activity_date', 'community', 'total_reached', 'female', 'male', 'youth_under_35', 'pwd'],
-    example: ['STEP', '2026-07-06', 'Sapele, Delta', '42', '24', '18', '31', '1'],
-    note: 'One row per activity/date. Disaggregation columns should add up to total_reached.',
-  },
-  'Activity logs': {
-    filename: 'spims-template-activity-logs.csv',
-    columns: ['project_code', 'activity_date', 'activity_type', 'location', 'total_reached', 'female', 'male', 'youth_under_35', 'pwd', 'site_notes'],
-    example: ['STEP', '2026-07-06', 'Training / workshop', 'Sapele — 5.8904, 5.6767', '42', '24', '18', '31', '1', 'Full-day literacy methods training delivered.'],
-    note: 'Mirrors the fields on the Log Activity form — activity_type should match one of the options there.',
-  },
-  'Financial spend': {
-    filename: 'spims-template-financial-spend.csv',
-    columns: ['project_code', 'period_month', 'pillar', 'amount_ngn', 'funding_source', 'notes'],
-    example: ['WATER', '2026-07', 'Infrastructure', '43000000', 'PIA HCDT — 3% OpEx', 'Q3 borehole works'],
-    note: 'period_month as YYYY-MM. amount_ngn as a plain number, no currency symbol or commas.',
-  },
-  'Project master data': {
-    filename: 'spims-template-project-master-data.csv',
-    columns: ['project_id', 'title', 'pillar', 'owner', 'community', 'lga', 'state', 'gps_coordinates', 'start_date', 'end_date', 'budget_ngn', 'funding_source', 'contractor', 'implementing_ngo'],
-    example: ['SPL-2026-048', 'Solar Skills Academy — Cohort 3', 'Economic Empowerment', 'Tunde Bello', 'Sapele', 'Sapele LGA', 'Delta', '5.8904, 5.6767', '2026-09-01', '2027-06-30', '180000000', 'PIA HCDT — 3% OpEx', 'Bright Energy Ltd', 'C4C Foundation'],
-    note: 'Mirrors the fields on the New Project intake form.',
-  },
-};
 
 function downloadTemplate(t: UploadTemplate) {
   const csv = buildCsvFromRows([t.columns, t.example]);
   downloadBlob(new Blob([csv], { type: 'text/csv' }), t.filename);
 }
 
-function parseHeaderRow(firstLine: string): string[] {
-  return firstLine.split(',').map((cell) => cell.trim().replace(/^"|"$/g, '').replace(/""/g, '"'));
-}
-
-function countDataRows(text: string): number {
-  const lines = text.split(/\r?\n/).filter((line) => line.trim().length > 0);
-  return Math.max(0, lines.length - 1);
-}
-
 export function BulkUpload({ projects, pushToast }: { projects: Project[]; pushToast: (message: string, tone?: ToastTone) => void }) {
   const fileRef = useRef<HTMLInputElement>(null);
-  const [dataType, setDataType] = useState<(typeof DATA_TYPES)[number]>('Beneficiary counts');
+  const [dataType, setDataType] = useState<BulkUploadDataType>('Beneficiary counts');
   const [projectId, setProjectId] = useState('all');
   const [fileName, setFileName] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
   const [uploads, setUploads] = useState<UploadRecord[]>([]);
-
-  const projectLabel = projectId === 'all' ? 'All projects' : projects.find((p) => p.id === projectId)?.name ?? 'All projects';
 
   const handleUpload = () => {
     const file = fileRef.current?.files?.[0];
@@ -79,21 +37,28 @@ export function BulkUpload({ projects, pushToast }: { projects: Project[]; pushT
       return;
     }
     const reader = new FileReader();
-    reader.onload = () => {
-      const text = String(reader.result ?? '');
-      const firstLine = text.split(/\r?\n/)[0] ?? '';
-      const expected = TEMPLATES[dataType].columns;
-      const actual = parseHeaderRow(firstLine);
-      const matches = expected.length === actual.length && expected.every((col, i) => col.toLowerCase() === actual[i]?.toLowerCase());
-      if (!matches) {
-        pushToast(`Columns don't match the ${dataType.toLowerCase()} template. Expected: ${expected.join(', ')}. Download the template and try again.`, 'warning');
-        return;
+    reader.onload = async () => {
+      const csvText = String(reader.result ?? '');
+      setUploading(true);
+      try {
+        const result = await api.post<{ id: string; rowCount: number; status: string }>('/api/bulk-upload', {
+          filename: file.name,
+          dataType,
+          projectId: projectId === 'all' ? null : projectId,
+          csvText,
+        });
+        setUploads((prev) => [
+          { id: result.id, filename: file.name, dataType, project: projectId === 'all' ? 'All projects' : projects.find((p) => p.id === projectId)?.name ?? 'All projects', rowCount: result.rowCount, status: result.status },
+          ...prev,
+        ]);
+        pushToast(`${file.name} received — ${result.rowCount} rows ${result.status.toLowerCase()}.`, 'success');
+        if (fileRef.current) fileRef.current.value = '';
+        setFileName(null);
+      } catch (err) {
+        pushToast(err instanceof Error ? err.message : 'Upload failed — try again.', 'warning');
+      } finally {
+        setUploading(false);
       }
-      const rowCount = countDataRows(text);
-      setUploads((prev) => [{ id: `up-${Date.now()}`, filename: file.name, dataType, project: projectLabel, rowCount }, ...prev]);
-      pushToast(`${file.name} received — ${rowCount} rows queued for review.`, 'success');
-      if (fileRef.current) fileRef.current.value = '';
-      setFileName(null);
     };
     reader.readAsText(file);
   };
@@ -107,14 +72,14 @@ export function BulkUpload({ projects, pushToast }: { projects: Project[]; pushT
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, ...sectionCardTitle }}>
           File details
           <InfoTip label="How this works" width={320}>
-            SPIMS matches columns by exact name — it doesn't yet interpret arbitrary spreadsheet layouts, so the file needs to follow one of the templates below. The file is validated and queued for a Project Manager to review; it does not write directly into SPIMS records yet. These templates are a placeholder scope until Seplat provides their own field list.
+            SPIMS matches columns by exact name — it doesn't yet interpret arbitrary spreadsheet layouts, so the file needs to follow one of the templates below. Validation and row parsing happen server-side. Financial spend rows are written straight into spend records; beneficiary counts, activity logs and project data are parsed and logged for a Project Manager to review, pending a decision on how each should update live records.
           </InfoTip>
         </div>
         <div className="form-grid-3" style={{ marginBottom: 16 }}>
           <div style={formField}>
             <label style={label}>Data type</label>
-            <select style={input} value={dataType} onChange={(e) => setDataType(e.target.value as (typeof DATA_TYPES)[number])}>
-              {DATA_TYPES.map((t) => (
+            <select style={input} value={dataType} onChange={(e) => setDataType(e.target.value as BulkUploadDataType)}>
+              {BULK_UPLOAD_DATA_TYPES.map((t) => (
                 <option key={t}>{t}</option>
               ))}
             </select>
@@ -142,10 +107,10 @@ export function BulkUpload({ projects, pushToast }: { projects: Project[]; pushT
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-          <button onClick={handleUpload} style={primaryBtn}>
-            Upload file →
+          <button onClick={handleUpload} disabled={uploading} style={{ ...primaryBtn, opacity: uploading ? 0.7 : 1 }}>
+            {uploading ? 'Uploading…' : 'Upload file →'}
           </button>
-          <button onClick={() => downloadTemplate(TEMPLATES[dataType])} style={secondaryBtn}>
+          <button onClick={() => downloadTemplate(UPLOAD_TEMPLATES[dataType])} style={secondaryBtn}>
             Download {dataType.toLowerCase()} template
           </button>
           {fileName && <span style={{ fontSize: 12.5, color: 'var(--muted)' }}>{fileName} selected</span>}
@@ -155,8 +120,8 @@ export function BulkUpload({ projects, pushToast }: { projects: Project[]; pushT
       <div style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: 16, padding: '24px 26px', marginBottom: 18 }}>
         <div style={sectionCardTitle}>Templates for each data type</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {DATA_TYPES.map((t, i) => {
-            const tpl = TEMPLATES[t];
+          {BULK_UPLOAD_DATA_TYPES.map((t, i) => {
+            const tpl = UPLOAD_TEMPLATES[t];
             return (
               <div
                 key={t}
@@ -167,7 +132,7 @@ export function BulkUpload({ projects, pushToast }: { projects: Project[]; pushT
                   gap: 14,
                   flexWrap: 'wrap',
                   paddingBottom: 14,
-                  borderBottom: i === DATA_TYPES.length - 1 ? 'none' : '1px solid var(--line)',
+                  borderBottom: i === BULK_UPLOAD_DATA_TYPES.length - 1 ? 'none' : '1px solid var(--line)',
                 }}
               >
                 <div style={{ flex: 1, minWidth: 260 }}>
@@ -199,7 +164,7 @@ export function BulkUpload({ projects, pushToast }: { projects: Project[]; pushT
                 <div style={{ fontSize: 12, color: 'var(--muted)' }}>{u.dataType} · {u.project} · {u.rowCount} rows</div>
               </div>
               <span style={{ fontSize: 11.5, fontWeight: 600, padding: '4px 11px', borderRadius: 20, background: 'rgba(43,76,155,0.12)', color: '#2B4C9B' }}>
-                Queued for review
+                {u.status}
               </span>
             </div>
           ))}

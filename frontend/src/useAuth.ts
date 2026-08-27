@@ -1,39 +1,44 @@
 import { useEffect, useState } from 'react';
-import { DEMO_ACCOUNTS } from './data/accounts';
 import type { Role } from './types';
 
-const STORAGE_KEY = 'spims_auth_v1';
-
-function load(): Role | null {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw === 'exec' || raw === 'manager' || raw === 'field' || raw === 'relations') return raw;
-  } catch {
-    // ignore corrupt storage
-  }
-  return null;
+export interface AuthUser {
+  id: string;
+  email: string;
+  name: string;
+  role: Role;
+  roleLabel: string;
+  initials: string;
 }
 
 export function useAuth() {
-  const [role, setRole] = useState<Role | null>(() => load());
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    try {
-      if (role) localStorage.setItem(STORAGE_KEY, role);
-      else localStorage.removeItem(STORAGE_KEY);
-    } catch {
-      // storage unavailable — proceed without persistence
-    }
-  }, [role]);
+    fetch('/api/auth/me', { credentials: 'include' })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => setUser(data?.user ?? null))
+      .catch(() => setUser(null))
+      .finally(() => setLoading(false));
+  }, []);
 
-  const login = (email: string, password: string): boolean => {
-    const account = DEMO_ACCOUNTS.find((a) => a.email.toLowerCase() === email.trim().toLowerCase() && a.password === password);
-    if (!account) return false;
-    setRole(account.role);
+  const login = async (email: string, password: string): Promise<boolean> => {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+    if (!res.ok) return false;
+    const data = await res.json();
+    setUser(data.user);
     return true;
   };
 
-  const logout = () => setRole(null);
+  const logout = async () => {
+    await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+    setUser(null);
+  };
 
-  return { role, login, logout };
+  return { user, loading, login, logout };
 }

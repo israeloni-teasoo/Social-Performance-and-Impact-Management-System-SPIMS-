@@ -4,36 +4,78 @@ An implementation of the SPIMS platform designed for Teasoo Consulting / Seplat 
 
 SPIMS moves social-investment reporting from a spend register to an output → outcome → impact chain, with one dataset that produces both a Nigerian local-compliance report (NCDMB/PIA/NUPRC) and a global ESG report (GRI/IFRS/SDG). It has four personas — **Executive**, **Project Manager**, **Field Officer**, and **Community Relations** — each with their own workspace. The sign-in screen lists a demo account for each persona.
 
-**Live demo**: once GitHub Pages finishes deploying from `main`, this runs at `https://<owner>.github.io/<repo>/` (check the repo's **Settings → Pages** or the **Actions** tab for the exact URL and deploy status).
+**Live demo (frontend only, pre-backend)**: `https://<owner>.github.io/<repo>/` via GitHub Pages — see [Versions](#versions) below for why this no longer matches `main`.
 
 ## Stack
 
-This is a **standalone front-end** — React + TypeScript + Vite, no backend or database. All data (projects, communities, indicators, reports, stakeholders, tasks, approvals, evidence) is seeded mock data drawn from Seplat's real programmes (STEP, PEARLs, Eye Can See, YEP, etc.), matching the original design's scope of a front-end-complete interactive prototype.
+This is now a real full-stack app, not a static prototype:
 
-Approvals, targets, team members, tasks, stakeholders, report comments, and the signed-in session all run client-side and persist to the browser's `localStorage`, so they survive a page reload but are local to your browser (not shared across devices/users). Styling matches the original design system (navy `#111C55` / crimson `#E31A38` / Poppins).
+- **Frontend** — React + TypeScript + Vite (`frontend/`).
+- **API** — TypeScript serverless functions (`api/`), sharing handler logic with a local Express dev server (`server/devServer.ts`) so the same code runs in dev and in production.
+- **Database** — PostgreSQL via [Prisma](https://www.prisma.io) (`prisma/schema.prisma`). All portfolio data (projects, impacts, communities, indicators, reports, stakeholders, tasks, team, approvals, targets, spend, bulk uploads) lives here — nothing is bundled seed data in the shipped app anymore.
+- **Auth** — real sessions: bcrypt-hashed passwords, signed httpOnly JWT cookies. The four demo accounts are seeded users, not a client-side allow-list.
+- **Claude** — `/api/reports/generate-preview` calls the Anthropic API server-side to draft a slide outline from a report's compiled content (the "Slide preview" button in Reports & Exports). Requires `ANTHROPIC_API_KEY`; degrades to a clear error if it's not set, rather than failing silently.
+
+Styling matches the original design system (navy `#111C55` / crimson `#E31A38` / Poppins).
 
 ## Project layout
 
 ```
-frontend/   React app — views/, components/, data/seed.ts, useAuth.ts
-chats/      Original design conversation transcripts (provenance)
-project/    Original Claude Design HTML/CSS/JS handoff bundle (reference only, not built/served)
-.github/    GitHub Actions workflow that builds and deploys frontend/ to GitHub Pages on push to main
+frontend/         React app — views/, components/, useAuth.ts, useAppData.ts, api.ts
+server/           Shared backend logic
+  handlers/       Framework-agnostic request handlers (one file per resource)
+  lib/            db (Prisma client), auth (JWT/bcrypt), session (cookies), csv
+  devServer.ts    Express server for local dev — mounts the same handlers as api/
+api/              Vercel serverless functions — thin wrappers around server/handlers
+prisma/           schema.prisma + seed.ts (seeds from frontend/src/data/seed.ts + accounts.ts)
+chats/            Original design conversation transcripts (provenance)
+project/          Original Claude Design HTML/CSS/JS handoff bundle (reference only)
+.github/          GitHub Actions workflow (deploys frontend/ only — see Versions)
+vercel.json       Build config for deploying frontend + api/ together on Vercel
 ```
 
 ## Running it locally
 
+Requires a local PostgreSQL instance (`postgresql://localhost:5432` by default).
+
 ```bash
-cd frontend
+# 1. Install backend deps at the repo root, and frontend deps separately
 npm install
-npm run dev      # http://localhost:5173
+cd frontend && npm install && cd ..
+
+# 2. Configure environment
+cp .env.example .env
+# .env needs: DATABASE_URL (point it at your local Postgres), JWT_SECRET (any random
+# string — the file has a one-liner to generate one), ANTHROPIC_API_KEY (optional,
+# only needed for the Claude slide-preview feature)
+
+# 3. Create the schema and seed demo data
+npx prisma migrate dev
+npm run prisma:seed
+
+# 4. Run both dev servers (in separate terminals)
+npm run dev:api              # API on http://localhost:8787
+cd frontend && npm run dev   # Frontend on http://localhost:5173, proxies /api to :8787
 ```
 
-No environment variables, no database, no backend process required.
+Sign in with any of the four seeded demo accounts (shown on the sign-in screen — passwords are also visible in `frontend/src/data/accounts.ts`, which is what `prisma/seed.ts` hashes and loads).
+
+## Deploying to production
+
+The target setup is **Vercel** (hosts the frontend build and the `api/` functions together, one deploy) **+ Neon** (serverless Postgres) **+ an Anthropic API key**.
+
+1. **Database**: create a project at [neon.tech](https://neon.tech), copy its connection string.
+2. **Vercel**: import this repo as a new Vercel project. `vercel.json` at the repo root already points it at `frontend/` for the build output and auto-detects `api/` for the serverless functions — no manual config needed there.
+3. **Environment variables** (Vercel project → Settings → Environment Variables):
+   - `DATABASE_URL` — the Neon connection string from step 1.
+   - `JWT_SECRET` — a random 64-char hex string (`node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`).
+   - `ANTHROPIC_API_KEY` — from [console.anthropic.com](https://console.anthropic.com) → API Keys (a developer/billing account, separate from a claude.ai login — add a payment method under Billing first). Omit this and the app still works; the Claude preview button just returns a clear "not configured" message instead of crashing.
+4. **Deploy**. `vercel.json`'s build command runs `prisma migrate deploy` against `DATABASE_URL` before building, so the schema is applied automatically.
+5. **Seed the production database once**, from your machine, pointed at the Neon connection string: `DATABASE_URL="<neon-url>" npm run prisma:seed`.
 
 ## What's implemented
 
-- **Executive**: Dashboard, Project Portfolio, Impact Chain, Communities, Reports & Exports, Targets, Bulk Upload.
+- **Executive**: Dashboard, Project Portfolio, Impact Chain, Communities, Reports & Exports (with Claude slide preview), Targets, Bulk Upload.
 - **Manager**: My Projects, New Project (intake form), Approvals Queue, My Team.
 - **Field Officer**: My Tasks, Log Activity, Evidence Repository.
 - **Community Relations**: Stakeholder Register, Communities.
@@ -41,24 +83,20 @@ No environment variables, no database, no backend process required.
 
 ## Versions
 
-- **`main`** — the current, actively developed build (v2 onward).
-- **`v1-archive`** branch — a frozen snapshot of v1 (the state reviewed with Seplat before the 26 Aug 2026 feedback round), preserved for reference/rollback. It is not deployed; `main` is what's live on GitHub Pages.
+- **`main`** — the current, actively developed build, now backed by a real database and API (see Stack above).
+- **GitHub Pages** (the `.github/workflows` deploy target) only builds `frontend/` as a static site — it has **no database or API to talk to**, so a Pages deploy of the current `main` won't function past the sign-in screen. Pages was the right target for the earlier static-prototype phase of this project; it isn't anymore. Point deployment at Vercel (see above) going forward, or repurpose/remove the Pages workflow.
+- **`v1-archive`** branch — a frozen snapshot of the original v1 static prototype (state reviewed with Seplat before the 26 Aug 2026 feedback round), preserved for reference/rollback.
 
 ## Roadmap
 
-- **PowerPoint export with real charts** (not flattened text) — planned for Phase 2, generated using Claude.
+- **PowerPoint file export** — the Claude-generated slide *outline* exists (Reports & Exports → Preview report → Slide preview); turning that into an actual downloadable `.pptx` with real chart graphics is the remaining piece.
+- **Deeper bulk-upload ingestion** — Financial spend CSVs are parsed and written straight into spend records. Beneficiary counts, activity logs, and project master data are validated and parsed server-side but only logged as a reviewable upload (`BulkUpload` table) rather than written into live project/task records yet — that needs a decision on aggregation rules before it's safe to automate.
+- **Real SROI / compliance calculation** — both are still illustrative figures with a documented intended methodology (see the ⓘ tooltips on the Executive Dashboard), not computed from the data now sitting in Postgres.
 - **ESG-Horizon "Social" module integration** — Teasoo's existing ESG-Horizon reporting/sustainability platform will eventually absorb this Social pillar; noted here for continuity, not yet started.
-- Report structure for the flagship "Social Performance Report" is aligned to Seplat's actual published annual report (Overview → Our Impact → Our Communities → Our People); the "Our People" section is intentionally a stub pending HR/HSE/environmental data sources SPIMS doesn't yet track.
+- "Our People" section of the flagship report (health/safety/D&I/environment) is intentionally a stub pending HR/HSE/environmental data sources SPIMS doesn't yet track.
 
 ## Known gaps
 
-- Sign-in is a hardcoded demo-account allow-list checked client-side (`data/accounts.ts`); there's no server-side access control since there's no server. A production deployment needs real authentication and server-enforced role permissions.
-- Bulk Upload (Executive role) validates a CSV client-side and queues it for review, but doesn't yet parse rows into live SPIMS records — that requires a backend import pipeline.
-- Evidence "Upload" is presentational (no real file upload/storage).
-- SROI and the "Are we compliant?" panel are illustrative placeholders, not computed from live data — see the ⓘ tooltips on the Executive Dashboard for the intended methodology and what's still missing.
-- Data other than approvals, targets, team members, tasks, stakeholders, and report comments (projects, spend, communities, indicators, etc.) is static seed data — editing it elsewhere doesn't persist, though everything editable in the UI persists to the browser's `localStorage`.
-- PowerPoint export is a stub (see Roadmap above); PDF/Excel/Word exports are fully functional, hand-generated client-side with zero dependencies.
-
-## A note on architecture
-
-An earlier version of this build included a real Express + PostgreSQL + Prisma backend with server-enforced role-based access control, so mutations were validated server-side rather than just gated by the UI. That version isn't in this repo (by request, to keep this deployable as a static site with no infrastructure) — if you want a backend brought back for a real multi-user deployment, that's a straightforward re-addition since the frontend's data layer (`data/seed.ts` and the `use*Store.ts` hooks) is a thin, swappable layer designed to be replaced by API calls.
+- Evidence "Upload" is presentational (no real file upload/storage) — it's the one workflow still not backed by a real table.
+- No server-side role enforcement yet beyond "is this a valid session" — a Field Officer's session token could technically call a Manager-only endpoint. Routes don't currently check `role` before acting; that's the next hardening pass before a real multi-tenant deployment.
+- PDF/Excel/Word exports remain hand-generated client-side with zero dependencies (unchanged from the static-prototype version) — they now include the actual compiled report content and the report's scope (project selection + financial year), not just metadata.

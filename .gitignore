@@ -1,4 +1,5 @@
-# The Express + Prisma + PostgreSQL backend built earlier in this session is
-# kept locally for reference but intentionally excluded from this repo per
-# request, so the app stays a zero-infrastructure static site (see README).
-/backend/
+node_modules/
+dist/
+.env
+.env.local
+*.log
