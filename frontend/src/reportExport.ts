@@ -1,3 +1,4 @@
+import type { ReportSection } from './reportContent';
 import type { Project, ProjectImpact, Report } from './types';
 
 function todayLabel(): string {
@@ -38,7 +39,7 @@ function wrap(text: string, width: number): string[] {
   return lines;
 }
 
-function downloadBlob(blob: Blob, filename: string) {
+export function downloadBlob(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
@@ -92,7 +93,7 @@ function buildPdfFromLines(title: string, bodyLines: string[]): string {
   return pdf;
 }
 
-function buildCsvFromRows(rows: string[][]): string {
+export function buildCsvFromRows(rows: string[][]): string {
   const esc = (s: string) => `"${s.replace(/"/g, '""')}"`;
   return rows.map((r) => r.map(esc).join(',')).join('\r\n');
 }
@@ -107,40 +108,56 @@ function slug(name: string): string {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 }
 
-function reportBodyLines(report: Report): string[] {
-  return [
-    `Lens: ${report.lens}`,
+function reportBodyLines(report: Report, sections: ReportSection[], fy: string, scopeNote: string): string[] {
+  const lines = [
+    `Lens: ${report.lens} · Financial year: ${fy}`,
     '',
     ...wrap(toAscii(report.desc), 88),
     '',
+    toAscii(scopeNote),
+    '',
+  ];
+  for (const section of sections) {
+    lines.push(toAscii(section.heading).toUpperCase());
+    for (const line of section.lines) lines.push(...wrap(`- ${toAscii(line)}`, 88));
+    lines.push('');
+  }
+  lines.push(
     `Generated: ${todayLabel()}`,
     `Last updated: ${report.updated}`,
     '',
     'This export is a Phase 1 illustrative summary generated from SPIMS mock data.',
     'Replace with live figures once connected to Seplat production data.',
-  ];
+  );
+  return lines;
 }
 
-export function exportReport(report: Report, format: 'pdf' | 'excel' | 'word'): string {
+export function exportReport(report: Report, format: 'pdf' | 'excel' | 'word', sections: ReportSection[], fy: string, scopeNote: string): string {
   const base = slug(report.name);
   if (format === 'pdf') {
-    downloadBlob(new Blob([buildPdfFromLines(report.name, reportBodyLines(report))], { type: 'application/pdf' }), `${base}.pdf`);
+    downloadBlob(new Blob([buildPdfFromLines(report.name, reportBodyLines(report, sections, fy, scopeNote))], { type: 'application/pdf' }), `${base}.pdf`);
     return `${base}.pdf`;
   }
   if (format === 'excel') {
-    const rows = [
+    const rows: string[][] = [
       ['Field', 'Value'],
       ['Report name', report.name],
       ['Lens', report.lens],
+      ['Financial year', fy],
       ['Description', report.desc],
+      ['Scope', scopeNote],
       ['Last updated', report.updated],
       ['Generated on', todayLabel()],
       ['Data status', 'Illustrative - Phase 1 mock data, replace with live Seplat figures'],
     ];
+    for (const section of sections) {
+      rows.push([section.heading, '']);
+      for (const line of section.lines) rows.push(['', line]);
+    }
     downloadBlob(new Blob([buildCsvFromRows(rows)], { type: 'text/csv' }), `${base}.csv`);
     return `${base}.csv`;
   }
-  downloadBlob(new Blob([buildRtfFromLines(report.name, reportBodyLines(report))], { type: 'application/rtf' }), `${base}.rtf`);
+  downloadBlob(new Blob([buildRtfFromLines(report.name, reportBodyLines(report, sections, fy, scopeNote))], { type: 'application/rtf' }), `${base}.rtf`);
   return `${base}.rtf`;
 }
 

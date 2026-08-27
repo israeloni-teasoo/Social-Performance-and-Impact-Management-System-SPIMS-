@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { InfoTip } from '../components/Tooltip';
-import { formField, h1, input, label, primaryBtn, sectionCardTitle, subtitle } from '../ui';
+import { buildCsvFromRows, downloadBlob } from '../reportExport';
+import { formField, h1, input, label, primaryBtn, secondaryBtn, sectionCardTitle, subtitle } from '../ui';
 import type { Project } from '../types';
 import type { ToastTone } from '../useToastQueue';
 
@@ -12,6 +13,49 @@ interface UploadRecord {
   dataType: string;
   project: string;
   rowCount: number;
+}
+
+interface UploadTemplate {
+  filename: string;
+  columns: string[];
+  example: string[];
+  note: string;
+}
+
+const TEMPLATES: Record<(typeof DATA_TYPES)[number], UploadTemplate> = {
+  'Beneficiary counts': {
+    filename: 'spims-template-beneficiary-counts.csv',
+    columns: ['project_code', 'activity_date', 'community', 'total_reached', 'female', 'male', 'youth_under_35', 'pwd'],
+    example: ['STEP', '2026-07-06', 'Sapele, Delta', '42', '24', '18', '31', '1'],
+    note: 'One row per activity/date. Disaggregation columns should add up to total_reached.',
+  },
+  'Activity logs': {
+    filename: 'spims-template-activity-logs.csv',
+    columns: ['project_code', 'activity_date', 'activity_type', 'location', 'total_reached', 'female', 'male', 'youth_under_35', 'pwd', 'site_notes'],
+    example: ['STEP', '2026-07-06', 'Training / workshop', 'Sapele — 5.8904, 5.6767', '42', '24', '18', '31', '1', 'Full-day literacy methods training delivered.'],
+    note: 'Mirrors the fields on the Log Activity form — activity_type should match one of the options there.',
+  },
+  'Financial spend': {
+    filename: 'spims-template-financial-spend.csv',
+    columns: ['project_code', 'period_month', 'pillar', 'amount_ngn', 'funding_source', 'notes'],
+    example: ['WATER', '2026-07', 'Infrastructure', '43000000', 'PIA HCDT — 3% OpEx', 'Q3 borehole works'],
+    note: 'period_month as YYYY-MM. amount_ngn as a plain number, no currency symbol or commas.',
+  },
+  'Project master data': {
+    filename: 'spims-template-project-master-data.csv',
+    columns: ['project_id', 'title', 'pillar', 'owner', 'community', 'lga', 'state', 'gps_coordinates', 'start_date', 'end_date', 'budget_ngn', 'funding_source', 'contractor', 'implementing_ngo'],
+    example: ['SPL-2026-048', 'Solar Skills Academy — Cohort 3', 'Economic Empowerment', 'Tunde Bello', 'Sapele', 'Sapele LGA', 'Delta', '5.8904, 5.6767', '2026-09-01', '2027-06-30', '180000000', 'PIA HCDT — 3% OpEx', 'Bright Energy Ltd', 'C4C Foundation'],
+    note: 'Mirrors the fields on the New Project intake form.',
+  },
+};
+
+function downloadTemplate(t: UploadTemplate) {
+  const csv = buildCsvFromRows([t.columns, t.example]);
+  downloadBlob(new Blob([csv], { type: 'text/csv' }), t.filename);
+}
+
+function parseHeaderRow(firstLine: string): string[] {
+  return firstLine.split(',').map((cell) => cell.trim().replace(/^"|"$/g, '').replace(/""/g, '"'));
 }
 
 function countDataRows(text: string): number {
@@ -36,7 +80,16 @@ export function BulkUpload({ projects, pushToast }: { projects: Project[]; pushT
     }
     const reader = new FileReader();
     reader.onload = () => {
-      const rowCount = countDataRows(String(reader.result ?? ''));
+      const text = String(reader.result ?? '');
+      const firstLine = text.split(/\r?\n/)[0] ?? '';
+      const expected = TEMPLATES[dataType].columns;
+      const actual = parseHeaderRow(firstLine);
+      const matches = expected.length === actual.length && expected.every((col, i) => col.toLowerCase() === actual[i]?.toLowerCase());
+      if (!matches) {
+        pushToast(`Columns don't match the ${dataType.toLowerCase()} template. Expected: ${expected.join(', ')}. Download the template and try again.`, 'warning');
+        return;
+      }
+      const rowCount = countDataRows(text);
       setUploads((prev) => [{ id: `up-${Date.now()}`, filename: file.name, dataType, project: projectLabel, rowCount }, ...prev]);
       pushToast(`${file.name} received — ${rowCount} rows queued for review.`, 'success');
       if (fileRef.current) fileRef.current.value = '';
@@ -53,8 +106,8 @@ export function BulkUpload({ projects, pushToast }: { projects: Project[]; pushT
       <div style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: 16, padding: '24px 26px', marginBottom: 18 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, ...sectionCardTitle }}>
           File details
-          <InfoTip label="How this works">
-            The file is validated and queued for a Project Manager to review — it does not write directly into SPIMS records yet. Row-by-row import into live data is planned alongside the reporting API described in Help &amp; Standards.
+          <InfoTip label="How this works" width={320}>
+            SPIMS matches columns by exact name — it doesn't yet interpret arbitrary spreadsheet layouts, so the file needs to follow one of the templates below. The file is validated and queued for a Project Manager to review; it does not write directly into SPIMS records yet. These templates are a placeholder scope until Seplat provides their own field list.
           </InfoTip>
         </div>
         <div className="form-grid-3" style={{ marginBottom: 16 }}>
@@ -88,11 +141,46 @@ export function BulkUpload({ projects, pushToast }: { projects: Project[]; pushT
             />
           </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
           <button onClick={handleUpload} style={primaryBtn}>
             Upload file →
           </button>
+          <button onClick={() => downloadTemplate(TEMPLATES[dataType])} style={secondaryBtn}>
+            Download {dataType.toLowerCase()} template
+          </button>
           {fileName && <span style={{ fontSize: 12.5, color: 'var(--muted)' }}>{fileName} selected</span>}
+        </div>
+      </div>
+
+      <div style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: 16, padding: '24px 26px', marginBottom: 18 }}>
+        <div style={sectionCardTitle}>Templates for each data type</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {DATA_TYPES.map((t, i) => {
+            const tpl = TEMPLATES[t];
+            return (
+              <div
+                key={t}
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'flex-start',
+                  gap: 14,
+                  flexWrap: 'wrap',
+                  paddingBottom: 14,
+                  borderBottom: i === DATA_TYPES.length - 1 ? 'none' : '1px solid var(--line)',
+                }}
+              >
+                <div style={{ flex: 1, minWidth: 260 }}>
+                  <div style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--navy)', marginBottom: 4 }}>{t}</div>
+                  <div style={{ fontSize: 11.5, color: 'var(--muted)', fontFamily: 'monospace', marginBottom: 4, wordBreak: 'break-word' }}>{tpl.columns.join(', ')}</div>
+                  <div style={{ fontSize: 12, color: 'var(--muted)' }}>{tpl.note}</div>
+                </div>
+                <button onClick={() => downloadTemplate(tpl)} style={{ ...secondaryBtn, flexShrink: 0 }}>
+                  Download →
+                </button>
+              </div>
+            );
+          })}
         </div>
       </div>
 

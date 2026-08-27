@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { buildReportSections } from '../reportContent';
 import { REPORT_LENS_COLORS } from '../ui';
 import { InfoTip } from './Tooltip';
+import type { ReportSection } from '../reportContent';
 import type { Project, ProjectImpact, Report, ReportComment } from '../types';
 
 const FORMATS: { key: 'pdf' | 'excel' | 'word' | 'powerpoint'; label: string }[] = [
@@ -27,13 +28,27 @@ export function ReportPreviewModal({
   comments: ReportComment[];
   canComment: boolean;
   onClose: () => void;
-  onFormat: (report: Report, format: (typeof FORMATS)[number]['key']) => void;
+  onFormat: (report: Report, format: (typeof FORMATS)[number]['key'], sections: ReportSection[], fy: string, scopeNote: string) => void;
   onComment: (text: string, requestsCorrection: boolean) => void;
 }) {
-  const sections = buildReportSections(report, projects, impacts);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set(projects.map((p) => p.id)));
+  const [fy, setFy] = useState('FY2026');
+  const scopedProjects = projects.filter((p) => selectedIds.has(p.id));
+  const sections = buildReportSections(report, scopedProjects, impacts);
   const [tagBg, tagFg] = REPORT_LENS_COLORS[report.lens] ?? ['#eee', '#555'];
   const [requestsCorrection, setRequestsCorrection] = useState(false);
   const commentRef = useRef<HTMLTextAreaElement>(null);
+
+  const toggleProject = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const scopeNote = `Scope: ${fy} · ${scopedProjects.length} of ${projects.length} projects included${scopedProjects.length < projects.length ? ' (' + scopedProjects.map((p) => p.code).join(', ') + ')' : ''}.`;
 
   const submitComment = () => {
     const text = commentRef.current?.value.trim();
@@ -93,6 +108,58 @@ export function ReportPreviewModal({
         </div>
 
         <div style={{ padding: '22px 28px' }}>
+          <div style={{ background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 14, padding: '16px 18px', marginBottom: 22 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 700, color: 'var(--navy)', marginBottom: 12 }}>
+              Report scope
+              <InfoTip label="How scope affects this report" width={300}>
+                Unchecking a project removes it from every section that lists individual projects, and any standard whose only example was that project falls back to a company-wide reference. Portfolio-level aggregate figures (total spend, SROI, compliance %) still reflect the full FY26 portfolio in this prototype — recomputing those from a subset needs a live calculation engine, not yet built.
+              </InfoTip>
+            </div>
+
+            <div style={{ marginBottom: 14 }}>
+              <label style={{ fontSize: 11.5, fontWeight: 600, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: 6 }}>
+                Financial year
+              </label>
+              <select
+                value={fy}
+                onChange={(e) => setFy(e.target.value)}
+                style={{ fontFamily: 'inherit', fontSize: 13, padding: '7px 12px', border: '1px solid var(--line)', borderRadius: 8, background: '#fff', color: 'var(--ink)', width: 160 }}
+              >
+                <option>FY2026</option>
+              </select>
+              <span style={{ fontSize: 11.5, color: 'var(--muted)', marginLeft: 10 }}>Earlier years aren't in this dataset yet.</span>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+              <label style={{ fontSize: 11.5, fontWeight: 600, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Projects covered ({scopedProjects.length} of {projects.length})
+              </label>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button
+                  onClick={() => setSelectedIds(new Set(projects.map((p) => p.id)))}
+                  style={{ fontFamily: 'inherit', fontSize: 11.5, fontWeight: 600, color: 'var(--navy)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                >
+                  Select all
+                </button>
+                <span style={{ color: 'var(--line)' }}>·</span>
+                <button
+                  onClick={() => setSelectedIds(new Set())}
+                  style={{ fontFamily: 'inherit', fontSize: 11.5, fontWeight: 600, color: 'var(--navy)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                >
+                  Clear
+                </button>
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))', gap: 8 }}>
+              {projects.map((p) => (
+                <label key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12.5, color: 'var(--ink)', cursor: 'pointer' }}>
+                  <input type="checkbox" checked={selectedIds.has(p.id)} onChange={() => toggleProject(p.id)} />
+                  {p.name}
+                </label>
+              ))}
+            </div>
+          </div>
+
           {sections.map((section) => (
             <div key={section.heading} style={{ marginBottom: 22 }}>
               <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--navy)', marginBottom: 10, paddingBottom: 8, borderBottom: '1px solid var(--line)' }}>
@@ -114,7 +181,7 @@ export function ReportPreviewModal({
               {FORMATS.map((f) => (
                 <button
                   key={f.key}
-                  onClick={() => onFormat(report, f.key)}
+                  onClick={() => onFormat(report, f.key, sections, fy, scopeNote)}
                   style={{
                     fontFamily: 'inherit',
                     fontSize: 12.5,

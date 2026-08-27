@@ -38,16 +38,21 @@ export function buildReportSections(report: Report, projects: Project[], impacts
         },
         {
           heading: 'Our Communities — flagship corporate social investment programmes',
-          lines: projects.map((p) => {
-            const imp = impacts[p.code];
-            return imp ? `${p.name} — ${imp.outputHeadline}` : `${p.name} — ${p.output}`;
-          }),
+          lines:
+            projects.length > 0
+              ? projects.map((p) => {
+                  const imp = impacts[p.code];
+                  return imp ? `${p.name} — ${imp.outputHeadline}` : `${p.name} — ${p.output}`;
+                })
+              : ['No projects are in the selected report scope.'],
         },
         {
           heading: 'Our Communities — Host Community Development Trust (PIA)',
           lines: [
             'Status: funded and reconciled for FY26.',
-            `${byCode('WATER')?.name ?? 'Community Water Scheme'} is funded directly from this allocation — ${impacts.WATER?.outputHeadline ?? ''}, budget ${byCode('WATER')?.budget ?? ''}.`,
+            byCode('WATER')
+              ? `${byCode('WATER')!.name} is funded directly from this allocation — ${impacts.WATER?.outputHeadline ?? ''}, budget ${byCode('WATER')!.budget}.`
+              : 'Community Water Scheme is excluded from the selected report scope.',
           ],
         },
         {
@@ -74,7 +79,8 @@ export function buildReportSections(report: Report, projects: Project[], impacts
         },
       ];
 
-    case 'NCDMB Compliance Return':
+    case 'NCDMB Compliance Return': {
+      const inScope = projects.filter((p) => NCDMB_PROJECT_CODES.includes(p.code));
       return [
         {
           heading: 'Nigerian content compliance',
@@ -82,25 +88,33 @@ export function buildReportSections(report: Report, projects: Project[], impacts
         },
         {
           heading: 'Projects contributing to this return',
-          lines: NCDMB_PROJECT_CODES.map((code) => {
-            const p = byCode(code);
-            const imp = impacts[code];
-            return p && imp ? `${p.name} (${p.code}) — ${imp.outputHeadline}` : code;
-          }),
+          lines:
+            inScope.length > 0
+              ? inScope.map((p) => {
+                  const imp = impacts[p.code];
+                  return imp ? `${p.name} (${p.code}) — ${imp.outputHeadline}` : `${p.name} (${p.code})`;
+                })
+              : ['No NCDMB-relevant projects are in the selected scope.'],
         },
       ];
+    }
 
-    case 'PIA HCDT Statement':
+    case 'PIA HCDT Statement': {
+      const water = byCode('WATER');
       return [
         {
           heading: 'Host Community Development Trust — 3% OpEx',
-          lines: ['Status: funded and reconciled for FY26.', `${byCode('WATER')?.name ?? 'Community Water Scheme'} is funded directly from this allocation — ${impacts.WATER?.outputHeadline ?? ''}, budget ${byCode('WATER')?.budget ?? ''}.`],
+          lines: [
+            'Status: funded and reconciled for FY26.',
+            water ? `${water.name} is funded directly from this allocation — ${impacts.WATER?.outputHeadline ?? ''}, budget ${water.budget}.` : 'Community Water Scheme is excluded from the selected report scope.',
+          ],
         },
         {
           heading: 'Community investment by state',
           lines: ['Edo: 58%', 'Delta: 34%', 'Imo: 8%'],
         },
       ];
+    }
 
     case 'SDG Contribution Report':
       return [
@@ -117,10 +131,13 @@ export function buildReportSections(report: Report, projects: Project[], impacts
       return [
         {
           heading: 'What we did in your community this year',
-          lines: projects.map((p) => {
-            const imp = impacts[p.code];
-            return imp ? `${p.name}: ${imp.outputHeadline}. ${imp.outcome}` : `${p.name}: ${p.output}`;
-          }),
+          lines:
+            projects.length > 0
+              ? projects.map((p) => {
+                  const imp = impacts[p.code];
+                  return imp ? `${p.name}: ${imp.outputHeadline}. ${imp.outcome}` : `${p.name}: ${p.output}`;
+                })
+              : ['No projects are in the selected report scope.'],
         },
         {
           heading: 'What communities told us',

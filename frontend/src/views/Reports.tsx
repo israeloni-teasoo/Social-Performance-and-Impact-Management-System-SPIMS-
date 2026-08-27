@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ReportPreviewModal } from '../components/ReportPreviewModal';
 import { exportReport } from '../reportExport';
 import { card, h1, pill, REPORT_LENS_COLORS, subtitle } from '../ui';
+import type { ReportSection } from '../reportContent';
 import type { Project, ProjectImpact, Report, ReportComment, Role } from '../types';
 import type { ToastTone } from '../useToastQueue';
 
@@ -27,12 +28,12 @@ export function Reports({
   const [previewing, setPreviewing] = useState<Report | null>(null);
   const canComment = role === 'manager';
 
-  const handleFormat = (report: Report, format: 'pdf' | 'excel' | 'word' | 'powerpoint') => {
+  const handleFormat = (report: Report, format: 'pdf' | 'excel' | 'word' | 'powerpoint', sections: ReportSection[], fy: string, scopeNote: string) => {
     if (format === 'powerpoint') {
       pushToast('PowerPoint export — with charts kept as real graphics, not flattened text — is planned for Phase 2 using Claude to generate the slides. Use PDF or Word for now.', 'info');
       return;
     }
-    const filename = exportReport(report, format);
+    const filename = exportReport(report, format, sections, fy, scopeNote);
     pushToast(`Downloaded ${filename}.`, 'success');
   };
 
