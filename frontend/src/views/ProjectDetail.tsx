@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ImpactStageCard as StageCard } from '../components/ImpactStageCard';
 import { ProvenanceTip } from '../components/ImpactExplainers';
 import { ImpactPanel } from '../components/ImpactPanel';
+import { InfoTip } from '../components/Tooltip';
 import { exportProjectReport } from '../reportExport';
 import { h1, PILLAR_COLORS, pill, primaryBtn, STATUS_COLORS } from '../ui';
 import type { Project, ProjectImpact } from '../types';
@@ -107,7 +108,15 @@ export function ProjectDetail({
           </span>
         </div>
         <div style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: 16, padding: '20px 22px' }}>
-          <div style={{ fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Est. SROI</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+            Est. SROI
+            <InfoTip label="How SROI is calculated" width={300}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div>Social value created ÷ amount invested. A financial proxy is assigned to this project's outcome, then adjusted for deadweight, attribution and drop-off.</div>
+                <div style={{ color: '#8A5A0B' }}>⚠ Phase 1 illustrative placeholder — the financial proxy for this outcome hasn't been validated by Seplat's M&amp;E team yet.</div>
+              </div>
+            </InfoTip>
+          </div>
           <div style={{ fontSize: 26, fontWeight: 800, color: 'var(--navy)' }}>{impact?.sroi ?? '—'}</div>
         </div>
         <div style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: 16, padding: '20px 22px' }}>
@@ -133,7 +142,12 @@ export function ProjectDetail({
 
           <div className="grid-impact-lower">
             <div style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: 16, padding: '22px 24px' }}>
-              <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--navy)', marginBottom: 18 }}>Progress over time</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 700, color: 'var(--navy)', marginBottom: 18 }}>
+                Progress breakdown
+                <InfoTip label="What this chart shows" width={280}>
+                  Each bar is a milestone or comparison point for this specific project — sometimes a time series (e.g. quarterly figures), sometimes a breakdown by site or cohort. The caption below the chart states exactly what's being compared.
+                </InfoTip>
+              </div>
               <div style={{ display: 'flex', alignItems: 'flex-end', gap: 24, height: 150, paddingBottom: 8 }}>
                 {impact.baseline.map((b, i) => (
                   <div key={b.label} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>

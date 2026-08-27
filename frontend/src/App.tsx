@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { CaseModal } from './components/CaseModal';
 import { Sidebar } from './components/Sidebar';
 import { ToastStack } from './components/ToastStack';
 import { Topbar } from './components/Topbar';
@@ -7,7 +6,6 @@ import { COMMUNITIES, EVIDENCE_ITEMS, INDICATORS, PROJECT_IMPACTS, PROJECTS, REP
 import { CRUMBS, DEFAULT_VIEW_FOR_ROLE, ROLE_USERS } from './roles';
 import type { View } from './types';
 import { useApprovalsStore } from './useApprovalsStore';
-import { useGrievanceStore } from './useGrievanceStore';
 import { useReportCommentsStore } from './useReportCommentsStore';
 import { useStakeholdersStore } from './useStakeholdersStore';
 import { useTargetsStore } from './useTargetsStore';
@@ -15,16 +13,14 @@ import { useTasksStore } from './useTasksStore';
 import { useTeamStore } from './useTeamStore';
 import { useToastQueue } from './useToastQueue';
 import { Approvals } from './views/Approvals';
+import { BulkUpload } from './views/BulkUpload';
 import { Communities } from './views/Communities';
 import { CommunityDetail } from './views/CommunityDetail';
 import { Evidence } from './views/Evidence';
 import { ExecutiveDashboard } from './views/ExecutiveDashboard';
-import { GrievanceCases } from './views/GrievanceCases';
-import { GrievancesExec } from './views/GrievancesExec';
 import { HelpPage } from './views/HelpPage';
 import { ImpactChain } from './views/ImpactChain';
 import { LogActivity } from './views/LogActivity';
-import { LogGrievance } from './views/LogGrievance';
 import { MyProjects } from './views/MyProjects';
 import { MyTasks } from './views/MyTasks';
 import { NewProject } from './views/NewProject';
@@ -43,14 +39,12 @@ const ORG_NAME = 'Seplat Energy Plc';
 export default function App() {
   const { role, login, logout } = useAuth();
   const [view, setViewState] = useState<View>('dashboard');
-  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [projectDetailReturnView, setProjectDetailReturnView] = useState<View>('portfolio');
   const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(null);
 
   const { toasts, push: pushToast, dismiss: dismissToast } = useToastQueue();
-  const { grievances, logGrievance, assign, addNote, resolve, closeCase, escalate } = useGrievanceStore(role ?? 'exec');
   const { approvals, approve, returnItem, addComment: addApprovalComment } = useApprovalsStore(pushToast);
   const { stakeholders, addStakeholder } = useStakeholdersStore(pushToast);
   const { targets, addTarget, closeTarget } = useTargetsStore(pushToast);
@@ -61,7 +55,6 @@ export default function App() {
   useEffect(() => {
     if (role) {
       setViewState(DEFAULT_VIEW_FOR_ROLE[role]);
-      setSelectedId(null);
       setSidebarOpen(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -83,16 +76,8 @@ export default function App() {
     setView('communitydetail');
   };
 
-  const handleLogGrievance = (input: Parameters<typeof logGrievance>[0]) => {
-    const created = logGrievance(input);
-    setView('cases');
-    setSelectedId(created.id);
-  };
-
   if (!role) return <Login onLogin={login} />;
 
-  const selected = grievances.find((g) => g.id === selectedId) ?? null;
-  const gOpen = grievances.filter((g) => g.status === 'Open' || g.status === 'Investigating').length;
   const user = ROLE_USERS[role];
   const selectedProject = PROJECTS.find((p) => p.id === selectedProjectId) ?? null;
   const selectedCommunity = COMMUNITIES.find((c) => c.id === selectedCommunityId) ?? null;
@@ -105,7 +90,6 @@ export default function App() {
         role={role}
         view={view}
         setView={setView}
-        gOpen={gOpen}
         approvalsCount={approvals.length}
         tasksCount={myTasks.length}
         orgName={ORG_NAME}
@@ -137,7 +121,6 @@ export default function App() {
               projects={PROJECTS}
               impacts={PROJECT_IMPACTS}
               communities={COMMUNITIES}
-              grievances={grievances}
               goProjectDetail={(id) => goProjectDetail(id, 'impact')}
             />
           )}
@@ -147,12 +130,10 @@ export default function App() {
               community={selectedCommunity}
               projects={PROJECTS}
               impacts={PROJECT_IMPACTS}
-              grievances={grievances}
               goBack={() => setView('communities')}
               goProjectDetail={(id) => goProjectDetail(id, 'communitydetail')}
             />
           )}
-          {view === 'grievances' && <GrievancesExec grievances={grievances} onOpen={setSelectedId} />}
           {view === 'reports' && (
             <Reports
               reports={REPORTS}
@@ -173,11 +154,10 @@ export default function App() {
           {view === 'mytasks' && <MyTasks tasks={myTasks} goLogActivity={() => setView('logactivity')} onSetStatus={setTaskStatus} />}
           {view === 'logactivity' && <LogActivity goMyTasks={() => setView('mytasks')} pushToast={pushToast} />}
           {view === 'evidence' && <Evidence items={EVIDENCE_ITEMS} goLogActivity={() => setView('logactivity')} />}
-          {view === 'cases' && <GrievanceCases grievances={grievances} onOpen={setSelectedId} goLogGrievance={() => setView('loggrievance')} />}
-          {view === 'loggrievance' && <LogGrievance onCancel={() => setView('cases')} onSubmit={handleLogGrievance} />}
           {view === 'stakeholders' && <StakeholderRegister stakeholders={stakeholders} onAdd={addStakeholder} />}
           {view === 'targets' && <Targets targets={targets} onAdd={addTarget} onClose={closeTarget} pushToast={pushToast} />}
           {view === 'team' && <Team members={members} tasks={tasks} projects={PROJECTS} onInvite={inviteMember} onAssignTask={assignTask} />}
+          {view === 'bulkupload' && <BulkUpload projects={PROJECTS} pushToast={pushToast} />}
           {view === 'help' && <HelpPage projects={PROJECTS} indicators={INDICATORS} goProjectDetail={(id) => goProjectDetail(id, 'help')} />}
           {view === 'projectdetail' && selectedProject && (
             <ProjectDetail
@@ -189,19 +169,6 @@ export default function App() {
           )}
         </main>
       </div>
-
-      {selected && (
-        <CaseModal
-          grievance={selected}
-          role={role}
-          onCloseModal={() => setSelectedId(null)}
-          onAssign={(assignee) => assign(selected.id, assignee)}
-          onAddNote={(note) => addNote(selected.id, note)}
-          onResolve={(resolution) => resolve(selected.id, resolution)}
-          onCloseCase={(satisfaction) => closeCase(selected.id, satisfaction)}
-          onEscalate={() => escalate(selected.id)}
-        />
-      )}
 
       <ToastStack toasts={toasts} onDismiss={dismissToast} />
     </div>

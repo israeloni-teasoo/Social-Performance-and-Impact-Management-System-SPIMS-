@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { h1, input, PILLAR_COLORS, STATUS_COLORS, subtitle } from '../ui';
-import type { Community, Grievance, Project, ProjectImpact } from '../types';
+import type { Community, Project, ProjectImpact } from '../types';
 
 const PILLARS = ['Education', 'Health', 'Infrastructure', 'Economic Emp.'];
 const STATUSES: Project['status'][] = ['On track', 'At risk', 'Delayed'];
@@ -21,13 +21,11 @@ export function ImpactChain({
   projects,
   impacts,
   communities,
-  grievances,
   goProjectDetail,
 }: {
   projects: Project[];
   impacts: Record<string, ProjectImpact>;
   communities: Community[];
-  grievances: Grievance[];
   goProjectDetail: (id: string) => void;
 }) {
   const [pillar, setPillar] = useState('All');
@@ -49,9 +47,6 @@ export function ImpactChain({
   const totalInvestment = filtered.reduce((sum, p) => sum + parseBudgetMillions(p.budget), 0);
   const avgProgress = filtered.length ? Math.round(filtered.reduce((s, p) => s + Number(p.progPct.replace('%', '')), 0) / filtered.length) : 0;
   const communitiesReached = new Set(filtered.flatMap((p) => impacts[p.code]?.communitiesImpacted ?? [])).size;
-  const openGrievances = grievances.filter(
-    (g) => (g.status === 'Open' || g.status === 'Investigating') && (!communityLabel || g.raisedByCommunity === communityLabel),
-  ).length;
 
   const byPillar = PILLARS.map((p) => ({
     name: p,
@@ -149,10 +144,6 @@ export function ImpactChain({
                 </div>
               );
             })}
-          </div>
-          <div style={{ marginTop: 18, paddingTop: 14, borderTop: '1px solid var(--line)', display: 'flex', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: 12.5, color: 'var(--muted)' }}>Open grievances in scope</span>
-            <span style={{ fontSize: 15, fontWeight: 800, color: openGrievances > 0 ? 'var(--accent)' : 'var(--navy)' }}>{openGrievances}</span>
           </div>
         </div>
       </div>

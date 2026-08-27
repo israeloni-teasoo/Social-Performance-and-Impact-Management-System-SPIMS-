@@ -66,7 +66,6 @@ export function Sidebar({
   role,
   view,
   setView,
-  gOpen,
   approvalsCount,
   tasksCount,
   orgName,
@@ -78,7 +77,6 @@ export function Sidebar({
   role: Role;
   view: View;
   setView: (v: View) => void;
-  gOpen: number;
   approvalsCount: number;
   tasksCount: number;
   orgName: string;
@@ -142,9 +140,7 @@ export function Sidebar({
 
             <div style={SECTION_LABEL}>Configure</div>
             <NavButton icon="target" label="Targets" active={view === 'targets'} onClick={() => setView('targets')} />
-
-            <div style={SECTION_LABEL}>Other</div>
-            <NavButton icon="grievances" label="Grievances" active={view === 'grievances'} onClick={() => setView('grievances')} />
+            <NavButton icon="upload" label="Bulk Upload" active={view === 'bulkupload'} onClick={() => setView('bulkupload')} />
           </div>
         )}
 
@@ -166,7 +162,6 @@ export function Sidebar({
             <div style={SECTION_LABEL}>Field work</div>
             <NavButton icon="mytasks" label="My Tasks" active={view === 'mytasks'} onClick={() => setView('mytasks')} badge={tasksCount} />
             <NavButton icon="logactivity" label="Log Activity" active={view === 'logactivity'} onClick={() => setView('logactivity')} />
-            <NavButton icon="loggrievance" label="Log Grievance" active={view === 'loggrievance'} onClick={() => setView('loggrievance')} />
             <div style={SECTION_LABEL}>Repository</div>
             <NavButton icon="evidence" label="Evidence" active={view === 'evidence'} onClick={() => setView('evidence')} />
           </div>
@@ -174,9 +169,6 @@ export function Sidebar({
 
         {role === 'relations' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-            <div style={SECTION_LABEL}>Grievances</div>
-            <NavButton icon="cases" label="Grievance Cases" active={view === 'cases'} onClick={() => setView('cases')} badge={gOpen} />
-            <NavButton icon="loggrievance" label="Log Grievance" active={view === 'loggrievance'} onClick={() => setView('loggrievance')} />
             <div style={SECTION_LABEL}>Engagement</div>
             <NavButton icon="stakeholders" label="Stakeholders" active={view === 'stakeholders'} onClick={() => setView('stakeholders')} />
             <NavButton icon="communities" label="Communities" active={view === 'communities'} onClick={() => setView('communities')} />

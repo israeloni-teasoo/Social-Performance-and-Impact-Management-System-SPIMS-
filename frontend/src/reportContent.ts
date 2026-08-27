@@ -124,7 +124,7 @@ export function buildReportSections(report: Report, projects: Project[], impacts
         },
         {
           heading: 'What communities told us',
-          lines: ['78% of people surveyed said they were satisfied with the programmes reaching their community.', 'Grievances are welcomed via field officers, the phone hotline, walk-in desks or the suggestion box — every case gets a reference number and a named contact.'],
+          lines: ['78% of people surveyed said they were satisfied with the programmes reaching their community.', 'Feedback is welcomed via field officers, community meetings, or the local CDC — every stakeholder has a named contact.'],
         },
       ];
 

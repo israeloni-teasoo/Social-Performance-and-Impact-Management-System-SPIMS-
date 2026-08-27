@@ -122,19 +122,6 @@ export const REPORT_LENS_COLORS: Record<string, [string, string]> = {
   Community: ['rgba(31,138,91,0.14)', '#1F8A5B'],
 };
 
-export const SEVERITY_COLORS: Record<string, [string, string]> = {
-  High: ['rgba(227,26,56,0.12)', '#E31A38'],
-  Medium: ['rgba(192,73,30,0.14)', '#C0491E'],
-  Low: ['rgba(31,138,91,0.14)', '#1F8A5B'],
-};
-
-export const GRIEVANCE_STATUS_COLORS: Record<string, [string, string]> = {
-  Open: ['rgba(192,73,30,0.14)', '#C0491E'],
-  Investigating: ['rgba(43,76,155,0.12)', '#2B4C9B'],
-  Resolved: ['rgba(31,138,91,0.14)', '#1F8A5B'],
-  Closed: ['rgba(138,141,166,0.18)', '#6B6E88'],
-};
-
 export const STAKEHOLDER_STATUS_COLORS: Record<string, [string, string]> = {
   Active: ['rgba(31,138,91,0.14)', '#1F8A5B'],
   Watch: ['rgba(192,73,30,0.14)', '#C0491E'],

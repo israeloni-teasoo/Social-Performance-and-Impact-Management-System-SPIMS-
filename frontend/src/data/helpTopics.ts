@@ -51,13 +51,13 @@ export const HELP_TOPICS: HelpTopic[] = [
     ],
   },
   {
-    id: 'viewing-as',
+    id: 'sign-in-roles',
     tag: 'Roles',
-    question: 'What does the "Viewing as" switcher in the top bar do?',
+    question: 'How do roles and sign-in work?',
     answer: [
-      'SPIMS is a single application with four personas: Executive (read-only oversight), Project Manager, Field Officer, and Community Relations. The switcher lets you preview what each role sees without logging out.',
-      'In this prototype the switch is client-side only — a real deployment would enforce these permissions server-side so a Field Officer account could never see Executive screens, and vice versa.',
-      'Each role lands on a different default page: Executives land on the Dashboard, Managers on My Projects, Field Officers on My Tasks, and Community Relations on Grievance Cases.',
+      'SPIMS has four personas: Executive (read-only oversight), Project Manager, Field Officer, and Community Relations. Each demo account on the sign-in screen signs in as one of them.',
+      'In this prototype, access control is enforced client-side only — a production deployment would enforce these permissions server-side so a Field Officer account could never see Executive screens, and vice versa.',
+      'Each role lands on a different default page: Executives land on the Dashboard, Managers on My Projects, Field Officers on My Tasks, and Community Relations on the Stakeholder Register.',
     ],
   },
   {
@@ -67,15 +67,6 @@ export const HELP_TOPICS: HelpTopic[] = [
     answer: [
       'When a Field Officer logs an activity, submits a beneficiary count, records spend, or uploads evidence, it lands in the Approvals queue for a Project Manager to review.',
       'A manager can Approve (which then feeds into that project\'s Outputs) or Return it with a note asking the field officer to fix something. Nothing reaches the Outputs stage of the Impact Chain without going through this approval step.',
-    ],
-  },
-  {
-    id: 'grievances',
-    tag: 'Roles',
-    question: 'How are community grievances handled?',
-    answer: [
-      'Community Relations logs a grievance (via Log Grievance), which creates a case. Cases can be assigned, have notes and resolutions added, be escalated if severity warrants it, and closed with a recorded satisfaction rating.',
-      'Executives see an aggregated, read-only view of grievance volumes and status on the Grievances page; the case-level detail lives in Grievance Cases, which is scoped to the Community Relations role.',
     ],
   },
   {

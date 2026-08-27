@@ -1,18 +1,16 @@
-import { GRIEVANCE_STATUS_COLORS, h1, PILLAR_COLORS, pill, SEVERITY_COLORS, STATUS_COLORS } from '../ui';
-import type { Community, Grievance, Project, ProjectImpact } from '../types';
+import { h1, PILLAR_COLORS, pill, STATUS_COLORS } from '../ui';
+import type { Community, Project, ProjectImpact } from '../types';
 
 export function CommunityDetail({
   community,
   projects,
   impacts,
-  grievances,
   goBack,
   goProjectDetail,
 }: {
   community: Community;
   projects: Project[];
   impacts: Record<string, ProjectImpact>;
-  grievances: Grievance[];
   goBack: () => void;
   goProjectDetail: (id: string) => void;
 }) {
@@ -20,8 +18,6 @@ export function CommunityDetail({
   const communityProjects = projects.filter((p) => impacts[p.code]?.communitiesImpacted.includes(label));
   const completed = communityProjects.filter((p) => p.progPct === '100%').length;
   const ongoing = communityProjects.length - completed;
-  const communityGrievances = grievances.filter((g) => g.raisedByCommunity === label);
-  const openGrievances = communityGrievances.filter((g) => g.status === 'Open' || g.status === 'Investigating').length;
 
   return (
     <div>
@@ -53,7 +49,7 @@ export function CommunityDetail({
         {community.lga}, {community.state} · Population {community.pop} · CDC: {community.cdc}
       </p>
 
-      <div className="grid-4" style={{ marginBottom: 22 }}>
+      <div className="grid-3" style={{ marginBottom: 22 }}>
         <div style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: 16, padding: '20px 22px' }}>
           <div style={{ fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>FY26 spend</div>
           <div style={{ fontSize: 26, fontWeight: 800, color: 'var(--navy)' }}>{community.spend}</div>
@@ -64,12 +60,7 @@ export function CommunityDetail({
           <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>{ongoing} ongoing · {completed} completed</div>
         </div>
         <div style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: 16, padding: '20px 22px' }}>
-          <div style={{ fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Grievances</div>
-          <div style={{ fontSize: 26, fontWeight: 800, color: openGrievances > 0 ? 'var(--accent)' : 'var(--navy)' }}>{communityGrievances.length}</div>
-          <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>{openGrievances} open</div>
-        </div>
-        <div style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: 16, padding: '20px 22px' }}>
-          <div style={{ fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Community</div>
+          <div style={{ fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Population</div>
           <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--navy)' }}>{community.pop}</div>
           <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>{community.lga}</div>
         </div>
@@ -137,31 +128,6 @@ export function CommunityDetail({
                 <div style={{ fontSize: 12, color: 'var(--muted)' }}>{p.progress} complete</div>
               </div>
             </button>
-          );
-        })}
-      </div>
-
-      <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--navy)', marginBottom: 14 }}>Grievances from {community.name}</div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {communityGrievances.length === 0 && (
-          <div style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: 16, padding: '22px 24px', color: 'var(--muted)', fontSize: 13.5 }}>
-            No grievances raised from this community.
-          </div>
-        )}
-        {communityGrievances.map((g) => {
-          const [sevBg, sevFg] = SEVERITY_COLORS[g.severity] ?? ['#eee', '#555'];
-          const [stBg, stFg] = GRIEVANCE_STATUS_COLORS[g.status] ?? ['#eee', '#555'];
-          return (
-            <div key={g.id} style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: 14, padding: '14px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14, flexWrap: 'wrap' }}>
-              <div>
-                <div style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--navy)' }}>{g.title}</div>
-                <div style={{ fontSize: 12, color: 'var(--muted)' }}>{g.ref} · {g.category} · {g.dateRaised}</div>
-              </div>
-              <div style={{ display: 'flex', gap: 8 }}>
-                <span style={pill(sevBg, sevFg)}>{g.severity}</span>
-                <span style={pill(stBg, stFg)}>{g.status}</span>
-              </div>
-            </div>
           );
         })}
       </div>

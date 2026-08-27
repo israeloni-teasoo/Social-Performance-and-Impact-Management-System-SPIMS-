@@ -42,7 +42,7 @@ export function Reports({
     <div>
       <h1 style={h1}>Reports &amp; Exports</h1>
       <p style={subtitle}>
-        One dataset, two audiences. Every report below is auto-compiled from live SPIMS data using a standardized template — nobody uploads these by hand.
+        Each report is compiled automatically from live SPIMS data using a standardized template for its audience.
       </p>
 
       <div
@@ -61,9 +61,9 @@ export function Reports({
       >
         <div>
           <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#9EA1C0' }}>
-            Same data, reported two ways
+            Reporting formats
           </div>
-          <div style={{ fontSize: 22, fontWeight: 700, marginTop: 6 }}>Local compliance &amp; global ESG — from one entry.</div>
+          <div style={{ fontSize: 22, fontWeight: 700, marginTop: 6 }}>Local compliance and global ESG reporting from one dataset.</div>
         </div>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
           {['PDF', 'Excel', 'PowerPoint', 'Word'].map((f) => (

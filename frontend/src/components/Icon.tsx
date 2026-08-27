@@ -27,12 +27,6 @@ const PATHS: Record<string, ReactElement> = {
       <path d="M7 15l4-4 3 3 5-6" />
     </>
   ),
-  grievances: (
-    <>
-      <path d="M12 3 2 20h20L12 3Z" />
-      <path d="M12 10v4M12 17.5v.5" />
-    </>
-  ),
   indicators: (
     <>
       <path d="M8 6h13M8 12h13M8 18h13" />
@@ -71,12 +65,6 @@ const PATHS: Record<string, ReactElement> = {
       <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
     </>
   ),
-  loggrievance: (
-    <>
-      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z" />
-      <path d="M12 8v5M12 15.5v.01" />
-    </>
-  ),
   evidence: (
     <>
       <rect x="3" y="5" width="18" height="14" rx="2" />
@@ -84,10 +72,11 @@ const PATHS: Record<string, ReactElement> = {
       <path d="m21 16-5-5L5 19" />
     </>
   ),
-  cases: (
+  upload: (
     <>
-      <path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9Z" />
-      <path d="M14 3v6h6M9 14l2 2 4-4" />
+      <path d="M12 3v12" />
+      <path d="m7 8 5-5 5 5" />
+      <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
     </>
   ),
   stakeholders: (

@@ -33,8 +33,8 @@ export const STANDARDS: StandardEntry[] = [
     category: 'local',
     code: 'NUPRC Host Communities Development Regulations (2022)',
     issuer: 'Nigerian Upstream Petroleum Regulatory Commission',
-    summary: 'Governs how Host Community Development Trusts operate, and sets expectations for how community grievances are logged, investigated and resolved within a defined SLA.',
-    exampleText: 'Every case in Grievance Management is tracked against the NUPRC-implied resolution SLA — the "Breaching SLA" tile on the Executive Dashboard measures exactly this.',
+    summary: 'Governs how Host Community Development Trusts operate, and sets expectations for ongoing engagement between operators and host communities.',
+    exampleText: 'The Stakeholder Register tracks engagement with each host community institution against this regulation.',
   },
   {
     id: 'ncdmb-human-capital',
@@ -106,14 +106,6 @@ export const STANDARDS: StandardEntry[] = [
     issuer: 'Global Reporting Initiative',
     summary: 'Requires disclosure of gender and age diversity across governance bodies and the populations a company’s programmes reach.',
     exampleText: 'The dashboard’s gender/youth/disability breakdown under "Who benefited" is the company-wide figure reported here, paired with IPIECA SOC-4.',
-  },
-  {
-    id: 'gri-413-soc13',
-    category: 'global',
-    code: 'GRI 413 · IPIECA SOC-13 — Grievance mechanisms',
-    issuer: 'Global Reporting Initiative / IPIECA',
-    summary: 'Requires disclosure of the number of grievances raised, how they were resolved, and average resolution time.',
-    exampleText: 'Every case in Grievance Management feeds this disclosure directly — open/closed counts and average resolution time on the Executive Dashboard are the GRI 413 figures.',
   },
   {
     id: 'gri-302-303',
@@ -192,6 +184,6 @@ export const STANDARDS: StandardEntry[] = [
     code: 'SDG 16 · Peace, Justice and Strong Institutions',
     issuer: 'UN Sustainable Development Goals',
     summary: 'Promote peaceful and inclusive societies, access to justice, and effective, accountable institutions.',
-    exampleText: 'The grievance mechanism’s transparent intake-to-resolution workflow maps to SDG 16.',
+    exampleText: 'Stakeholder engagement with traditional and community institutions maps to SDG 16.',
   },
 ];

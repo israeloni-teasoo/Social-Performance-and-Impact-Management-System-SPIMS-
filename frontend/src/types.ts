@@ -6,7 +6,6 @@ export type View =
   | 'impact'
   | 'communities'
   | 'communitydetail'
-  | 'grievances'
   | 'reports'
   | 'myprojects'
   | 'newproject'
@@ -14,13 +13,12 @@ export type View =
   | 'mytasks'
   | 'logactivity'
   | 'evidence'
-  | 'cases'
-  | 'loggrievance'
   | 'stakeholders'
   | 'projectdetail'
   | 'help'
   | 'targets'
-  | 'team';
+  | 'team'
+  | 'bulkupload';
 
 export interface Project {
   id: string;
@@ -140,37 +138,6 @@ export interface EvidenceItem {
   kind: string;
 }
 
-export interface GrievanceTimelineEntry {
-  id: string;
-  ts: string;
-  actor: string;
-  action: string;
-}
-
-export interface Grievance {
-  id: string;
-  ref: string;
-  title: string;
-  category: string;
-  severity: 'Low' | 'Medium' | 'High';
-  status: 'Open' | 'Investigating' | 'Resolved' | 'Closed';
-  channel: string;
-  raisedByName: string;
-  raisedByRole: string;
-  raisedByCommunity: string;
-  raisedByContact: string;
-  loggedBy: string;
-  assignee: string | null;
-  description: string;
-  dateRaised: string;
-  dueDate: string;
-  overdue: boolean;
-  resolution: string | null;
-  resolvedDate: string | null;
-  satisfaction: string | null;
-  timeline: GrievanceTimelineEntry[];
-}
-
 export interface ImpactMethodology {
   metric: string;
   calculation: string;
@@ -243,15 +210,4 @@ export interface NewTargetInput {
   periodEnd: string;
   totalTarget: number;
   currentValue: number;
-}
-
-export interface NewGrievanceInput {
-  title: string;
-  category: string;
-  severity: string;
-  channel: string;
-  raisedByName: string;
-  raisedByCommunity: string;
-  raisedByContact: string;
-  description: string;
 }

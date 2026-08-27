@@ -2,11 +2,36 @@ import { InfoTip } from '../components/Tooltip';
 import { card } from '../ui';
 
 const COMPLIANCE_ITEMS = [
-  { icon: '✓', iconColor: '#1F8A5B', text: 'PIA HCDT — 3% OpEx funded' },
-  { icon: '87%', iconColor: '#2B4C9B', text: 'NCDMB local content' },
-  { icon: '!', iconColor: '#C0491E', text: '4 IFRS S1 gaps open' },
-  { icon: '96%', iconColor: '#1F8A5B', text: 'GRI 403 disclosure complete' },
-  { icon: '✓', iconColor: '#1F8A5B', text: 'SDG mapping current' },
+  {
+    icon: '✓',
+    iconColor: '#1F8A5B',
+    text: 'PIA HCDT — 3% OpEx funded',
+    detail: 'FY26 Host Community Development Trust allocation is fully funded and reconciled quarterly against actual OpEx. No open gap.',
+  },
+  {
+    icon: '87%',
+    iconColor: '#2B4C9B',
+    text: 'NCDMB local content',
+    detail: 'Target: 90% Nigerian personnel, goods and services. Current: 87%. Gap: local-hire share on 2 infrastructure contracts is below threshold — Procurement is tracking corrective hiring targets with those contractors this quarter.',
+  },
+  {
+    icon: '!',
+    iconColor: '#C0491E',
+    text: '4 IFRS S1 gaps open',
+    detail: 'Open items: climate-related risk disclosure, governance oversight statement, scenario analysis, and value-chain emissions estimate. Owner: Sustainability team, targeted for close-out before the FY26 annual report.',
+  },
+  {
+    icon: '96%',
+    iconColor: '#1F8A5B',
+    text: 'GRI 403 disclosure complete',
+    detail: 'Target: 100% of active sites with occupational-health disclosure. Current: 96%. Gap: 1 site is awaiting its Q3 safety audit before its disclosure can be finalised.',
+  },
+  {
+    icon: '✓',
+    iconColor: '#1F8A5B',
+    text: 'SDG mapping current',
+    detail: 'Every active project is tagged to at least one SDG target. No open gap.',
+  },
 ];
 
 const OUTCOME_ROWS = [
@@ -30,18 +55,17 @@ export function ExecutiveDashboard({ targetYear }: { targetYear: number }) {
           Executive Dashboard
         </h1>
         <p style={{ fontSize: 14.5, color: 'var(--muted)', margin: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
-          What changed, and what it means — the numbers you already have, one click away if you need them.
+          Social investment performance, FY26 year to date.
           <InfoTip label="About this data">
             This build isn't connected to Seplat's real field data yet — figures shown are illustrative, pending verified data.
           </InfoTip>
         </p>
       </div>
 
-      {/* HERO: What changed */}
       <div style={{ background: 'linear-gradient(160deg,#1a2a63,#111c55)', borderRadius: 18, padding: '26px 28px', marginBottom: 22 }}>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
           <div style={{ fontSize: 19, fontWeight: 800, color: '#fff' }}>What changed</div>
-          <div style={{ fontSize: 12.5, color: '#9EA1C0' }}>The outcomes behind this year's investment — not just the spend</div>
+          <div style={{ fontSize: 12.5, color: '#9EA1C0' }}>Outcome deltas for FY26, mapped to local and global frameworks</div>
         </div>
         <div className="grid-3" style={{ gap: 16 }}>
           {OUTCOME_ROWS.map((row) => (
@@ -57,7 +81,16 @@ export function ExecutiveDashboard({ targetYear }: { targetYear: number }) {
         </div>
         <div style={{ display: 'flex', gap: 26, marginTop: 20, paddingTop: 18, borderTop: '1px solid rgba(255,255,255,0.12)' }}>
           <div>
-            <div style={{ fontSize: 26, fontWeight: 800, color: '#fff' }}>3.4×</div>
+            <div style={{ fontSize: 26, fontWeight: 800, color: '#fff', display: 'flex', alignItems: 'center', gap: 6 }}>
+              3.4×
+              <InfoTip label="How SROI is calculated">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <div>SROI = total social value created ÷ total invested. 3.4× means ₦3.40 of estimated social value for every ₦1 spent.</div>
+                  <div>Social value is estimated by assigning a financial proxy to each outcome — for example, the wage uplift from a job created, or the healthcare-cost value of restored sight — then adjusting for deadweight (what would have happened anyway), attribution, and drop-off over time.</div>
+                  <div style={{ color: '#8A5A0B' }}>⚠ This figure is a Phase 1 illustrative placeholder. Seplat's M&amp;E team hasn't yet validated the financial proxies each outcome needs, so this ratio isn't computed from live data.</div>
+                </div>
+              </InfoTip>
+            </div>
             <div style={{ fontSize: 11.5, color: '#9EA1C0' }}>SROI ratio</div>
           </div>
           <div>
@@ -71,7 +104,6 @@ export function ExecutiveDashboard({ targetYear }: { targetYear: number }) {
         </div>
       </div>
 
-      {/* compact at-a-glance strip — financials/beneficiaries, already known to the C-suite */}
       <div
         style={{
           display: 'flex',
@@ -102,7 +134,6 @@ export function ExecutiveDashboard({ targetYear }: { targetYear: number }) {
         ))}
       </div>
 
-      {/* middle grid */}
       <div className="grid-dash-money" style={{ marginBottom: 18 }}>
         <div style={card}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 22, flexWrap: 'wrap', gap: 8 }}>
@@ -197,7 +228,6 @@ export function ExecutiveDashboard({ targetYear }: { targetYear: number }) {
         </div>
       </div>
 
-      {/* lower grid */}
       <div className="grid-2" style={{ marginBottom: 18, gap: 18 }}>
         <div style={card}>
           <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--navy)', marginBottom: 18 }}>Who benefited</div>
@@ -223,8 +253,15 @@ export function ExecutiveDashboard({ targetYear }: { targetYear: number }) {
         </div>
 
         <div style={card}>
-          <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--navy)', marginBottom: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 700, color: 'var(--navy)', marginBottom: 16 }}>
             Are we compliant? <span style={{ fontWeight: 500, fontSize: 12, color: 'var(--muted)' }}>· local + global view</span>
+            <InfoTip label="How compliance is assessed">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div>Each row compares one commitment — a PIA HCDT allocation, an NCDMB threshold, a disclosure standard — against the data logged for it in SPIMS. A checkmark means the target is fully met; a percentage shows partial progress; ! flags an open gap.</div>
+                <div>Tap the ⓘ on any row below to see exactly what the gap is and who owns closing it.</div>
+                <div style={{ color: '#8A5A0B' }}>⚠ In this prototype these figures are a static illustrative summary, not a live check against source data — automatic gap-detection against real compliance data is a Phase 2 backend integration.</div>
+              </div>
+            </InfoTip>
           </div>
           <div style={{ fontSize: 12, fontWeight: 600, color: '#1F8A5B', marginBottom: 14 }}>22 / 24 commitments met</div>
           <div className="grid-compliance-inner">
@@ -236,14 +273,16 @@ export function ExecutiveDashboard({ targetYear }: { targetYear: number }) {
                 <span style={{ fontSize: row.icon.length > 1 && row.icon !== '!' ? 12 : undefined, fontWeight: row.icon.length > 1 ? 700 : undefined, color: row.iconColor }}>
                   {row.icon}
                 </span>
-                <span style={{ fontSize: 13 }}>{row.text}</span>
+                <span style={{ fontSize: 13, flex: 1 }}>{row.text}</span>
+                <InfoTip label={`Detail on ${row.text}`} width={300}>
+                  {row.detail}
+                </InfoTip>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      {/* risk strip */}
       <div style={card}>
         <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--navy)', marginBottom: 16 }}>What risks exist?</div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>

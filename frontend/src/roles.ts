@@ -11,7 +11,7 @@ export const DEFAULT_VIEW_FOR_ROLE: Record<Role, View> = {
   exec: 'dashboard',
   manager: 'myprojects',
   field: 'mytasks',
-  relations: 'cases',
+  relations: 'stakeholders',
 };
 
 export function currentUserLabel(role: Role): string {
@@ -25,7 +25,6 @@ export const CRUMBS: Record<View, string> = {
   impact: 'Impact Chain',
   communities: 'Communities',
   communitydetail: 'Community Detail',
-  grievances: 'Grievances',
   reports: 'Reports & Exports',
   myprojects: 'My Projects',
   newproject: 'New Project',
@@ -33,11 +32,10 @@ export const CRUMBS: Record<View, string> = {
   mytasks: 'My Tasks',
   logactivity: 'Log Activity',
   evidence: 'Evidence Repository',
-  cases: 'Grievance Cases',
-  loggrievance: 'Log Grievance',
   stakeholders: 'Stakeholder Register',
   projectdetail: 'Project Detail',
   help: 'Help & Standards',
   targets: 'Targets',
   team: 'My Team',
+  bulkupload: 'Bulk Upload',
 };
