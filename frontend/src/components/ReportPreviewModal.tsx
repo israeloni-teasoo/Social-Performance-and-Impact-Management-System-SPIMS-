@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { api } from '../api';
+import { isApiAvailable } from '../apiMode';
 import { buildReportSections } from '../reportContent';
 import { REPORT_LENS_COLORS, secondaryBtn } from '../ui';
 import { InfoTip } from './Tooltip';
@@ -63,6 +64,10 @@ export function ReportPreviewModal({
     setClaudeLoading(true);
     setClaudeError(null);
     try {
+      if (!(await isApiAvailable())) {
+        setClaudeError('Slide generation runs on the server and is unavailable in this demo build. It is active once the platform is deployed with an Anthropic API key.');
+        return;
+      }
       const result = await api.post<{ slides: Slide[] }>('/api/reports/generate-preview', { reportName: report.name, lens: report.lens, scopeNote, sections });
       setClaudeSlides(result.slides);
     } catch (err) {

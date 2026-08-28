@@ -7,6 +7,7 @@ export function Topbar({
   crumb,
   userName,
   userRole,
+  demoMode,
   onMenuClick,
   onLogout,
   projects,
@@ -18,6 +19,7 @@ export function Topbar({
   crumb: string;
   userName: string;
   userRole: string;
+  demoMode?: boolean;
   onMenuClick: () => void;
   onLogout: () => void;
   projects: Project[];
@@ -191,6 +193,27 @@ export function Topbar({
           <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#1F8A5B', display: 'inline-block' }}></span>
           FY 2026 · ₦ Naira
         </div>
+        {demoMode && (
+          <div
+            className="spims-topbar-fy"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              background: 'rgba(192,73,30,0.09)',
+              border: '1px solid rgba(192,73,30,0.22)',
+              borderRadius: 10,
+              padding: '7px 12px',
+              fontSize: 12.5,
+              fontWeight: 600,
+              color: '#A85E0B',
+              whiteSpace: 'nowrap',
+            }}
+            title="No backend is connected. Data comes from the bundled sample set and changes are saved only in this browser."
+          >
+            Demo mode
+          </div>
+        )}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{ textAlign: 'right', lineHeight: 1.2 }} className="spims-topbar-user">
             <div style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--navy)' }}>{userName}</div>

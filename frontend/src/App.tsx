@@ -37,7 +37,7 @@ const TARGET_YEAR = 2030;
 const ORG_NAME = 'Seplat Energy Plc';
 
 export default function App() {
-  const { user, loading, login, logout } = useAuth();
+  const { user, loading, demoMode, login, logout } = useAuth();
   const { projects: PROJECTS, projectImpacts: PROJECT_IMPACTS, communities: COMMUNITIES, indicators: INDICATORS, reports: REPORTS, evidence: EVIDENCE_ITEMS, loading: dataLoading, error: dataError } = useAppData();
   const [view, setViewState] = useState<View>('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -130,6 +130,7 @@ export default function App() {
           crumb={CRUMBS[view]}
           userName={user.name}
           userRole={user.roleLabel}
+          demoMode={demoMode}
           onLogout={logout}
           onMenuClick={() => setSidebarOpen((o) => !o)}
           projects={PROJECTS}

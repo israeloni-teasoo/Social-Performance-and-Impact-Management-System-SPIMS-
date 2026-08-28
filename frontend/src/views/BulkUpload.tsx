@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { api } from '../api';
+import { isApiAvailable } from '../apiMode';
 import { InfoTip } from '../components/Tooltip';
 import { BULK_UPLOAD_DATA_TYPES, UPLOAD_TEMPLATES } from '../data/uploadTemplates';
 import { buildCsvFromRows, downloadBlob } from '../reportExport';
@@ -22,6 +23,19 @@ function downloadTemplate(t: UploadTemplate) {
   downloadBlob(new Blob([csv], { type: 'text/csv' }), t.filename);
 }
 
+/** Demo mode: validate the header against the template in the browser, since
+ *  there is no server to parse rows into records. Mirrors the server's check. */
+function validateLocally(csvText: string, dataType: BulkUploadDataType) {
+  const lines = csvText.split(/\r?\n/).filter((l) => l.trim() !== '');
+  const expected = UPLOAD_TEMPLATES[dataType].columns;
+  const header = (lines[0] ?? '').split(',').map((c) => c.trim().replace(/^"|"$/g, ''));
+  const ok = header.length === expected.length && expected.every((c, i) => c.toLowerCase() === header[i]?.toLowerCase());
+  if (!ok) {
+    throw new Error(`Columns don't match the ${dataType.toLowerCase()} template. Expected: ${expected.join(', ')}.`);
+  }
+  return { id: `up-${Date.now()}`, rowCount: Math.max(0, lines.length - 1), status: 'Validated — demo mode' };
+}
+
 export function BulkUpload({ projects, pushToast }: { projects: Project[]; pushToast: (message: string, tone?: ToastTone) => void }) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [dataType, setDataType] = useState<BulkUploadDataType>('Beneficiary counts');
@@ -41,12 +55,14 @@ export function BulkUpload({ projects, pushToast }: { projects: Project[]; pushT
       const csvText = String(reader.result ?? '');
       setUploading(true);
       try {
-        const result = await api.post<{ id: string; rowCount: number; status: string }>('/api/bulk-upload', {
-          filename: file.name,
-          dataType,
-          projectId: projectId === 'all' ? null : projectId,
-          csvText,
-        });
+        const result = (await isApiAvailable())
+          ? await api.post<{ id: string; rowCount: number; status: string }>('/api/bulk-upload', {
+              filename: file.name,
+              dataType,
+              projectId: projectId === 'all' ? null : projectId,
+              csvText,
+            })
+          : validateLocally(csvText, dataType);
         setUploads((prev) => [
           { id: result.id, filename: file.name, dataType, project: projectId === 'all' ? 'All projects' : projects.find((p) => p.id === projectId)?.name ?? 'All projects', rowCount: result.rowCount, status: result.status },
           ...prev,

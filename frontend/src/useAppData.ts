@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from './api';
+import { isApiAvailable } from './apiMode';
+import { COMMUNITIES, EVIDENCE_ITEMS, INDICATORS, PROJECT_IMPACTS, PROJECTS, REPORTS } from './data/seed';
 import type { Community, EvidenceItem, Indicator, Project, ProjectImpact, Report } from './types';
 
 export interface AppData {
@@ -11,29 +13,55 @@ export interface AppData {
   evidence: EvidenceItem[];
 }
 
+const SEED: AppData = {
+  projects: PROJECTS,
+  projectImpacts: PROJECT_IMPACTS,
+  communities: COMMUNITIES,
+  indicators: INDICATORS,
+  reports: REPORTS,
+  evidence: EVIDENCE_ITEMS,
+};
+
 const EMPTY: AppData = { projects: [], projectImpacts: {}, communities: [], indicators: [], reports: [], evidence: [] };
 
-/** Loads the read-mostly portfolio content that used to be static seed data, now served
- * from Postgres via the API. Fetched once per session since none of this changes live yet. */
+/** Portfolio content: served from Postgres when an API is present, otherwise
+ *  read from the bundled seed data so the app is fully browsable on a static host. */
 export function useAppData() {
   const [data, setData] = useState<AppData>(EMPTY);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    Promise.all([
-      api.get<Project[]>('/api/projects'),
-      api.get<Record<string, ProjectImpact>>('/api/project-impacts'),
-      api.get<Community[]>('/api/communities'),
-      api.get<Indicator[]>('/api/indicators'),
-      api.get<Report[]>('/api/reports'),
-      api.get<EvidenceItem[]>('/api/evidence'),
-    ])
-      .then(([projects, projectImpacts, communities, indicators, reports, evidence]) => {
-        setData({ projects, projectImpacts, communities, indicators, reports, evidence });
+    let cancelled = false;
+    isApiAvailable()
+      .then(async (live) => {
+        if (!live) {
+          if (!cancelled) setData(SEED);
+          return;
+        }
+        const [projects, projectImpacts, communities, indicators, reports, evidence] = await Promise.all([
+          api.get<Project[]>('/api/projects'),
+          api.get<Record<string, ProjectImpact>>('/api/project-impacts'),
+          api.get<Community[]>('/api/communities'),
+          api.get<Indicator[]>('/api/indicators'),
+          api.get<Report[]>('/api/reports'),
+          api.get<EvidenceItem[]>('/api/evidence'),
+        ]);
+        if (!cancelled) setData({ projects, projectImpacts, communities, indicators, reports, evidence });
       })
-      .catch(() => setError('Could not load SPIMS data. Check that the API server is running and try reloading.'))
-      .finally(() => setLoading(false));
+      .catch(() => {
+        // An API was detected but a request failed — fall back rather than showing an empty app.
+        if (!cancelled) {
+          setData(SEED);
+          setError(null);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return { ...data, loading, error };
