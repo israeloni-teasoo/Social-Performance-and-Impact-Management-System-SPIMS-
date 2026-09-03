@@ -5,6 +5,7 @@ import { Topbar } from './components/Topbar';
 import { CRUMBS, DEFAULT_VIEW_FOR_ROLE } from './roles';
 import type { View } from './types';
 import { useApprovalsStore } from './useApprovalsStore';
+import { useCustomFieldsStore } from './useCustomFieldsStore';
 import { useReportCommentsStore } from './useReportCommentsStore';
 import { useStakeholdersStore } from './useStakeholdersStore';
 import { useTargetsStore } from './useTargetsStore';
@@ -52,6 +53,7 @@ export default function App() {
   const { members, inviteMember } = useTeamStore(pushToast);
   const { tasks, assignTask, setTaskStatus } = useTasksStore(pushToast);
   const { comments, addComment } = useReportCommentsStore(pushToast);
+  const { fields: customFields, addField, updateField, removeField } = useCustomFieldsStore(pushToast, user?.name ?? '');
 
   useEffect(() => {
     if (user) {
@@ -140,7 +142,7 @@ export default function App() {
         />
 
         <main className="spims-scroll" style={{ flex: 1, overflowY: 'auto', padding: '30px 34px 48px' }}>
-          {view === 'dashboard' && <ExecutiveDashboard targetYear={TARGET_YEAR} />}
+          {view === 'dashboard' && <ExecutiveDashboard targetYear={TARGET_YEAR} projects={PROJECTS} impacts={PROJECT_IMPACTS} />}
           {view === 'portfolio' && <ProjectPortfolio projects={PROJECTS} onOpen={(id) => goProjectDetail(id, 'portfolio')} />}
           {view === 'impact' && (
             <ImpactChain
@@ -189,6 +191,11 @@ export default function App() {
             <ProjectDetail
               project={selectedProject}
               impact={PROJECT_IMPACTS[selectedProject.code]}
+              customFields={customFields}
+              canEditFields={role === 'exec' || role === 'manager'}
+              onAddField={addField}
+              onUpdateField={updateField}
+              onRemoveField={removeField}
               goBack={() => setView(projectDetailReturnView)}
               pushToast={pushToast}
             />

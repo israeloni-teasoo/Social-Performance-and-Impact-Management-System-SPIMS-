@@ -1,3 +1,5 @@
+import { ReachVsImpactTip } from '../components/ReachPanel';
+import { formatCount, totalsFor } from '../reach';
 import { useMemo, useState } from 'react';
 import { h1, input, PILLAR_COLORS, STATUS_COLORS, subtitle } from '../ui';
 import type { Community, Project, ProjectImpact } from '../types';
@@ -47,6 +49,7 @@ export function ImpactChain({
   const totalInvestment = filtered.reduce((sum, p) => sum + parseBudgetMillions(p.budget), 0);
   const avgProgress = filtered.length ? Math.round(filtered.reduce((s, p) => s + Number(p.progPct.replace('%', '')), 0) / filtered.length) : 0;
   const communitiesReached = new Set(filtered.flatMap((p) => impacts[p.code]?.communitiesImpacted ?? [])).size;
+  const reachTotals = totalsFor(filtered, impacts);
 
   const byPillar = PILLARS.map((p) => ({
     name: p,
@@ -106,6 +109,26 @@ export function ImpactChain({
           <div style={{ fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Communities reached</div>
           <div style={{ fontSize: 30, fontWeight: 800, color: 'var(--navy)', marginTop: 6 }}>{communitiesReached}</div>
         </div>
+      </div>
+
+      <div style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: 16, padding: '20px 24px', marginBottom: 18, display: 'flex', alignItems: 'center', gap: 30, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+          Reach vs. impact
+          <ReachVsImpactTip width={300} />
+        </div>
+        <div>
+          <div style={{ fontSize: 24, fontWeight: 800, color: '#2B4C9B', lineHeight: 1.1 }}>{formatCount(reachTotals.reach)}</div>
+          <div style={{ fontSize: 12, color: 'var(--muted)' }}>interactions</div>
+        </div>
+        <div>
+          <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--accent)', lineHeight: 1.1 }}>{formatCount(reachTotals.impact)}</div>
+          <div style={{ fontSize: 12, color: 'var(--muted)' }}>people served ({reachTotals.conversionPct}%)</div>
+        </div>
+        {reachTotals.unmapped.length > 0 && (
+          <div style={{ fontSize: 12, color: 'var(--muted)', flex: '1 1 200px' }}>
+            {reachTotals.unmapped.join(', ')} not yet separated into reach and impact, so excluded from these totals.
+          </div>
+        )}
       </div>
 
       <div className="grid-2" style={{ gap: 18, marginBottom: 18 }}>

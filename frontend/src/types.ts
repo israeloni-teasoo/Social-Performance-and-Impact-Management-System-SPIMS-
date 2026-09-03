@@ -162,12 +162,40 @@ export interface ImpactScenario {
   highImpact: string;
 }
 
+export interface ReachChannel {
+  /** How the interaction happened, e.g. "Scholarship applications received". */
+  label: string;
+  value: number;
+}
+
+/**
+ * Reach is everyone a programme interacted with — applicants, attendees, people
+ * screened, residents in a catchment area. Impact is the subset who actually
+ * received the intervention. The two are deliberately separate figures: counting
+ * an applicant who was turned down as someone the programme impacted overstates
+ * the result, which is the single correction Seplat pressed hardest on.
+ */
+export interface ReachProfile {
+  /** Total interactions across every channel. Aggregatable, so it is a number, not a display string. */
+  total: number;
+  /** What those interactions were, in plain words. */
+  label: string;
+  channels: ReachChannel[];
+  /** The subset who actually received the intervention — the impact-side counterpart. */
+  directBeneficiaries: number;
+  /** What separates the two figures for this specific programme. */
+  note: string;
+}
+
 export interface ProjectImpact {
   projectCode: string;
   inputs: string;
   activities: string;
   outputHeadline: string;
   outcome: string;
+  /** Interactions vs. people actually served. Optional so a programme that hasn't
+   *  had its reach separated yet is visibly unmapped rather than silently zero. */
+  reach?: ReachProfile;
   impactHeadline: string;
   /** Single big number for the Impact stage card, e.g. "934,500" or "≈4,000". */
   impactFigure: string;
@@ -210,4 +238,31 @@ export interface NewTargetInput {
   periodEnd: string;
   totalTarget: number;
   currentValue: number;
+}
+
+export type CustomFieldFormat = 'text' | 'number' | 'percent' | 'naira' | 'date';
+
+/**
+ * A question a programme keeps getting asked, answered on the programme's own page
+ * so it doesn't need a fresh ad-hoc report each time. Every field carries a source,
+ * on the same provenance rule as impact figures.
+ */
+export interface CustomField {
+  id: string;
+  projectCode: string;
+  question: string;
+  answer: string;
+  format: CustomFieldFormat;
+  /** Where the answer came from, so a reader can challenge it. */
+  source: string;
+  updatedAt: string;
+  updatedBy: string;
+}
+
+export interface NewCustomFieldInput {
+  projectCode: string;
+  question: string;
+  answer: string;
+  format: CustomFieldFormat;
+  source: string;
 }

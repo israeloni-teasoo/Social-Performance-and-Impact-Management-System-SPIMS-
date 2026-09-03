@@ -16,6 +16,7 @@ export async function listProjectImpactsHandler(): Promise<HandlerResult> {
       activities: imp.activities,
       outputHeadline: imp.outputHeadline,
       outcome: imp.outcome,
+      reach: imp.reach ?? undefined,
       impactHeadline: imp.impactHeadline,
       impactFigure: imp.impactFigure,
       impactFigureLabel: imp.impactFigureLabel,

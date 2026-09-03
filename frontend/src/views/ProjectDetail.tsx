@@ -1,11 +1,14 @@
 import { useState } from 'react';
+import { CustomFieldsPanel } from '../components/CustomFieldsPanel';
 import { ImpactStageCard as StageCard } from '../components/ImpactStageCard';
 import { ProvenanceTip } from '../components/ImpactExplainers';
 import { ImpactPanel } from '../components/ImpactPanel';
+import { ReachPanel, ReachVsImpactTip } from '../components/ReachPanel';
 import { InfoTip } from '../components/Tooltip';
+import { formatCount } from '../reach';
 import { exportProjectReport } from '../reportExport';
 import { h1, PILLAR_COLORS, pill, primaryBtn, STATUS_COLORS } from '../ui';
-import type { Project, ProjectImpact } from '../types';
+import type { CustomField, NewCustomFieldInput, Project, ProjectImpact } from '../types';
 import type { ToastTone } from '../useToastQueue';
 
 const FORMATS: { key: 'pdf' | 'excel' | 'word'; label: string }[] = [
@@ -17,11 +20,21 @@ const FORMATS: { key: 'pdf' | 'excel' | 'word'; label: string }[] = [
 export function ProjectDetail({
   project,
   impact,
+  customFields,
+  canEditFields,
+  onAddField,
+  onUpdateField,
+  onRemoveField,
   goBack,
   pushToast,
 }: {
   project: Project;
   impact: ProjectImpact | undefined;
+  customFields: CustomField[];
+  canEditFields: boolean;
+  onAddField: (input: NewCustomFieldInput) => void;
+  onUpdateField: (id: string, answer: string, source: string) => void;
+  onRemoveField: (id: string) => void;
   goBack: () => void;
   pushToast: (message: string, tone?: ToastTone) => void;
 }) {
@@ -31,7 +44,7 @@ export function ProjectDetail({
 
   const handleFormat = (format: (typeof FORMATS)[number]['key']) => {
     setFormatOpen(false);
-    const filename = exportProjectReport(project, impact, format);
+    const filename = exportProjectReport(project, impact, format, customFields);
     pushToast(`Downloaded ${filename}.`, 'success');
   };
 
@@ -68,7 +81,17 @@ export function ProjectDetail({
             <span style={{ fontFamily: 'monospace', fontSize: 12.5, color: 'var(--muted)' }}>{project.code}</span>
           </div>
           <h1 style={{ ...h1, margin: '0 0 4px' }}>{project.name}</h1>
-          <p style={{ fontSize: 14.5, color: 'var(--muted)', margin: 0 }}>{project.state} · {project.output}</p>
+          <p style={{ fontSize: 14.5, color: 'var(--muted)', margin: 0, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+            <span>{project.state} · {project.output}</span>
+            {impact?.reach && (
+              <>
+                <span>
+                  · {formatCount(impact.reach.total)} reached · {formatCount(impact.reach.directBeneficiaries)} served
+                </span>
+                <ReachVsImpactTip />
+              </>
+            )}
+          </p>
         </div>
         <div style={{ position: 'relative' }}>
           {formatOpen ? (
@@ -138,7 +161,18 @@ export function ProjectDetail({
             <StageCard index="04" label="Outcomes" title="What changes" detail={impact.outcome} variant="accentBorder" badge="Calculated" />
           </div>
 
+          <ReachPanel reach={impact.reach} />
+
           <ImpactPanel impact={impact} />
+
+          <CustomFieldsPanel
+            projectCode={project.code}
+            fields={customFields}
+            canEdit={canEditFields}
+            onAdd={onAddField}
+            onUpdate={onUpdateField}
+            onRemove={onRemoveField}
+          />
 
           <div className="grid-impact-lower">
             <div style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: 16, padding: '22px 24px' }}>

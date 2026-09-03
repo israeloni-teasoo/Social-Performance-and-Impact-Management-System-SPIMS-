@@ -1,4 +1,5 @@
 import { STANDARDS } from './data/standards';
+import { formatCount, totalsFor } from './reach';
 import type { Project, ProjectImpact, Report } from './types';
 
 export interface ReportSection {
@@ -10,6 +11,12 @@ const NCDMB_PROJECT_CODES = ['STEP', 'YEP', 'FELL', 'POWER'];
 
 export function buildReportSections(report: Report, projects: Project[], impacts: Record<string, ProjectImpact>): ReportSection[] {
   const byCode = (code: string) => projects.find((p) => p.code === code);
+  const totals = totalsFor(projects, impacts);
+  const reachLines = [
+    `Reach — people the programmes interacted with: ${formatCount(totals.reach)}`,
+    `Impact — people who received the intervention: ${formatCount(totals.impact)} (${totals.conversionPct}% of interactions)`,
+    'Reach and impact are reported separately. An applicant who did not receive a place has been reached, not impacted.',
+  ];
 
   switch (report.name) {
     case 'Social Performance Report':
@@ -22,6 +29,10 @@ export function buildReportSections(report: Report, projects: Project[], impacts
             'Host communities: 42 across Edo, Delta and Imo',
             '52% of the 2030 social aspiration achieved — Economic Empowerment flagged as the priority gap.',
           ],
+        },
+        {
+          heading: 'Our Impact — reach vs. impact',
+          lines: reachLines,
         },
         {
           heading: 'Our Impact — what changed',

@@ -62,9 +62,14 @@ Sign in with any of the four seeded demo accounts (shown on the sign-in screen �
 
 ## Deploying to production
 
-The target setup is **Vercel** (hosts the frontend build and the `api/` functions together, one deploy) **+ Neon** (serverless Postgres) **+ an Anthropic API key**.
+The target setup is **Vercel** (hosts the frontend build and the `api/` functions together, one deploy) **+ a managed Postgres** **+ an Anthropic API key**.
 
-1. **Database**: create a project at [neon.tech](https://neon.tech), copy its connection string.
+**Supabase is the recommended database.** It is plain Postgres, so the schema and migrations apply unchanged, and unlike Neon it can also be self-hosted via Docker — which matters because Seplat's stated model is to host on their own infrastructure. Two Supabase-specific details:
+
+- `DATABASE_URL` must point at the **connection pooler** (port 6543, with `?pgbouncer=true`), since serverless functions open many short-lived connections.
+- `DIRECT_URL` must point at the **direct connection** (port 5432); Prisma needs it for `migrate deploy`, which cannot run through the pooler.
+
+1. **Database**: create a project at [supabase.com](https://supabase.com) (or [neon.tech](https://neon.tech)), copy its connection string(s).
 2. **Vercel**: import this repo as a new Vercel project. `vercel.json` at the repo root already points it at `frontend/` for the build output and auto-detects `api/` for the serverless functions — no manual config needed there.
 3. **Environment variables** (Vercel project → Settings → Environment Variables):
    - `DATABASE_URL` — the Neon connection string from step 1.
@@ -76,6 +81,8 @@ The target setup is **Vercel** (hosts the frontend build and the `api/` function
 ## What's implemented
 
 - **Executive**: Dashboard, Project Portfolio, Impact Chain, Communities, Reports & Exports (with Claude slide preview), Targets, Bulk Upload.
+- **Reach, reported separately from Impact**: reach counts everyone a programme interacted with (applicants, attendees, people screened, catchment residents); impact counts only those who received the intervention. Both appear on the Executive Dashboard with a per-pillar breakdown, on every programme page with a conversion rate and a programme-specific note, and in exports. STEAM is the worked example — 120,000 scholarship applicants, 48 awards.
+- **Custom fields per programme**: questions a programme keeps being asked, answered on its own page with a source and a last-updated stamp, and carried into that programme's export.
 - **Manager**: My Projects, New Project (intake form), Approvals Queue, My Team.
 - **Field Officer**: My Tasks, Log Activity, Evidence Repository.
 - **Community Relations**: Stakeholder Register, Communities.
@@ -91,6 +98,7 @@ The target setup is **Vercel** (hosts the frontend build and the `api/` function
 
 - **PowerPoint file export** — the Claude-generated slide *outline* exists (Reports & Exports → Preview report → Slide preview); turning that into an actual downloadable `.pptx` with real chart graphics is the remaining piece.
 - **Deeper bulk-upload ingestion** — Financial spend CSVs are parsed and written straight into spend records. Beneficiary counts, activity logs, and project master data are validated and parsed server-side but only logged as a reviewable upload (`BulkUpload` table) rather than written into live project/task records yet — that needs a decision on aggregation rules before it's safe to automate.
+- **Reach for new programmes** — a programme without a reach profile is shown as unmapped and excluded from portfolio totals rather than counted as zero. Any programme added after this round needs its reach separated before it contributes to the headline figures.
 - **Real SROI / compliance calculation** — both are still illustrative figures with a documented intended methodology (see the ⓘ tooltips on the Executive Dashboard), not computed from the data now sitting in Postgres.
 - **ESG-Horizon "Social" module integration** — Teasoo's existing ESG-Horizon reporting/sustainability platform will eventually absorb this Social pillar; noted here for continuity, not yet started.
 - "Our People" section of the flagship report (health/safety/D&I/environment) is intentionally a stub pending HR/HSE/environmental data sources SPIMS doesn't yet track.

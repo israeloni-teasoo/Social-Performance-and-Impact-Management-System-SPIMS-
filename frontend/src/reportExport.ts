@@ -1,5 +1,6 @@
+import { formatCount } from './reach';
 import type { ReportSection } from './reportContent';
-import type { Project, ProjectImpact, Report } from './types';
+import type { CustomField, Project, ProjectImpact, Report } from './types';
 
 function todayLabel(): string {
   return new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
@@ -161,7 +162,7 @@ export function exportReport(report: Report, format: 'pdf' | 'excel' | 'word', s
   return `${base}.rtf`;
 }
 
-function projectBodyLines(project: Project, impact: ProjectImpact | undefined): string[] {
+function projectBodyLines(project: Project, impact: ProjectImpact | undefined, customFields: CustomField[]): string[] {
   const lines = [
     `Pillar: ${project.pillar} · State: ${project.state} · Status: ${project.status}`,
     `Budget: ${project.budget} (${project.utilPct} utilised) · Progress: ${project.progress}`,
@@ -180,6 +181,16 @@ function projectBodyLines(project: Project, impact: ProjectImpact | undefined): 
       '',
       '04 OUTCOMES — What changes',
       ...wrap(toAscii(impact.outcome), 88),
+      '',
+      'REACH VS IMPACT',
+      ...(impact.reach
+        ? [
+            `Reach (interactions): ${formatCount(impact.reach.total)} - ${toAscii(impact.reach.label)}`,
+            `Impact (people served): ${formatCount(impact.reach.directBeneficiaries)} received the intervention`,
+            ...impact.reach.channels.map((c) => `- ${toAscii(c.label)}: ${formatCount(c.value)}`),
+            ...wrap(toAscii(impact.reach.note), 88),
+          ]
+        : ['Reach has not been separated from impact for this programme yet.']),
       '',
       '05 IMPACT — What it means',
       toAscii(impact.impactHeadline),
@@ -208,14 +219,28 @@ function projectBodyLines(project: Project, impact: ProjectImpact | undefined): 
     );
   }
   lines.push('', `Generated: ${todayLabel()}`, 'This export is a Phase 1 illustrative summary generated from SPIMS mock data.');
+  const mine = customFields.filter((f) => f.projectCode === project.code);
+  if (mine.length > 0) {
+    lines.push('', 'QUESTIONS ABOUT THIS PROGRAMME');
+    for (const f of mine) {
+      lines.push(
+        ...wrap(toAscii(f.question), 88),
+        ...wrap(`  ${toAscii(f.answer)}`, 88),
+        ...wrap(`  Source: ${toAscii(f.source)}`, 88),
+        `  Updated ${toAscii(f.updatedAt)} by ${toAscii(f.updatedBy)}`,
+        '',
+      );
+    }
+  }
+
   return lines;
 }
 
-export function exportProjectReport(project: Project, impact: ProjectImpact | undefined, format: 'pdf' | 'excel' | 'word'): string {
+export function exportProjectReport(project: Project, impact: ProjectImpact | undefined, format: 'pdf' | 'excel' | 'word', customFields: CustomField[] = []): string {
   const base = slug(`${project.code}-${project.name}`);
   const title = `${project.name} — Project Report`;
   if (format === 'pdf') {
-    downloadBlob(new Blob([buildPdfFromLines(title, projectBodyLines(project, impact))], { type: 'application/pdf' }), `${base}.pdf`);
+    downloadBlob(new Blob([buildPdfFromLines(title, projectBodyLines(project, impact, customFields))], { type: 'application/pdf' }), `${base}.pdf`);
     return `${base}.pdf`;
   }
   if (format === 'excel') {
@@ -236,6 +261,9 @@ export function exportProjectReport(project: Project, impact: ProjectImpact | un
         ['Activities', impact.activities],
         ['Outputs', impact.outputHeadline],
         ['Outcome', impact.outcome],
+        ['Reach — interactions', impact.reach ? `${formatCount(impact.reach.total)} (${impact.reach.label})` : 'Not yet separated'],
+        ['Impact — people served', impact.reach ? formatCount(impact.reach.directBeneficiaries) : 'Not yet separated'],
+        ['Reach vs impact note', impact.reach ? impact.reach.note : '—'],
         ['Impact', `${impact.impactHeadline} — ${impact.impactFigure} ${impact.impactFigureLabel}`],
         ['Impact — what it means', impact.impactPoints.join('; ')],
         ['Methodology metric', impact.methodology.metric],
@@ -245,7 +273,7 @@ export function exportProjectReport(project: Project, impact: ProjectImpact | un
       );
       if (impact.impactScenarios) {
         for (const s of impact.impactScenarios) {
-          rows.push([`Reach — ${s.horizon}`, `${s.conservative} (conservative) to ${s.highImpact} (high-impact)`]);
+          rows.push([`Projection — ${s.horizon}`, `${s.conservative} (conservative) to ${s.highImpact} (high-impact)`]);
         }
       }
       rows.push(
@@ -255,9 +283,12 @@ export function exportProjectReport(project: Project, impact: ProjectImpact | un
         ['Project manager', impact.contactPerson],
       );
     }
+    for (const f of customFields.filter((x) => x.projectCode === project.code)) {
+      rows.push([`Q: ${f.question}`, `${f.answer} — source: ${f.source} (updated ${f.updatedAt} by ${f.updatedBy})`]);
+    }
     downloadBlob(new Blob([buildCsvFromRows(rows)], { type: 'text/csv' }), `${base}.csv`);
     return `${base}.csv`;
   }
-  downloadBlob(new Blob([buildRtfFromLines(title, projectBodyLines(project, impact))], { type: 'application/rtf' }), `${base}.rtf`);
+  downloadBlob(new Blob([buildRtfFromLines(title, projectBodyLines(project, impact, customFields))], { type: 'application/rtf' }), `${base}.rtf`);
   return `${base}.rtf`;
 }

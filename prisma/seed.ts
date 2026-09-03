@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import bcrypt from 'bcryptjs';
 import { PrismaClient, Prisma } from '@prisma/client';
-import { PROJECTS, PROJECT_IMPACTS, COMMUNITIES, INDICATORS, REPORTS, STAKEHOLDERS, TEAM_MEMBERS, TASKS, APPROVALS, EVIDENCE_ITEMS, TARGETS } from '../frontend/src/data/seed';
+import { PROJECTS, PROJECT_IMPACTS, COMMUNITIES, INDICATORS, REPORTS, STAKEHOLDERS, TEAM_MEMBERS, TASKS, APPROVALS, EVIDENCE_ITEMS, TARGETS, CUSTOM_FIELDS } from '../frontend/src/data/seed';
 import { DEMO_ACCOUNTS } from '../frontend/src/data/accounts';
 
 const prisma = new PrismaClient();
@@ -52,6 +52,7 @@ async function main() {
         activities: imp.activities,
         outputHeadline: imp.outputHeadline,
         outcome: imp.outcome,
+        reach: imp.reach ? asJson(imp.reach) : undefined,
         impactHeadline: imp.impactHeadline,
         impactFigure: imp.impactFigure,
         impactFigureLabel: imp.impactFigureLabel,
@@ -70,6 +71,7 @@ async function main() {
       update: {
         outputHeadline: imp.outputHeadline,
         outcome: imp.outcome,
+        reach: imp.reach ? asJson(imp.reach) : undefined,
         impactHeadline: imp.impactHeadline,
         impactFigure: imp.impactFigure,
         impactFigureLabel: imp.impactFigureLabel,
@@ -176,6 +178,15 @@ async function main() {
       where: { id: t.id },
       create: { ...rest, createdAt: new Date(createdAt) },
       update: { ...rest, createdAt: new Date(createdAt) },
+    });
+  }
+
+  console.log('Seeding custom fields...');
+  for (const f of CUSTOM_FIELDS) {
+    await prisma.customField.upsert({
+      where: { id: f.id },
+      create: { ...f },
+      update: { ...f },
     });
   }
 

@@ -6,6 +6,7 @@ import { addApprovalCommentHandler, approveHandler, listApprovalsHandler, return
 import { loginHandler, meHandler } from './handlers/auth';
 import { bulkUploadHandler } from './handlers/bulkUpload';
 import { listCommunitiesHandler, listEvidenceHandler, listIndicatorsHandler, listProjectImpactsHandler, listProjectsHandler, listReportsHandler } from './handlers/content';
+import { createCustomFieldHandler, deleteCustomFieldHandler, listCustomFieldsHandler, updateCustomFieldHandler } from './handlers/customFields';
 import { addReportCommentHandler, listReportCommentsHandler } from './handlers/reportComments';
 import { generateReportPreviewHandler } from './handlers/reportPreview';
 import { createStakeholderHandler, listStakeholdersHandler } from './handlers/stakeholders';
@@ -140,6 +141,24 @@ app.post('/api/bulk-upload', async (req, res) => {
 // --- Claude-generated report preview ---
 app.post('/api/reports/generate-preview', async (req, res) => {
   const r = await generateReportPreviewHandler(req.body ?? {}, await currentUser(req));
+  res.status(r.status).json(r.body);
+});
+
+// --- Custom fields (per-programme questions) ---
+app.get('/api/custom-fields', async (_req, res) => {
+  const r = await listCustomFieldsHandler();
+  res.status(r.status).json(r.body);
+});
+app.post('/api/custom-fields', async (req, res) => {
+  const r = await createCustomFieldHandler(req.body ?? {}, await currentUser(req));
+  res.status(r.status).json(r.body);
+});
+app.post('/api/custom-fields/update', async (req, res) => {
+  const r = await updateCustomFieldHandler(req.body ?? {}, await currentUser(req));
+  res.status(r.status).json(r.body);
+});
+app.post('/api/custom-fields/delete', async (req, res) => {
+  const r = await deleteCustomFieldHandler(req.body ?? {});
   res.status(r.status).json(r.body);
 });
 

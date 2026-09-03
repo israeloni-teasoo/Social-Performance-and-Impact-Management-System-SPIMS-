@@ -7,6 +7,27 @@ export interface HelpTopic {
 
 export const HELP_TOPICS: HelpTopic[] = [
   {
+    id: 'reach-vs-impact',
+    tag: 'Impact',
+    question: 'What is the difference between reach and impact?',
+    answer: [
+      'Reach counts everyone a programme interacted with — people who applied, attended, were screened, or live inside a catchment area. Impact counts only those who actually received the intervention.',
+      'They are reported as two separate figures on purpose. The STEAM programme is the clearest example: 120,000 students applied for a scholarship and 48 received one. All 120,000 were reached; 48 were impacted. Reporting the full 120,000 as people impacted would overstate the result by a factor of 2,500.',
+      'Every programme page shows both figures, the conversion rate between them, and a note explaining what separates the two for that specific programme. The Executive Dashboard shows the portfolio totals and a breakdown by pillar.',
+      'Reach is not a lesser number — it is the honest measure of scale, and the gap between reach and impact is itself useful: 1,640 applications for 83 YEP training places is direct evidence of unmet demand.',
+    ],
+  },
+  {
+    id: 'custom-fields',
+    tag: 'Data',
+    question: 'Can we add our own fields to a programme?',
+    answer: [
+      'Yes. Each programme page has a "Questions about this programme" section where an executive or project manager can record a question stakeholders keep asking, along with the answer and its source.',
+      'The point is to stop the same question generating a fresh ad-hoc report each time. If the board repeatedly asks what share of scholarships went to host-community students, that answer lives on the programme page and appears in the programme\u2019s exported report.',
+      'Every answer carries a source and a last-updated stamp, on the same rule as impact figures — a number without a source is not reportable.',
+    ],
+  },
+  {
     id: 'lens-toggle',
     tag: 'Data',
     question: 'What does the Local / Global lens toggle on the Executive Dashboard actually do?',

@@ -1,5 +1,8 @@
+import { ReachVsImpactTip } from '../components/ReachPanel';
 import { InfoTip } from '../components/Tooltip';
+import { byPillar, formatCompact, formatCount, totalsFor } from '../reach';
 import { card } from '../ui';
+import type { Project, ProjectImpact } from '../types';
 
 const COMPLIANCE_ITEMS = [
   {
@@ -40,14 +43,28 @@ const OUTCOME_ROWS = [
   { delta: '+22K', desc: 'people gained clean-water access', localTag: 'PIA HCDT', globalTag: 'SDG 6' },
 ];
 
-const AT_A_GLANCE = [
-  { label: 'Social investment · FY26', value: '₦4.68B', sub: '90% of ₦5.2B budget' },
-  { label: 'Beneficiaries reached', value: '312K', sub: '▲ 18% vs FY25' },
-  { label: 'Active projects', value: '47', sub: '38 on track · 6 at risk · 3 delayed' },
-  { label: 'Host communities', value: '42', sub: 'Edo · Delta · Imo' },
-];
+const SPEND_TILE = { label: 'Social investment · FY26', value: '\u20a64.68B', sub: '90% of \u20a65.2B budget' };
+const COMMUNITIES_TILE = { label: 'Host communities', value: '42', sub: 'Edo \u00b7 Delta \u00b7 Imo' };
 
-export function ExecutiveDashboard({ targetYear }: { targetYear: number }) {
+export function ExecutiveDashboard({
+  targetYear,
+  projects,
+  impacts,
+}: {
+  targetYear: number;
+  projects: Project[];
+  impacts: Record<string, ProjectImpact>;
+}) {
+  const totals = totalsFor(projects, impacts);
+  const pillars = byPillar(projects, impacts);
+
+  const atAGlance = [
+    SPEND_TILE,
+    { label: 'Reach \u00b7 interactions', value: formatCompact(totals.reach), sub: `${formatCount(totals.reach)} people engaged`, tone: 'reach' as const },
+    { label: 'Impact \u00b7 people served', value: formatCompact(totals.impact), sub: `${formatCount(totals.impact)} · ${totals.conversionPct}% of interactions`, tone: 'impact' as const },
+    COMMUNITIES_TILE,
+  ];
+
   return (
     <div>
       <div style={{ marginBottom: 18 }}>
@@ -116,7 +133,7 @@ export function ExecutiveDashboard({ targetYear }: { targetYear: number }) {
           overflow: 'hidden',
         }}
       >
-        {AT_A_GLANCE.map((item, i) => (
+        {atAGlance.map((item, i) => (
           <div
             key={item.label}
             style={{
@@ -125,13 +142,64 @@ export function ExecutiveDashboard({ targetYear }: { targetYear: number }) {
               borderLeft: i === 0 ? 'none' : '1px solid var(--line)',
             }}
           >
-            <div style={{ fontSize: 10.5, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{item.label}</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10.5, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              {item.label}
+              {'tone' in item && <ReachVsImpactTip width={300} />}
+            </div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 2 }}>
-              <span style={{ fontSize: 19, fontWeight: 800, color: 'var(--navy)' }}>{item.value}</span>
+              <span
+                style={{
+                  fontSize: 19,
+                  fontWeight: 800,
+                  color: 'tone' in item && item.tone === 'impact' ? 'var(--accent)' : 'tone' in item ? '#2B4C9B' : 'var(--navy)',
+                }}
+              >
+                {item.value}
+              </span>
               <span style={{ fontSize: 11.5, color: 'var(--muted)' }}>{item.sub}</span>
             </div>
           </div>
         ))}
+      </div>
+
+      <div style={{ ...card, marginBottom: 18 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 10, marginBottom: 6, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 17, fontWeight: 800, color: 'var(--navy)' }}>
+            Reach and impact by pillar
+            <ReachVsImpactTip width={300} />
+          </div>
+          <div style={{ fontSize: 12.5, color: 'var(--muted)' }}>Scale on the left, delivered intervention on the right</div>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: 18 }}>
+          {pillars.map((p) => {
+            const share = totals.reach === 0 ? 0 : (p.reach / totals.reach) * 100;
+            const impactShare = p.reach === 0 ? 0 : (p.impact / p.reach) * 100;
+            return (
+              <div key={p.pillar}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, marginBottom: 6, flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--navy)' }}>
+                    {p.pillar} <span style={{ fontWeight: 500, color: 'var(--muted)' }}>· {p.projectCount} programme{p.projectCount === 1 ? '' : 's'}</span>
+                  </span>
+                  <span style={{ fontSize: 13, color: 'var(--muted)', whiteSpace: 'nowrap' }}>
+                    <strong style={{ color: '#2B4C9B' }}>{formatCount(p.reach)}</strong> reached ·{' '}
+                    <strong style={{ color: 'var(--accent)' }}>{formatCount(p.impact)}</strong> served
+                  </span>
+                </div>
+                <div style={{ display: 'flex', height: 10, borderRadius: 5, overflow: 'hidden', background: 'var(--bg)' }}>
+                  <span style={{ width: `${share}%`, display: 'flex', background: 'rgba(43,76,155,0.28)' }}>
+                    <span style={{ width: `${Math.max(impactShare, 0.5)}%`, background: 'var(--accent)' }} />
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 18, paddingTop: 14, borderTop: '1px solid var(--line)', lineHeight: 1.55 }}>
+          Bar width is each pillar's share of total reach; the solid segment inside it is the share that received the intervention.
+          {totals.unmapped.length > 0 && ` ${totals.unmapped.join(', ')} not yet separated into reach and impact, so ${totals.unmapped.length === 1 ? 'it is' : 'they are'} excluded from these totals.`}
+        </div>
       </div>
 
       <div className="grid-dash-money" style={{ marginBottom: 18 }}>

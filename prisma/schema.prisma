@@ -45,6 +45,7 @@ model Project {
   impact       ProjectImpact?
   fieldTasks   FieldTask[]
   spendEntries SpendEntry[]
+  customFields CustomField[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -56,16 +57,17 @@ model ProjectImpact {
   projectId   String  @unique
   projectCode String
 
-  inputs            String
-  activities        String
-  outputHeadline    String
-  outcome           String
-  impactHeadline    String
-  impactFigure      String
-  impactFigureLabel String
-  impactPoints      Json // string[]
-  methodology       Json // { metric, calculation, source, note }
-  impactScenarios   Json? // ImpactScenario[]
+  inputs              String
+  activities          String
+  outputHeadline      String
+  outcome             String
+  reach               Json? // ReachProfile — interactions vs. people actually served
+  impactHeadline      String
+  impactFigure        String
+  impactFigureLabel   String
+  impactPoints        Json // string[]
+  methodology         Json // { metric, calculation, source, note }
+  impactScenarios     Json? // ImpactScenario[]
   impactScenarioBasis String?
   baseline            Json // BaselinePoint[]
   baselineCaption     String
@@ -96,7 +98,7 @@ model Indicator {
 }
 
 model Report {
-  id      String   @id
+  id      String @id
   name    String
   lens    String
   desc    String
@@ -194,25 +196,43 @@ model Target {
 }
 
 model SpendEntry {
-  id          String   @id @default(cuid())
-  project     Project  @relation(fields: [projectId], references: [id])
-  projectId   String
-  periodMonth String
-  pillar      String
-  amountNgn   Float
+  id            String   @id @default(cuid())
+  project       Project  @relation(fields: [projectId], references: [id])
+  projectId     String
+  periodMonth   String
+  pillar        String
+  amountNgn     Float
   fundingSource String
-  notes       String?
-  createdAt   DateTime @default(now())
+  notes         String?
+  createdAt     DateTime @default(now())
 }
 
 model BulkUpload {
-  id         String   @id @default(cuid())
-  filename   String
-  dataType   String
-  projectId  String?
-  rowCount   Int
-  status     String   @default("Received")
-  uploadedBy User     @relation(fields: [uploadedById], references: [id])
+  id           String   @id @default(cuid())
+  filename     String
+  dataType     String
+  projectId    String?
+  rowCount     Int
+  status       String   @default("Received")
+  uploadedBy   User     @relation(fields: [uploadedById], references: [id])
   uploadedById String
-  createdAt  DateTime @default(now())
+  createdAt    DateTime @default(now())
+}
+
+/// A question a programme keeps getting asked, answered on the programme's own page.
+model CustomField {
+  id          String  @id @default(cuid())
+  project     Project @relation(fields: [projectCode], references: [code], onDelete: Cascade)
+  projectCode String
+
+  question  String
+  answer    String
+  format    String // text | number | percent | naira | date
+  source    String
+  updatedBy String
+  updatedAt String
+
+  createdAt DateTime @default(now())
+
+  @@index([projectCode])
 }
