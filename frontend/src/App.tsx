@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import type { CSSProperties } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { ToastStack } from './components/ToastStack';
 import { Topbar } from './components/Topbar';
@@ -31,16 +32,48 @@ import { StakeholderRegister } from './views/StakeholderRegister';
 import { Targets } from './views/Targets';
 import { Team } from './views/Team';
 import { useAuth } from './useAuth';
+import type { AuthUser } from './useAuth';
 import { useAppData } from './useAppData';
 import { Login } from './views/Login';
 
 const TARGET_YEAR = 2030;
 const ORG_NAME = 'Seplat Energy Plc';
 
+const splash = (color: string): CSSProperties => ({
+  minHeight: '100vh',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  color,
+  fontFamily: "'Poppins', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+  padding: 24,
+  textAlign: 'center',
+});
+
 export default function App() {
   const { user, loading, demoMode, login, logout } = useAuth();
+
+  if (loading) return <div style={splash('var(--muted)')}>Loading SPIMS…</div>;
+  if (!user) return <Login onLogin={login} />;
+
+  // Keyed on the user so signing in as someone else remounts with their own data and
+  // landing view, rather than carrying the previous session's state across.
+  return <SignedInApp key={user.id} user={user} demoMode={demoMode} onLogout={logout} />;
+}
+
+/**
+ * Everything behind the sign-in screen.
+ *
+ * This is a separate component so the data hooks below only ever mount for a
+ * signed-in user. When they lived in the parent they fired on page load, before
+ * anyone had signed in; once the API began requiring a session those calls returned
+ * 401, the hooks fell back to the bundled sample data, and — because they load once on
+ * mount — never re-fetched after login. The app then showed seed data while appearing
+ * completely healthy.
+ */
+function SignedInApp({ user, demoMode, onLogout }: { user: AuthUser; demoMode: boolean; onLogout: () => void }) {
   const { projects: PROJECTS, projectImpacts: PROJECT_IMPACTS, communities: COMMUNITIES, indicators: INDICATORS, reports: REPORTS, evidence: EVIDENCE_ITEMS, loading: dataLoading, error: dataError } = useAppData();
-  const [view, setViewState] = useState<View>('dashboard');
+  const [view, setViewState] = useState<View>(DEFAULT_VIEW_FOR_ROLE[user.role]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [projectDetailReturnView, setProjectDetailReturnView] = useState<View>('portfolio');
@@ -53,15 +86,7 @@ export default function App() {
   const { members, inviteMember } = useTeamStore(pushToast);
   const { tasks, assignTask, setTaskStatus } = useTasksStore(pushToast);
   const { comments, addComment } = useReportCommentsStore(pushToast);
-  const { fields: customFields, addField, updateField, removeField } = useCustomFieldsStore(pushToast, user?.name ?? '');
-
-  useEffect(() => {
-    if (user) {
-      setViewState(DEFAULT_VIEW_FOR_ROLE[user.role]);
-      setSidebarOpen(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id]);
+  const { fields: customFields, addField, updateField, removeField } = useCustomFieldsStore(pushToast, user.name);
 
   const setView = (v: View) => {
     setViewState(v);
@@ -79,31 +104,8 @@ export default function App() {
     setView('communitydetail');
   };
 
-  if (loading) {
-    return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)', fontFamily: "'Poppins', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" }}>
-        Loading SPIMS…
-      </div>
-    );
-  }
-
-  if (!user) return <Login onLogin={login} />;
-
-  if (dataLoading) {
-    return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)', fontFamily: "'Poppins', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" }}>
-        Loading SPIMS…
-      </div>
-    );
-  }
-
-  if (dataError) {
-    return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent)', fontFamily: "'Poppins', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif", padding: 24, textAlign: 'center' }}>
-        {dataError}
-      </div>
-    );
-  }
+  if (dataLoading) return <div style={splash('var(--muted)')}>Loading SPIMS…</div>;
+  if (dataError) return <div style={splash('var(--accent)')}>{dataError}</div>;
 
   const role = user.role;
   const selectedProject = PROJECTS.find((p) => p.id === selectedProjectId) ?? null;
@@ -133,7 +135,7 @@ export default function App() {
           userName={user.name}
           userRole={user.roleLabel}
           demoMode={demoMode}
-          onLogout={logout}
+          onLogout={onLogout}
           onMenuClick={() => setSidebarOpen((o) => !o)}
           projects={PROJECTS}
           communities={COMMUNITIES}

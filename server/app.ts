@@ -14,6 +14,7 @@ import { closeTargetHandler, createTargetHandler, listTargetsHandler } from './h
 import { assignTaskHandler, listTasksHandler, setTaskStatusHandler } from './handlers/tasks';
 import { inviteTeamMemberHandler, listTeamHandler } from './handlers/team';
 import { prisma } from './lib/db';
+import { guard } from './lib/guard';
 import { requireUser } from './lib/requireAuth';
 import { clearSessionCookie, getSessionUserId, setSessionCookie } from './lib/session';
 
@@ -42,6 +43,23 @@ app.get('/api/health', async (_req, res) => {
   } catch {
     res.status(503).json({ status: 'degraded', database: 'unreachable' });
   }
+});
+
+/**
+ * Authorisation gate for every /api route.
+ *
+ * Placed ahead of the route table so a route cannot be added without being covered:
+ * anything not explicitly public requires a session, and any write without a
+ * permission rule is refused rather than allowed through.
+ */
+app.use('/api', async (req, res, next) => {
+  const { user, denial } = await guard(req, req.baseUrl + (req.path === '/' ? '' : req.path));
+  if (denial) {
+    res.status(denial.status).json(denial.body);
+    return;
+  }
+  res.locals.user = user;
+  next();
 });
 
 async function currentUser(req: Request) {

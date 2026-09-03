@@ -93,7 +93,8 @@ totals rather than counted as zero.
   approvals (approve/return/comment), report comments, custom fields
   (create/update/delete), `bulk-upload`, `reports/generate-preview`
 
-There is no public API surface beyond these, and no unauthenticated write path.
+Only `/api/health` and the three `/api/auth/*` routes are reachable without a session.
+Every other endpoint, read or write, requires one.
 
 ---
 
@@ -115,20 +116,47 @@ allowlist; the API never reflects arbitrary origins.
 
 ---
 
-## 6. Authorisation — read this section
+## 6. Authorisation
 
-Every write endpoint verifies **that** the caller has a valid session. Endpoints do
-**not** currently check **which role** that session holds.
+Enforcement happens in a single shared gate (`server/lib/guard.ts`) applied by both
+adapters, against one permission table (`server/lib/permissions.ts`). One
+implementation means the self-hosted and serverless deployments cannot drift into
+different security postures.
 
-In practice the interface only shows each role its own screens, so this is not
-reachable through normal use. But a user who crafted a request directly could call an
-endpoint belonging to another role — for example a Field Officer calling an approval
-endpoint.
+**Reads** are available to any signed-in user. SPIMS is a single-tenant internal
+system where staff are expected to see the portfolio; the meaningful restriction is on
+who can change it. This is a deliberate decision rather than an omission.
 
-**This is a known gap, it is not fixed, and it should be closed before the system holds
-data where the distinction between roles carries real consequence.** The fix is
-mechanical — a role check in the shared handler layer — and is the first item on the
-hardening list. We are flagging it rather than waiting for your review to find it.
+**Writes** are restricted by role, derived from what each role's navigation actually
+exposes — so the API permits exactly what the interface offers and nothing more:
+
+| Action | Permitted role |
+|---|---|
+| Targets (create, close), bulk upload | Executive |
+| Approvals (approve, return, comment), team invite, task assignment | Project Manager |
+| Task status updates | Field Officer, Project Manager |
+| Stakeholder register | Community Relations |
+| Report preview, report comments, programme custom fields | Executive, Project Manager |
+
+A write to a route with no permission rule is **refused by default**, so a route added
+without a rule fails visibly in development rather than shipping unprotected.
+
+Roles are read from the database on each request, not from the session token, so a
+role change or a disabled account takes effect immediately rather than when the
+seven-day token expires.
+
+### Correction to an earlier draft
+
+An earlier version of this document stated that every write endpoint verified a valid
+session, and that there was no unauthenticated write path. **That was incorrect.** On
+testing, every read endpoint and several write endpoints — targets, stakeholders, team
+invite, task status, approval approve/return, and custom-field deletion — accepted
+requests with no session at all. Only handlers that happened to take a user parameter
+were protected.
+
+This has been fixed and verified: unauthenticated requests to those endpoints now
+return 401, and cross-role requests return 403. The correction is recorded here rather
+than quietly amended, because the earlier statement was relied upon.
 
 ---
 
@@ -217,7 +245,7 @@ Stated plainly so they can be weighed during review.
 
 | # | Gap | Impact | Remedy |
 |---|---|---|---|
-| 1 | **No server-side role enforcement** (§6) | A crafted request could reach another role's endpoint | Role check in the handler layer — first hardening item |
+| 1 | ~~No server-side role enforcement~~ — **fixed**, see §6 | Was: any caller, signed in or not, could reach most endpoints | Closed: shared guard, permission table, default-deny on writes |
 | 2 | **No user-management screen** | Accounts are created via CLI script | Admin screen for create/disable/reset |
 | 3 | **Evidence upload is metadata only** | No file storage; the register records descriptions, not documents | Object storage plus upload/download |
 | 4 | **Bulk upload is partial** | Financial spend writes to live records; beneficiary counts, activity logs and project data are validated and logged for review only | Needs Seplat's decision on aggregation rules before automating |
@@ -227,8 +255,8 @@ Stated plainly so they can be weighed during review.
 | 8 | **No audit log** | Data changes record who and when on the row, but there is no immutable append-only trail | Dedicated audit table if required for assurance |
 | 9 | **Demo dataset ships in the repository** | Demo account passwords are public | Do not seed production; delete demo accounts (runbook §4) |
 
-Items 1, 2 and 6 are the ones we would close before a production go-live holding real
-data. Items 4 and 5 depend on decisions only Seplat can make.
+Item 1 is closed. Items 2 and 6 are the ones we would still close before a production
+go-live holding real data. Items 4 and 5 depend on decisions only Seplat can make.
 
 ---
 
