@@ -34,7 +34,7 @@ export function Login({ onLogin }: { onLogin: (email: string, password: string) 
         alignItems: 'center',
         justifyContent: 'center',
         background: 'var(--bg)',
-        fontFamily: "'Poppins',sans-serif",
+        fontFamily: "'Poppins', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
         padding: '32px 20px',
       }}
     >

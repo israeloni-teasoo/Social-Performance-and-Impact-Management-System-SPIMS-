@@ -81,7 +81,7 @@ export default function App() {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)', fontFamily: "'Poppins',sans-serif" }}>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)', fontFamily: "'Poppins', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" }}>
         Loading SPIMS…
       </div>
     );
@@ -91,7 +91,7 @@ export default function App() {
 
   if (dataLoading) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)', fontFamily: "'Poppins',sans-serif" }}>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)', fontFamily: "'Poppins', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" }}>
         Loading SPIMS…
       </div>
     );
@@ -99,7 +99,7 @@ export default function App() {
 
   if (dataError) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent)', fontFamily: "'Poppins',sans-serif", padding: 24, textAlign: 'center' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent)', fontFamily: "'Poppins', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif", padding: 24, textAlign: 'center' }}>
         {dataError}
       </div>
     );
@@ -111,7 +111,7 @@ export default function App() {
   const myTasks = tasks.filter((t) => t.assigneeId === 'tm-1');
 
   return (
-    <div className="spims-shell" style={{ fontFamily: "'Poppins',sans-serif", background: 'var(--bg)', color: 'var(--ink)' }}>
+    <div className="spims-shell" style={{ fontFamily: "'Poppins', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif", background: 'var(--bg)', color: 'var(--ink)' }}>
       <div className={`spims-sidebar-backdrop${sidebarOpen ? ' is-open' : ''}`} onClick={() => setSidebarOpen(false)} />
       <Sidebar
         role={role}

@@ -1,0 +1,27 @@
+# SPIMS API. Runs the Express app and owns database migrations.
+FROM node:22-alpine
+
+WORKDIR /app
+
+# The Prisma schema must be present before `npm ci`, because the postinstall hook
+# runs `prisma generate` against it.
+COPY package.json package-lock.json ./
+COPY prisma ./prisma
+RUN npm ci
+
+# Dev dependencies are kept deliberately: the runtime uses tsx to execute the
+# TypeScript sources directly, and the Prisma CLI applies migrations on start.
+COPY tsconfig.json ./
+COPY server ./server
+# prisma/seed.ts reads the seed dataset from the frontend sources.
+COPY frontend/src ./frontend/src
+
+COPY docker/api-entrypoint.sh /usr/local/bin/api-entrypoint.sh
+RUN chmod +x /usr/local/bin/api-entrypoint.sh
+
+ENV NODE_ENV=production
+ENV API_PORT=8787
+EXPOSE 8787
+
+ENTRYPOINT ["/usr/local/bin/api-entrypoint.sh"]
+CMD ["npm", "run", "start:api"]

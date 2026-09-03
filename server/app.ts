@@ -13,12 +13,36 @@ import { createStakeholderHandler, listStakeholdersHandler } from './handlers/st
 import { closeTargetHandler, createTargetHandler, listTargetsHandler } from './handlers/targets';
 import { assignTaskHandler, listTasksHandler, setTaskStatusHandler } from './handlers/tasks';
 import { inviteTeamMemberHandler, listTeamHandler } from './handlers/team';
+import { prisma } from './lib/db';
 import { requireUser } from './lib/requireAuth';
 import { clearSessionCookie, getSessionUserId, setSessionCookie } from './lib/session';
 
-const app = express();
+export const app = express();
 app.use(express.json({ limit: '5mb' })); // CSV text rides along in the JSON body for bulk uploads
-app.use(cors({ origin: true, credentials: true }));
+
+// In the supported deployments the browser is same-origin with the API (nginx serves
+// the build and proxies /api, and Vite proxies /api in dev), so no CORS header is
+// needed. Reflecting every origin with credentials would let any site make
+// credentialed requests against this API, so cross-origin access is opt-in and must
+// name its origins explicitly.
+const corsOrigins = (process.env.CORS_ORIGINS ?? '')
+  .split(',')
+  .map((o) => o.trim())
+  .filter(Boolean);
+if (corsOrigins.length > 0) {
+  app.use(cors({ origin: corsOrigins, credentials: true }));
+}
+
+// Container healthcheck: liveness plus a real round trip to Postgres, so an
+// unreachable database fails the check instead of reporting a healthy app.
+app.get('/api/health', async (_req, res) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    res.status(200).json({ status: 'ok', database: 'connected' });
+  } catch {
+    res.status(503).json({ status: 'degraded', database: 'unreachable' });
+  }
+});
 
 async function currentUser(req: Request) {
   return requireUser(getSessionUserId(req));
@@ -170,9 +194,4 @@ app.get('/api/report-comments', async (_req, res) => {
 app.post('/api/report-comments', async (req, res) => {
   const r = await addReportCommentHandler(req.body ?? {}, await currentUser(req));
   res.status(r.status).json(r.body);
-});
-
-const port = Number(process.env.API_PORT ?? 8787);
-app.listen(port, () => {
-  console.log(`SPIMS API dev server listening on http://localhost:${port}`);
 });

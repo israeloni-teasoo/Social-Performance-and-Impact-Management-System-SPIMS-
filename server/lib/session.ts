@@ -9,6 +9,19 @@ interface CookieSetter {
   setHeader(name: string, value: string | string[]): void;
 }
 
+/**
+ * A Secure cookie is never sent over plain HTTP, so an internal self-hosted
+ * deployment served on http:// would accept the login and then silently drop the
+ * session on the next request. Defaults to on in production — the correct default,
+ * since sessions belong over TLS — but stays explicitly overridable for an
+ * internal-HTTP install rather than failing in a way that looks like a bad password.
+ */
+function secureCookie(): boolean {
+  const explicit = process.env.SESSION_COOKIE_SECURE;
+  if (explicit !== undefined) return explicit === 'true';
+  return process.env.NODE_ENV === 'production';
+}
+
 export function getSessionUserId(req: CookieCarrier): string | null {
   const raw = req.headers.cookie;
   if (!raw) return null;
@@ -27,7 +40,7 @@ export function setSessionCookie(res: CookieSetter, token: string) {
       sameSite: 'lax',
       path: '/',
       maxAge: SESSION_MAX_AGE_SECONDS,
-      secure: process.env.NODE_ENV === 'production',
+      secure: secureCookie(),
     }),
   );
 }
@@ -40,7 +53,7 @@ export function clearSessionCookie(res: CookieSetter) {
       sameSite: 'lax',
       path: '/',
       maxAge: 0,
-      secure: process.env.NODE_ENV === 'production',
+      secure: secureCookie(),
     }),
   );
 }

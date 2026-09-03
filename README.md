@@ -4,7 +4,7 @@ An implementation of the SPIMS platform designed for Teasoo Consulting / Seplat 
 
 SPIMS moves social-investment reporting from a spend register to an output → outcome → impact chain, with one dataset that produces both a Nigerian local-compliance report (NCDMB/PIA/NUPRC) and a global ESG report (GRI/IFRS/SDG). It has four personas — **Executive**, **Project Manager**, **Field Officer**, and **Community Relations** — each with their own workspace. The sign-in screen lists a demo account for each persona.
 
-**Live demo (frontend only, pre-backend)**: `https://<owner>.github.io/<repo>/` via GitHub Pages — see [Versions](#versions) below for why this no longer matches `main`.
+**Live demo**: `https://<owner>.github.io/<repo>/` via GitHub Pages. Pages is a static host with no API, so the app detects that and runs in **demo mode** — it signs in against the bundled demo accounts, reads the sample dataset, and saves changes to the viewer's browser only. A "Demo mode" pill in the topbar makes this unambiguous during a client demo. Claude report generation is the one feature that genuinely needs a server and says so.
 
 ## Stack
 
@@ -91,8 +91,27 @@ The target setup is **Vercel** (hosts the frontend build and the `api/` function
 ## Versions
 
 - **`main`** — the current, actively developed build, now backed by a real database and API (see Stack above).
-- **GitHub Pages** (the `.github/workflows` deploy target) only builds `frontend/` as a static site — it has **no database or API to talk to**, so a Pages deploy of the current `main` won't function past the sign-in screen. Pages was the right target for the earlier static-prototype phase of this project; it isn't anymore. Point deployment at Vercel (see above) going forward, or repurpose/remove the Pages workflow.
+- **GitHub Pages** (the `.github/workflows` deploy target) builds only `frontend/` as a static site, with no database or API behind it. The app detects the absence of an API by response content type — a static host answers unknown paths with HTML, a real API returns JSON, including a 401 JSON when signed out, so status code alone is not a usable signal — and falls back to demo mode. Pages therefore stays a valid demo target; it is not a deployment target for real data.
 - **`v1-archive`** branch — a frozen snapshot of the original v1 static prototype (state reviewed with Seplat before the 26 Aug 2026 feedback round), preserved for reference/rollback.
+
+## Self-hosting
+
+Seplat's stated model is to hold their own data on their own infrastructure, with no
+vendor access after handover. `docker compose up -d --build` brings up the full stack
+— nginx serving the build and proxying the API, the Node API, and PostgreSQL on a
+named volume with no host port published.
+
+- **[docs/SELF-HOSTING.md](docs/SELF-HOSTING.md)** — install, first-boot, TLS, backup
+  and restore, upgrades, troubleshooting, and the handover position.
+- **[docs/TECHNICAL-SPECIFICATION.md](docs/TECHNICAL-SPECIFICATION.md)** — for Seplat
+  IT review: architecture, data model, auth, outbound data flows, and a plain list of
+  known gaps.
+
+Because the API is written as framework-agnostic handlers with thin adapters, the
+self-hosted Express deployment and the serverless demo run the same business logic.
+
+Accounts for a real deployment are created with `npm run create:user` — the demo seed
+must never be used where real data lives, since its passwords are in this repository.
 
 ## Roadmap
 
@@ -106,5 +125,8 @@ The target setup is **Vercel** (hosts the frontend build and the `api/` function
 ## Known gaps
 
 - Evidence "Upload" is presentational (no real file upload/storage) — it's the one workflow still not backed by a real table.
-- No server-side role enforcement yet beyond "is this a valid session" — a Field Officer's session token could technically call a Manager-only endpoint. Routes don't currently check `role` before acting; that's the next hardening pass before a real multi-tenant deployment.
+- No server-side role enforcement yet beyond "is this a valid session" — a Field Officer's session token could technically call a Manager-only endpoint. Routes don't currently check `role` before acting; that's the next hardening pass before a real deployment holding live data.
+- Poppins is loaded from Google Fonts, so every user's browser makes a third-party request on each page load. It degrades to a system font stack when unreachable, but the font should be self-hosted before any production go-live — see [docs/SELF-HOSTING.md](docs/SELF-HOSTING.md) §8.
+- No user-management screen — accounts are created with `npm run create:user`. No audit log beyond per-row "updated by/at" stamps.
+- The full list, written for Seplat IT review, is in [docs/TECHNICAL-SPECIFICATION.md](docs/TECHNICAL-SPECIFICATION.md) §11.
 - PDF/Excel/Word exports remain hand-generated client-side with zero dependencies (unchanged from the static-prototype version) — they now include the actual compiled report content and the report's scope (project selection + financial year), not just metadata.

@@ -4,12 +4,14 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev:api": "tsx watch server/devServer.ts",
+    "dev:api": "tsx watch server/main.ts",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "tsx prisma/seed.ts",
     "db:reset": "prisma migrate reset --force",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "start:api": "tsx server/main.ts",
+    "create:user": "tsx prisma/createUser.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.1",
