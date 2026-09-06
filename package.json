@@ -11,7 +11,8 @@
     "db:reset": "prisma migrate reset --force",
     "postinstall": "prisma generate",
     "start:api": "tsx server/main.ts",
-    "create:user": "tsx prisma/createUser.ts"
+    "create:user": "tsx prisma/createUser.ts",
+    "report": "node docs/status-report/build.cjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.1",
@@ -30,8 +31,12 @@
     "@types/express": "^4.17.21",
     "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^22.7.4",
+    "docx": "^9.7.1",
     "prisma": "^5.20.0",
     "tsx": "^4.19.1",
     "typescript": "^5.6.2"
+  },
+  "overrides": {
+    "qs": "^6.16.0"
   }
 }

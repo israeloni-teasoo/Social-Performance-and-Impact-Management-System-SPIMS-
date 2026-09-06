@@ -113,6 +113,20 @@ self-hosted Express deployment and the serverless demo run the same business log
 Accounts for a real deployment are created with `npm run create:user` — the demo seed
 must never be used where real data lives, since its passwords are in this repository.
 
+## Documentation
+
+- **[docs/PROJECT-STATUS.md](docs/PROJECT-STATUS.md)** — where the project stands: what
+  is built, what the system does, what is outstanding, the options for each and the
+  recommendation. `docs/SPIMS-Project-Status.docx` is the same content as a Word
+  document for the client.
+- **[docs/TECHNICAL-SPECIFICATION.md](docs/TECHNICAL-SPECIFICATION.md)** — for Seplat IT.
+- **[docs/SELF-HOSTING.md](docs/SELF-HOSTING.md)** — operator runbook.
+
+The status report is **generated** — edit `docs/status-report/content.cjs` and run
+`npm run report`, which rewrites both the Markdown and the Word file. Never edit either
+output by hand. Keep it current in the same commit as any change it describes; see
+[CLAUDE.md](CLAUDE.md).
+
 ## Roadmap
 
 - **PowerPoint file export** — the Claude-generated slide *outline* exists (Reports & Exports → Preview report → Slide preview); turning that into an actual downloadable `.pptx` with real chart graphics is the remaining piece.
