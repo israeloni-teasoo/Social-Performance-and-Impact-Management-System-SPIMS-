@@ -13,6 +13,7 @@ import { createStakeholderHandler, listStakeholdersHandler } from './handlers/st
 import { closeTargetHandler, createTargetHandler, listTargetsHandler } from './handlers/targets';
 import { assignTaskHandler, listTasksHandler, setTaskStatusHandler } from './handlers/tasks';
 import { inviteTeamMemberHandler, listTeamHandler } from './handlers/team';
+import { changeOwnPasswordHandler, createUserHandler, listUsersHandler, resetUserPasswordHandler, setUserActiveHandler, setUserRoleHandler } from './handlers/users';
 import { prisma } from './lib/db';
 import { guard } from './lib/guard';
 import { requireUser } from './lib/requireAuth';
@@ -201,6 +202,34 @@ app.post('/api/custom-fields/update', async (req, res) => {
 });
 app.post('/api/custom-fields/delete', async (req, res) => {
   const r = await deleteCustomFieldHandler(req.body ?? {});
+  res.status(r.status).json(r.body);
+});
+
+// --- User accounts ---
+// The guard has already established the caller's role, so currentUser cannot be null
+// on these routes; the non-null assertion documents that rather than hiding it.
+app.get('/api/users', async (_req, res) => {
+  const r = await listUsersHandler();
+  res.status(r.status).json(r.body);
+});
+app.post('/api/users', async (req, res) => {
+  const r = await createUserHandler(req.body ?? {});
+  res.status(r.status).json(r.body);
+});
+app.post('/api/users/role', async (req, res) => {
+  const r = await setUserRoleHandler(req.body ?? {}, (await currentUser(req))!);
+  res.status(r.status).json(r.body);
+});
+app.post('/api/users/active', async (req, res) => {
+  const r = await setUserActiveHandler(req.body ?? {}, (await currentUser(req))!);
+  res.status(r.status).json(r.body);
+});
+app.post('/api/users/reset-password', async (req, res) => {
+  const r = await resetUserPasswordHandler(req.body ?? {});
+  res.status(r.status).json(r.body);
+});
+app.post('/api/users/change-password', async (req, res) => {
+  const r = await changeOwnPasswordHandler(req.body ?? {}, (await currentUser(req))!);
   res.status(r.status).json(r.body);
 });
 

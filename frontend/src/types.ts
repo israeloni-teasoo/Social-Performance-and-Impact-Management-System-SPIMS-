@@ -2,6 +2,7 @@ export type Role = 'exec' | 'manager' | 'field' | 'relations';
 
 export type View =
   | 'dashboard'
+  | 'users'
   | 'portfolio'
   | 'impact'
   | 'communities'
@@ -265,4 +266,24 @@ export interface NewCustomFieldInput {
   answer: string;
   format: CustomFieldFormat;
   source: string;
+}
+
+/** An account as shown to an administrator. Never carries the password hash. */
+export interface ManagedUser {
+  id: string;
+  email: string;
+  name: string;
+  role: Role;
+  roleLabel: string;
+  initials: string;
+  /** Accounts are deactivated rather than deleted, so their history survives. */
+  active: boolean;
+  createdAt: string;
+}
+
+export interface NewUserInput {
+  email: string;
+  name: string;
+  role: Role;
+  password: string;
 }

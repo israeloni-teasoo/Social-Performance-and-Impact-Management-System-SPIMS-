@@ -143,8 +143,14 @@ DELETE FROM "User" WHERE email IN (
 );
 ```
 
-> SPIMS has no user-management screen yet. Accounts are created with this script.
-> That is a known gap, listed in the technical specification.
+> This script exists to create the **first** account. After that, sign in as that
+> Executive and use **User Accounts** in the interface to create everyone else, set
+> roles, deactivate people who leave, and reset passwords. Every user can change their
+> own password from the same screen.
+>
+> Deactivating an account signs it out immediately — the existing session stops working
+> on its next request. Accounts are deactivated rather than deleted so the comments and
+> uploads attributed to that person survive.
 
 ---
 
@@ -217,9 +223,12 @@ deliberately, rather than starting against a mismatched schema.
 Postgres is unreachable. Check `docker compose ps` and `docker compose logs db`. The
 API recovers on its own once the database returns — no restart needed.
 
-**The interface renders in a different typeface.**
-The build requests Poppins from Google Fonts. On a network without egress it falls
-back to a system font stack and remains fully legible. See §8 to remove the dependency.
+**Nobody can sign in and the account was definitely created.**
+Check the account is active: a deactivated account is refused at sign-in with a clear
+message. If the last Executive was somehow deactivated directly in the database, create
+a fresh one with `npm run create:user` — the interface deliberately refuses to
+deactivate or demote the last active Executive, so this should not arise through
+normal use.
 
 ---
 
@@ -230,13 +239,13 @@ SPIMS works air-gapped, with two caveats.
 **Claude report generation** calls Anthropic's API. Leave `ANTHROPIC_API_KEY` empty
 and the feature returns a clear "not configured" message; nothing else is affected.
 
-**Poppins** is requested from `fonts.googleapis.com` by the page itself, so every
-user's browser makes that request. On a restricted network it fails silently and the
-fallback stack is used. To remove the dependency entirely, download the Poppins woff2
-files into `frontend/public/fonts/`, replace the `<link>` tags in
-`frontend/index.html` with a local `@font-face` block, and rebuild. **We recommend
-doing this before go-live** — not for appearance, but because it stops user browsers
-making third-party requests on every page load.
+**Fonts** are served by the application itself — the Poppins files are held in the
+repository and bundled at build time. No browser contacts Google, and the interface
+renders correctly with no outbound access. Nothing to do.
+
+If the font ever needs refreshing (a new weight, or a Google Fonts revision), run
+`node frontend/scripts/fetch-fonts.mjs` on a machine with internet access and commit
+the result. That is a development task, never required at install time.
 
 ---
 

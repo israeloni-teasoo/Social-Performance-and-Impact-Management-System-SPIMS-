@@ -5,5 +5,8 @@ import type { User } from '@prisma/client';
  * (a comment, an invite) to a real person rather than trusting a client-supplied name. */
 export async function requireUser(userId: string | null): Promise<User | null> {
   if (!userId) return null;
-  return prisma.user.findUnique({ where: { id: userId } });
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  // A deactivated account keeps a valid signed token until it expires, so the check
+  // has to happen here — on every request — not only at sign-in.
+  return user?.active ? user : null;
 }

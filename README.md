@@ -140,7 +140,8 @@ output by hand. Keep it current in the same commit as any change it describes; s
 
 - Evidence "Upload" is presentational (no real file upload/storage) — it's the one workflow still not backed by a real table.
 - ~~No server-side role enforcement~~ — **closed.** A shared guard (`server/lib/guard.ts`) applied by both the Express and serverless adapters now requires a session on every route except `/api/health` and `/api/auth/*`, and restricts writes by role from one permission table (`server/lib/permissions.ts`). Writes to a route with no rule are refused by default. Testing this turned up something worse than the documented gap: every read endpoint, and several writes, previously accepted requests with **no session at all**.
-- Poppins is loaded from Google Fonts, so every user's browser makes a third-party request on each page load. It degrades to a system font stack when unreachable, but the font should be self-hosted before any production go-live — see [docs/SELF-HOSTING.md](docs/SELF-HOSTING.md) §8.
-- No user-management screen — accounts are created with `npm run create:user`. No audit log beyond per-row "updated by/at" stamps.
+- ~~Poppins loaded from Google Fonts~~ — **closed.** The font is served by the app itself (`frontend/src/assets/fonts`, refreshed with `node frontend/scripts/fetch-fonts.mjs`). Verified: a signed-in session makes zero external requests.
+- ~~No user-management screen~~ — **closed.** Executives manage accounts in the interface; `npm run create:user` now only bootstraps the first one. Accounts are deactivated rather than deleted, and deactivation ends live sessions on the next request.
+- No audit log beyond per-row "updated by/at" stamps.
 - The full list, written for Seplat IT review, is in [docs/TECHNICAL-SPECIFICATION.md](docs/TECHNICAL-SPECIFICATION.md) §11.
 - PDF/Excel/Word exports remain hand-generated client-side with zero dependencies (unchanged from the static-prototype version) — they now include the actual compiled report content and the report's scope (project selection + financial year), not just metadata.

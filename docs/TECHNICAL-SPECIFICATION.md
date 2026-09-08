@@ -51,7 +51,7 @@ weaker.
 
 | Table | Holds |
 |---|---|
-| `User` | Login accounts — email, bcrypt hash, role |
+| `User` | Login accounts — email, bcrypt hash, role, active flag |
 | `Project` | Programme master record — budget, pillar, state, status |
 | `ProjectImpact` | Impact chain per programme: inputs, activities, outputs, outcomes, **reach**, impact, methodology, provenance |
 | `CustomField` | Per-programme question/answer pairs with sources |
@@ -110,6 +110,10 @@ Every other endpoint, read or write, requires one.
   (`SESSION_COOKIE_SECURE`).
 - Rotating `JWT_SECRET` invalidates all sessions immediately — the lever to pull in an
   incident.
+- Accounts are **deactivated, never deleted**, because a user is referenced by the
+  comments they wrote and the uploads they made. A deactivated account is refused at
+  sign-in and its existing session stops working on its next request, not when the
+  token expires — the role and active flag are read from the database per request.
 
 Cross-origin access is **off by default**. If needed, `CORS_ORIGINS` takes an explicit
 allowlist; the API never reflects arbitrary origins.
@@ -137,6 +141,18 @@ exposes — so the API permits exactly what the interface offers and nothing mor
 | Task status updates | Field Officer, Project Manager |
 | Stakeholder register | Community Relations |
 | Report preview, report comments, programme custom fields | Executive, Project Manager |
+| Account administration — create, set role, deactivate, reset password | Executive |
+| Changing your own password | Any signed-in user |
+
+The account list is also restricted to the Executive on read, since it carries email
+addresses and role assignments rather than portfolio data. Account administration sits
+with the Executive because it is the senior role in this system; if Seplat wants
+separation of duties, a dedicated administrator role can be split out without
+disturbing anything else.
+
+Three changes are refused outright, because each would leave the system with no way
+in: deactivating your own account, changing your own role away from Executive, and
+deactivating or demoting the last active Executive.
 
 A write to a route with no permission rule is **refused by default**, so a route added
 without a rule fails visibly in development rather than shipping unprotected.
@@ -179,16 +195,13 @@ the exposure is limited — but it is still data crossing your boundary to a thi
 and **it is Seplat IT's decision whether that is acceptable.** If it is not, the
 feature can be left disabled indefinitely without affecting any other function.
 
-### 7.2 Google Fonts — remove before go-live
+### 7.2 Web fonts — resolved
 
-The page requests the Poppins typeface from `fonts.googleapis.com`, so **each user's
-browser** makes a third-party request on every page load, exposing their IP and the
-referring host to Google. It fails gracefully on a restricted network (a system font
-stack is used).
-
-Recommendation: self-host the font files before go-live. This removes the only
-unavoidable third-party call in normal operation. Instructions are in the self-hosting
-runbook, §8.
+Earlier versions requested the Poppins typeface from Google, so every user's browser
+made a third-party request on each page load. **The font is now served by the
+application itself.** The files are held in the repository and bundled at build time,
+so no browser contacts Google, and the interface renders correctly with no outbound
+access at all. Poppins is used under the SIL Open Font License 1.1.
 
 ### 7.3 Media monitoring — planned, not built
 
@@ -246,17 +259,18 @@ Stated plainly so they can be weighed during review.
 | # | Gap | Impact | Remedy |
 |---|---|---|---|
 | 1 | ~~No server-side role enforcement~~ — **fixed**, see §6 | Was: any caller, signed in or not, could reach most endpoints | Closed: shared guard, permission table, default-deny on writes |
-| 2 | **No user-management screen** | Accounts are created via CLI script | Admin screen for create/disable/reset |
+| 2 | ~~No user-management screen~~ — **closed** | Was: accounts could only be created by command line | Executives create accounts, set roles, deactivate and reset passwords in the interface; every user can change their own password |
 | 3 | **Evidence upload is metadata only** | No file storage; the register records descriptions, not documents | Object storage plus upload/download |
 | 4 | **Bulk upload is partial** | Financial spend writes to live records; beneficiary counts, activity logs and project data are validated and logged for review only | Needs Seplat's decision on aggregation rules before automating |
 | 5 | **SROI and compliance figures are illustrative** | Labelled as such in the interface, with methodology shown, but not computed from live data | Agree financial proxies with Seplat M&E, then compute |
-| 6 | **Google Fonts dependency** (§7.2) | Third-party request from each user's browser | Self-host the font — before go-live |
+| 6 | ~~Google Fonts dependency~~ — **closed** (§7.2) | Was: a third-party request from each user's browser on every page load | Font files are served by the application; verified that a signed-in session makes zero external requests |
 | 7 | **PowerPoint export produces an outline, not a file** | No `.pptx` with chart graphics | Generation library plus chart rendering |
 | 8 | **No audit log** | Data changes record who and when on the row, but there is no immutable append-only trail | Dedicated audit table if required for assurance |
 | 9 | **Demo dataset ships in the repository** | Demo account passwords are public | Do not seed production; delete demo accounts (runbook §4) |
 
-Item 1 is closed. Items 2 and 6 are the ones we would still close before a production
-go-live holding real data. Items 4 and 5 depend on decisions only Seplat can make.
+Items 1, 2 and 6 are closed — the three we considered blocking for a production
+go-live holding real data. Of what remains, items 4 and 5 depend on decisions only
+Seplat can make; 3, 7 and 8 are scheduled work.
 
 ---
 

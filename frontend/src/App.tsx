@@ -30,6 +30,7 @@ import { ProjectPortfolio } from './views/ProjectPortfolio';
 import { Reports } from './views/Reports';
 import { StakeholderRegister } from './views/StakeholderRegister';
 import { Targets } from './views/Targets';
+import { UserAccounts } from './views/UserAccounts';
 import { Team } from './views/Team';
 import { useAuth } from './useAuth';
 import type { AuthUser } from './useAuth';
@@ -188,6 +189,7 @@ function SignedInApp({ user, demoMode, onLogout }: { user: AuthUser; demoMode: b
           {view === 'targets' && <Targets targets={targets} onAdd={addTarget} onClose={closeTarget} pushToast={pushToast} />}
           {view === 'team' && <Team members={members} tasks={tasks} projects={PROJECTS} onInvite={inviteMember} onAssignTask={assignTask} />}
           {view === 'bulkupload' && <BulkUpload projects={PROJECTS} pushToast={pushToast} />}
+          {view === 'users' && <UserAccounts currentUserId={user.id} canAdminister={role === 'exec'} pushToast={pushToast} />}
           {view === 'help' && <HelpPage projects={PROJECTS} indicators={INDICATORS} goProjectDetail={(id) => goProjectDetail(id, 'help')} />}
           {view === 'projectdetail' && selectedProject && (
             <ProjectDetail

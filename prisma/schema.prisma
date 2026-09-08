@@ -22,6 +22,10 @@ model User {
   role         Role
   roleLabel    String
   initials     String
+  /// Accounts are deactivated rather than deleted: a user is referenced by the
+  /// comments they wrote and the uploads they made, and that history must survive
+  /// someone leaving.
+  active       Boolean  @default(true)
   createdAt    DateTime @default(now())
 
   approvalComments ApprovalComment[]

@@ -18,7 +18,26 @@ export const PUBLIC_ROUTES = ['/api/health', '/api/auth/login', '/api/auth/logou
 /** Any signed-in role. */
 const ANY: Role[] = ['exec', 'manager', 'field', 'relations'];
 
+/**
+ * Reads that are not open to every signed-in user. The account list carries email
+ * addresses and role assignments, which is administrative rather than portfolio data.
+ */
+export const READ_PERMISSIONS: Record<string, Role[]> = {
+  '/api/users': ['exec'],
+};
+
 export const WRITE_PERMISSIONS: Record<string, Role[]> = {
+  // Account administration. The executive is the senior role in this system, so it
+  // holds it; if Seplat wants separation of duties, a dedicated admin role can be
+  // split out without disturbing anything else.
+  '/api/users': ['exec'],
+  '/api/users/role': ['exec'],
+  '/api/users/active': ['exec'],
+  '/api/users/reset-password': ['exec'],
+  // Anyone may change their own password — that is what makes an administrator-set
+  // password acceptable.
+  '/api/users/change-password': ANY,
+
   // Executive — Targets and Bulk Upload sit under the executive's Configure section.
   '/api/targets': ['exec'],
   '/api/targets/close': ['exec'],
@@ -66,6 +85,10 @@ export function checkAccess(method: string, path: string, role: Role | null): Ac
 
   const verb = method.toUpperCase();
   if (verb === 'GET' || verb === 'HEAD') {
+    const restricted = READ_PERMISSIONS[route];
+    if (restricted) {
+      return restricted.includes(role) ? null : { status: 403, body: { error: 'Your role cannot view this.' } };
+    }
     return ANY.includes(role) ? null : { status: 403, body: { error: 'Not permitted.' } };
   }
 

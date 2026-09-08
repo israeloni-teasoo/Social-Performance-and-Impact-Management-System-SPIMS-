@@ -176,6 +176,12 @@ export function Sidebar({
         )}
 
         <div style={{ marginTop: 'auto', paddingTop: 12 }}>
+          <NavButton
+            icon="team"
+            label={role === 'exec' ? 'User Accounts' : 'My Account'}
+            active={view === 'users'}
+            onClick={() => setView('users')}
+          />
           <NavButton icon="help" label="Help & Standards" active={view === 'help'} onClick={() => setView('help')} />
         </div>
       </nav>

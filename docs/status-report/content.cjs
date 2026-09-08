@@ -16,9 +16,9 @@ module.exports = {
     subtitle: 'Social Performance & Impact Management System',
     client: 'Prepared for Seplat Energy Plc',
     author: 'Teasoo Consulting',
-    version: '1.0',
-    date: '6 September 2026',
-    commit: 'e31e9e2',
+    version: '1.1',
+    date: '8 September 2026',
+    commit: '1bee977',
   },
 
   sections: [
@@ -49,7 +49,7 @@ module.exports = {
         {
           type: 'p',
           text:
-            'The system is ready to be demonstrated and to be installed on Seplat infrastructure for evaluation. It is not yet ready to hold live production data: two hardening items remain, and several figures are still illustrative pending Seplat’s own data and methodology decisions. Those are listed plainly in sections 4 and 5.',
+            'The system is ready to be demonstrated and to be installed on Seplat infrastructure. The three items we regarded as blocking a deployment holding real data — server-side permission enforcement, account administration, and the removal of third-party calls from the interface — are now closed. Several figures remain illustrative pending Seplat’s own data and methodology decisions, and those are listed plainly in sections 4 and 5.',
         },
         {
           type: 'p',
@@ -80,6 +80,8 @@ module.exports = {
             ['Bulk upload', 'Self-serve CSV upload with four downloadable templates, server-side validation and parsing, and an audit record of every upload.'],
             ['AI report generation', 'Claude generates a slide outline from the compiled report content. Runs server-side only; the API key never reaches the browser.'],
             ['Security', 'Every route requires a session except the health check and sign-in. Writes restricted by role from a single permission table. Writes to a route with no rule are refused by default.'],
+            ['Account administration', 'Executives create accounts, assign roles, deactivate people who have left and reset passwords, all from the interface. Every user can change their own password. Accounts are deactivated rather than deleted so their contributions survive, and deactivation ends any live session immediately.'],
+            ['No third-party calls in normal use', 'The interface typeface is served by the application rather than fetched from Google, so no user’s browser contacts an outside service on page load and the system works on a network with no outbound access.'],
             ['Deployment', 'Docker Compose stack — web, application and database — with the database unreachable from outside the application. Operator runbook and technical specification for Seplat IT.'],
           ],
         },
@@ -103,7 +105,7 @@ module.exports = {
           type: 'table',
           head: ['Role', 'Can do'],
           rows: [
-            ['Executive', 'View the portfolio dashboard with reach, impact, spend and compliance position; browse programmes and communities; analyse the portfolio-wide impact chain; set and track organisational targets; compile and export reports; upload bulk data.'],
+            ['Executive', 'View the portfolio dashboard with reach, impact, spend and compliance position; browse programmes and communities; analyse the portfolio-wide impact chain; set and track organisational targets; compile and export reports; upload bulk data; administer user accounts.'],
             ['Project Manager', 'Manage assigned programmes; submit new programmes for approval; review, approve or return field submissions with comments; assign tasks and invite team members; comment on reports and request corrections.'],
             ['Field Officer', 'See assigned tasks and update their status; log field activity with disaggregated beneficiary counts; view the evidence register.'],
             ['Community Relations', 'Maintain the stakeholder register; view communities and the programmes reaching them.'],
@@ -140,6 +142,9 @@ module.exports = {
             'Exports contain the compiled report content, the reach and impact figures, and the programme custom fields.',
             'Bulk upload validates column structure against the published templates and rejects mismatches.',
             'The health check reports the database as unreachable when it is, and recovers on its own when it returns.',
+            'Account administration: an account can be created, given a role, deactivated and reactivated. A deactivated account is refused at sign-in and its existing session stops working on the next request.',
+            'The system refuses to deactivate your own account, to change your own role away from Executive, or to remove the last active Executive — the three changes that would lock everyone out.',
+            'A signed-in session makes no requests to any external service.',
           ],
         },
         {
@@ -173,8 +178,6 @@ module.exports = {
           head: ['Item', 'Constraint', 'Priority'],
           rows: [
             ['Production hosting', 'Accounts and credentials, then a short deployment', 'High'],
-            ['User management screen', 'Engineering. Accounts are currently created by command line', 'High'],
-            ['Self-hosting the interface font', 'Engineering, small. Currently the page requests a typeface from Google on every load', 'High'],
             ['Media and social mention monitoring', 'Engineering plus a decision on paid data', 'Medium'],
             ['PowerPoint export preserving charts', 'Engineering, plus Seplat IT approval of the AI used', 'Medium'],
             ['Evidence file storage', 'Engineering. The register records descriptions, not documents', 'Medium'],
@@ -271,11 +274,11 @@ module.exports = {
             'The evidence register currently records descriptions rather than documents. Options are object storage run inside Seplat’s environment, cloud object storage, or a plain server volume. Recommendation: object storage running alongside the application, which keeps files on Seplat infrastructure and behaves identically in both configurations.',
         },
 
-        { type: 'h3', text: '6.6 User management and single sign-on' },
+        { type: 'h3', text: '6.6 Single sign-on' },
         {
           type: 'p',
           text:
-            'Accounts are currently created with a command-line script, which is workable for installation but not for ongoing administration. Recommendation: build an administration screen for creating, disabling and resetting accounts. Separately, if Seplat wants staff to sign in with their existing corporate credentials, single sign-on should be scoped now rather than retrofitted — the authentication layer is isolated enough that adding it is straightforward today and progressively harder later.',
+            'Account administration is now built, so the command-line script is only needed to create the very first account at installation. What remains is whether staff should sign in with their existing Seplat credentials instead of a separate password. Recommendation: decide this now rather than later. The authentication layer is isolated enough that adding single sign-on against Seplat’s identity provider is straightforward today and becomes progressively harder as more accounts exist.',
         },
 
         { type: 'h3', text: '6.7 Bulk upload and live calculation' },
@@ -324,19 +327,18 @@ module.exports = {
           head: ['Stage', 'Work', 'Depends on'],
           rows: [
             ['1', 'Install on Seplat infrastructure, or stand up a cloud demonstration instance', 'Seplat infrastructure or hosting approval'],
-            ['2', 'User management screen and self-hosted interface font', 'Nothing — can proceed immediately'],
-            ['3', 'Worked example on one real programme, end to end', 'Seplat programme data and organisation chart'],
-            ['4', 'Media monitoring, phase one (press and web)', 'Nothing — can proceed immediately'],
-            ['5', 'PowerPoint export with charts', 'Seplat IT decision on AI; ideally their deck template'],
-            ['6', 'Evidence file storage', 'Stage 1'],
-            ['7', 'Bulk upload write-through and live SROI', 'Seplat aggregation rules and M&E validation'],
-            ['8', 'Media monitoring, phase two (social and hashtags)', 'Budget approval for a monitoring subscription'],
+            ['2', 'Worked example on one real programme, end to end', 'Seplat programme data and organisation chart'],
+            ['3', 'Media monitoring, phase one (press and web)', 'Nothing — can proceed immediately'],
+            ['4', 'PowerPoint export with charts', 'Seplat IT decision on AI; ideally their deck template'],
+            ['5', 'Evidence file storage', 'Stage 1'],
+            ['6', 'Bulk upload write-through and live SROI', 'Seplat aggregation rules and M&E validation'],
+            ['7', 'Media monitoring, phase two (social and hashtags)', 'Budget approval for a monitoring subscription'],
           ],
         },
         {
           type: 'p',
           text:
-            'Stages 2 and 4 require nothing from Seplat and can run in parallel with the hosting conversation. Stage 1 is the highest-value single step, because it converts the system from something demonstrated into something in use, and unblocks four later stages.',
+            'Stage 3 requires nothing from Seplat and can run in parallel with the hosting conversation. Stage 1 is the highest-value single step, because it converts the system from something demonstrated into something in use, and unblocks three later stages.',
         },
       ],
     },
