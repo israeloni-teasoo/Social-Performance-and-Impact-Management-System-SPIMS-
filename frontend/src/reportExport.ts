@@ -1,4 +1,4 @@
-import { formatCount } from './reach';
+import { formatCount } from './analytics/metrics';
 import type { ReportSection } from './reportContent';
 import type { CustomField, Project, ProjectImpact, Report } from './types';
 

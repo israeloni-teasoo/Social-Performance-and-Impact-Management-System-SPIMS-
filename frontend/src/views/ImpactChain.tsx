@@ -1,5 +1,5 @@
 import { ReachVsImpactTip } from '../components/ReachPanel';
-import { formatCount, totalsFor } from '../reach';
+import { analysePortfolio, formatCount } from '../analytics/metrics';
 import { useMemo, useState } from 'react';
 import { h1, input, PILLAR_COLORS, STATUS_COLORS, subtitle } from '../ui';
 import type { Community, Project, ProjectImpact } from '../types';
@@ -49,7 +49,7 @@ export function ImpactChain({
   const totalInvestment = filtered.reduce((sum, p) => sum + parseBudgetMillions(p.budget), 0);
   const avgProgress = filtered.length ? Math.round(filtered.reduce((s, p) => s + Number(p.progPct.replace('%', '')), 0) / filtered.length) : 0;
   const communitiesReached = new Set(filtered.flatMap((p) => impacts[p.code]?.communitiesImpacted ?? [])).size;
-  const reachTotals = totalsFor(filtered, impacts);
+  const reachTotals = analysePortfolio(filtered, impacts);
 
   const byPillar = PILLARS.map((p) => ({
     name: p,

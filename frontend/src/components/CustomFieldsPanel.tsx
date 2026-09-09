@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { formatCount } from '../reach';
+import { formatCount } from '../analytics/metrics';
 import { formField, input, label as labelStyle, primaryBtn, secondaryBtn } from '../ui';
 import { InfoTip } from './Tooltip';
 import type { CustomField, CustomFieldFormat, NewCustomFieldInput } from '../types';

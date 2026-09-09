@@ -6,7 +6,7 @@ import { ProvenanceTip } from '../components/ImpactExplainers';
 import { ImpactPanel } from '../components/ImpactPanel';
 import { ReachPanel, ReachVsImpactTip } from '../components/ReachPanel';
 import { InfoTip } from '../components/Tooltip';
-import { formatCount } from '../reach';
+import { formatCount } from '../analytics/metrics';
 import { exportProjectReport } from '../reportExport';
 import { h1, PILLAR_COLORS, pill, primaryBtn, STATUS_COLORS } from '../ui';
 import type { CustomField, NewCustomFieldInput, Project, ProjectImpact } from '../types';

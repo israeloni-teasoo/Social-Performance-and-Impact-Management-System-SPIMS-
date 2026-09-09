@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import { ReportPreviewModal } from '../components/ReportPreviewModal';
 import { exportReport } from '../reportExport';
-import { exportReportPdf } from '../reportPdf';
+import { analysePortfolio } from '../analytics/metrics';
+import { buildReportSpec } from '../report/buildSpec';
+import { describeValidation, validateReport } from '../report/validate';
+import { renderReportPdf } from '../reportPdf';
 import { card, h1, pill, REPORT_LENS_COLORS, subtitle } from '../ui';
 import type { ReportSection } from '../reportContent';
 import type { OrgSettings, Project, ProjectImpact, Report, ReportComment, Role } from '../types';
@@ -41,7 +44,18 @@ export function Reports({
       pushToast('Building the report…', 'info');
       const base = report.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
       try {
-        await exportReportPdf({ report, sections, fy, scopeNote, org, projects, impacts }, `${base}.pdf`);
+        const generatedOn = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
+        const spec = buildReportSpec({ report, sections, fy, scopeNote, org, projects, impacts, generatedOn });
+
+        // Reconcile the narrative against the analytics layer before the report leaves
+        // the building. A figure that cannot be tied back to the data is surfaced
+        // rather than silently exported.
+        const validation = validateReport(spec, analysePortfolio(projects, impacts));
+        if (!validation.ok) {
+          pushToast(`${describeValidation(validation)} ${validation.findings[0]?.message ?? ''}`, 'warning');
+        }
+
+        await renderReportPdf(spec, `${base}.pdf`);
         pushToast(`Downloaded ${base}.pdf.`, 'success');
       } catch {
         pushToast('Could not build that PDF — try again.', 'warning');

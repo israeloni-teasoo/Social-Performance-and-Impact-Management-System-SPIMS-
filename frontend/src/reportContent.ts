@@ -1,5 +1,5 @@
 import { STANDARDS } from './data/standards';
-import { formatCount, totalsFor } from './reach';
+import { analysePortfolio, formatCount } from './analytics/metrics';
 import type { Project, ProjectImpact, Report } from './types';
 
 export interface ReportSection {
@@ -11,7 +11,7 @@ const NCDMB_PROJECT_CODES = ['STEP', 'YEP', 'FELL', 'POWER'];
 
 export function buildReportSections(report: Report, projects: Project[], impacts: Record<string, ProjectImpact>): ReportSection[] {
   const byCode = (code: string) => projects.find((p) => p.code === code);
-  const totals = totalsFor(projects, impacts);
+  const totals = analysePortfolio(projects, impacts);
   const reachLines = [
     `Reach — people the programmes interacted with: ${formatCount(totals.reach)}`,
     `Impact — people who received the intervention: ${formatCount(totals.impact)} (${totals.conversionPct}% of interactions)`,

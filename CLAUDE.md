@@ -32,6 +32,9 @@ The other two documents follow the same rule when they are affected:
 - `docs/TECHNICAL-SPECIFICATION.md` — for Seplat IT. Architecture, data model, auth,
   outbound data flows, known gaps.
 - `docs/SELF-HOSTING.md` — the operator runbook.
+- `docs/REPORTING-ARCHITECTURE.md` — reporting decisions, and what was deliberately
+  not adopted.
+- `docs/SSO-SCOPE.md` — single sign-on options and effort.
 
 ## Reporting rules that apply to the product itself
 
@@ -42,6 +45,21 @@ The other two documents follow the same rule when they are affected:
   figure. A programme with no reach profile is shown as unmapped, never as zero.
 - **Illustrative figures must say so** in the interface, not only in documentation.
   SROI and the compliance percentages are currently illustrative.
+
+## Reporting architecture
+
+Reports flow: **analytics layer → report spec → renderer**. See
+`docs/REPORTING-ARCHITECTURE.md` for the decision record.
+
+- `frontend/src/analytics/metrics.ts` is the **only** place a reported figure is
+  calculated. No screen, exporter or prompt may compute one of its own.
+- `frontend/src/report/spec.ts` describes a report as data. Its block list is a closed
+  set — a renderer's switch ends in `assertNever`, so adding a block without updating
+  every renderer fails the build rather than shipping a blank page.
+- `frontend/src/report/validate.ts` reconciles narrative figures against analytics
+  before export. When it flags something, check the validator's verified set before
+  assuming the report is wrong — a false positive there is worse than no check.
+- Adding an output format means a new renderer of the spec. Never a second pipeline.
 
 ## Conventions
 

@@ -1,6 +1,7 @@
-import { byPillar, formatCount, totalsFor } from './reach';
-import type { ReportSection } from './reportContent';
-import type { OrgSettings, Project, ProjectImpact, Report } from './types';
+import { formatCount } from './analytics/metrics';
+import { assertNever } from './report/spec';
+import type { PillarMetrics, ProgrammeSpend } from './analytics/metrics';
+import type { ReportBlock, ReportMeta, ReportSpec } from './report/spec';
 
 /**
  * Designed PDF export.
@@ -92,7 +93,7 @@ function kpiTiles(tiles: { label: string; value: string; sub: string; colour: st
  * The two are drawn as separate bars on a shared scale on purpose — the visual gap
  * between them is the point being made, and stacking or merging them would hide it.
  */
-function reachChart(rows: { pillar: string; reach: number; impact: number }[]) {
+function reachChart(rows: PillarMetrics[]) {
   const labelW = 92;
   const valueW = 62;
   // Leave room for both fixed columns plus the gaps pdfmake puts between them,
@@ -142,8 +143,7 @@ function reachChart(rows: { pillar: string; reach: number; impact: number }[]) {
 }
 
 /** Conversion bar: the share of all interactions that became a delivered intervention. */
-function conversionBar(reach: number, impact: number) {
-  const pct = reach === 0 ? 0 : (impact / reach) * 100;
+function conversionBar(pct: number, caption: string) {
   const filled = Math.max(2, (pct / 100) * CONTENT_WIDTH);
   return {
     stack: [
@@ -153,30 +153,15 @@ function conversionBar(reach: number, impact: number) {
           { type: 'rect', x: 0, y: 0, w: filled, h: 14, r: 7, color: ACCENT },
         ],
       },
-      {
-        text: `${pct < 1 ? '<1' : pct.toFixed(1)}% of interactions converted into a delivered intervention · ${formatCount(
-          Math.max(0, reach - impact),
-        )} reached but not served`,
-        fontSize: 7.5,
-        color: MUTED,
-        margin: [0, 6, 0, 0],
-      },
+      { text: caption, fontSize: 7.5, color: MUTED, margin: [0, 6, 0, 0] },
     ],
     margin: [0, 0, 0, 26],
   };
 }
 
 /** Horizontal budget bars per programme, scaled to the largest. */
-function budgetChart(projects: Project[]) {
-  const parse = (b: string) => {
-    const n = Number(b.replace(/[^\d.]/g, ''));
-    return b.toUpperCase().includes('B') ? n * 1000 : n;
-  };
-  const rows = projects
-    .map((p) => ({ name: p.name, value: parse(p.budget), label: p.budget, util: Number(p.utilPct.replace('%', '')) || 0 }))
-    .sort((a, b) => b.value - a.value)
-    .slice(0, 8);
-  const max = Math.max(1, ...rows.map((r) => r.value));
+function budgetChart(rows: ProgrammeSpend[]) {
+  const max = Math.max(1, ...rows.map((r) => r.budgetMillions));
   const barMax = CONTENT_WIDTH - 210;
 
   return {
@@ -186,11 +171,11 @@ function budgetChart(projects: Project[]) {
         {
           width: 'auto',
           canvas: [
-            { type: 'rect', x: 0, y: 1, w: Math.max(2, (r.value / max) * barMax), h: 10, r: 2, color: BLUE },
-            { type: 'rect', x: 0, y: 1, w: Math.max(1, ((r.value * r.util) / 100 / max) * barMax), h: 10, r: 2, color: NAVY },
+            { type: 'rect', x: 0, y: 1, w: Math.max(2, (r.budgetMillions / max) * barMax), h: 10, r: 2, color: BLUE },
+            { type: 'rect', x: 0, y: 1, w: Math.max(1, ((r.budgetMillions * r.utilisedPct) / 100 / max) * barMax), h: 10, r: 2, color: NAVY },
           ],
         },
-        { width: 60, text: richText(r.label), fontSize: 8, bold: true, color: NAVY, alignment: 'right' },
+        { width: 60, text: richText(r.budgetLabel), fontSize: 8, bold: true, color: NAVY, alignment: 'right' },
       ],
       margin: [0, 0, 0, 8],
     })),
@@ -198,9 +183,10 @@ function budgetChart(projects: Project[]) {
   };
 }
 
-/* -------------------------------------------------------------- assembly */
 
-function coverPage(report: Report, org: OrgSettings, fy: string, scopeNote: string, generated: string) {
+/* ------------------------------------------------------- spec-driven render */
+
+function coverPage(meta: ReportMeta) {
   return [
     {
       canvas: [
@@ -211,144 +197,126 @@ function coverPage(report: Report, org: OrgSettings, fy: string, scopeNote: stri
     {
       relativePosition: { x: 0, y: -190 },
       stack: [
-        { text: org.orgName.toUpperCase(), fontSize: 8, color: '#9EA1C0', characterSpacing: 1.4 },
-        { text: report.name, fontSize: 27, bold: true, color: '#FFFFFF', margin: [0, 14, 0, 0], lineHeight: 1.15 },
-        { text: report.desc, fontSize: 10, color: '#C7C9DC', margin: [0, 10, 60, 0], lineHeight: 1.3 },
-        { text: richText(`${fy}  ·  ${org.currencyLabel}`), fontSize: 9, bold: true, color: '#FFFFFF', margin: [0, 18, 0, 0] },
+        { text: meta.organisation.toUpperCase(), fontSize: 8, color: '#9EA1C0', characterSpacing: 1.4 },
+        { text: meta.title, fontSize: 27, bold: true, color: '#FFFFFF', margin: [0, 14, 0, 0], lineHeight: 1.15 },
+        { text: meta.subtitle, fontSize: 10, color: '#C7C9DC', margin: [0, 10, 60, 0], lineHeight: 1.3 },
+        {
+          text: richText(`${meta.financialYear}  ·  ${meta.currencyLabel}`),
+          fontSize: 9,
+          bold: true,
+          color: '#FFFFFF',
+          margin: [0, 18, 0, 0],
+        },
       ],
     },
     {
       margin: [0, 120, 0, 0],
       stack: [
         { text: 'SCOPE OF THIS REPORT', fontSize: 7, color: MUTED, characterSpacing: 0.8 },
-        { text: richText(scopeNote), fontSize: 9.5, color: INK, margin: [0, 6, 0, 0], lineHeight: 1.4 },
+        { text: richText(meta.scopeNote), fontSize: 9.5, color: INK, margin: [0, 6, 0, 0], lineHeight: 1.4 },
         { canvas: [{ type: 'line', x1: 0, y1: 14, x2: CONTENT_WIDTH, y2: 14, lineWidth: 1, lineColor: LINE }] },
         { text: 'DATA STATUS', fontSize: 7, color: MUTED, characterSpacing: 0.8, margin: [0, 22, 0, 0] },
-        { text: org.dataStatusNote, fontSize: 9, color: INK, margin: [0, 6, 0, 0], lineHeight: 1.4 },
-        { text: `Generated ${generated}`, fontSize: 8, color: MUTED, margin: [0, 26, 0, 0] },
+        { text: meta.dataStatusNote, fontSize: 9, color: INK, margin: [0, 6, 0, 0], lineHeight: 1.4 },
+        { text: `Generated ${meta.generatedOn}`, fontSize: 8, color: MUTED, margin: [0, 26, 0, 0] },
       ],
     },
-    { text: '', pageBreak: 'after' },
   ];
 }
 
-function sectionBlocks(sections: ReportSection[]) {
-  const out: unknown[] = [];
-  for (const section of sections) {
-    out.push({
-      text: section.heading,
-      fontSize: 13,
-      bold: true,
-      color: NAVY,
-      margin: [0, 18, 0, 8],
-    });
-    out.push({
-      canvas: [{ type: 'line', x1: 0, y1: 0, x2: 44, y2: 0, lineWidth: 2, lineColor: ACCENT }],
-      margin: [0, 0, 0, 10],
-    });
-    // A heading alone at the foot of a page reads as a mistake.
-    out.push({ text: '', margin: [0, 0, 0, 0] });
-    for (const line of section.lines) {
-      out.push({
-        // Without this a long bullet splits at a page break and leaves its marker
-        // stranded at the bottom of the previous page, on top of the footer.
-        unbreakable: true,
-        columns: [
-          { width: 10, canvas: [{ type: 'ellipse', x: 3, y: 5, r1: 2, r2: 2, color: ACCENT }] },
-          { width: '*', text: richText(line), fontSize: 9.5, color: INK, lineHeight: 1.4 },
-        ],
-        margin: [0, 0, 0, 6],
-      });
-    }
-  }
-  return out;
+function calloutBox(text: string) {
+  return {
+    margin: [0, 22, 0, 0],
+    table: {
+      widths: [CONTENT_WIDTH - 2],
+      body: [[{ text, fontSize: 8, color: '#4A3A22', margin: [10, 8, 10, 8] }]],
+    },
+    layout: {
+      hLineWidth: () => 0,
+      vLineWidth: (i: number) => (i === 0 ? 3 : 0),
+      vLineColor: () => ACCENT,
+      fillColor: () => '#F7F4EC',
+    },
+  };
 }
 
-/* ------------------------------------------------------------------ entry */
+/**
+ * Renders one specification block.
+ *
+ * The switch is exhaustive by construction: assertNever fails the build if a block
+ * type is added without a case here, so a new block cannot ship as a blank page.
+ */
+function renderBlock(block: ReportBlock, meta: ReportMeta): unknown[] {
+  switch (block.kind) {
+    case 'cover':
+      return coverPage(meta);
 
-export interface ReportPdfInput {
-  report: Report;
-  sections: ReportSection[];
-  fy: string;
-  scopeNote: string;
-  org: OrgSettings;
-  projects: Project[];
-  impacts: Record<string, ProjectImpact>;
-}
+    case 'break':
+      return [{ text: '', pageBreak: 'after' }];
 
-function buildDefinition(input: ReportPdfInput, generated: string): PdfDoc {
-  const { report, sections, fy, scopeNote, org, projects, impacts } = input;
-  const totals = totalsFor(projects, impacts);
-  const pillars = byPillar(projects, impacts);
+    case 'metricGrid':
+      return [
+        { text: block.title, fontSize: 15, bold: true, color: NAVY, margin: [0, 0, 0, 14] },
+        kpiTiles(
+          block.metrics.map((m, i) => ({
+            label: m.label,
+            value: m.display,
+            sub: m.provenance.metric,
+            colour: [NAVY, BLUE, ACCENT, GREEN][i % 4]!,
+          })),
+        ),
+      ];
 
-  const content: unknown[] = [
-    ...coverPage(report, org, fy, scopeNote, generated),
+    case 'reachComparison':
+      return [
+        { text: block.title, fontSize: 13, bold: true, color: NAVY, margin: [0, 0, 0, 4] },
+        { text: block.intro, fontSize: 8.5, color: MUTED, margin: [0, 0, 0, 12], lineHeight: 1.35 },
+        reachChart(block.rows),
+      ];
 
-    { text: 'At a glance', fontSize: 15, bold: true, color: NAVY, margin: [0, 0, 0, 14] },
-    kpiTiles([
-      { label: 'Programmes', value: String(projects.length), sub: 'in this report', colour: NAVY },
-      { label: 'Reach', value: formatCount(totals.reach), sub: 'people interacted with', colour: BLUE },
-      { label: 'Impact', value: formatCount(totals.impact), sub: 'received the intervention', colour: ACCENT },
-      { label: 'Conversion', value: `${totals.conversionPct}%`, sub: 'reach to impact', colour: GREEN },
-    ]),
+    case 'progress':
+      return [
+        ...(block.title ? [{ text: block.title, fontSize: 13, bold: true, color: NAVY, margin: [0, 0, 0, 8] }] : []),
+        conversionBar(block.pct, block.caption),
+      ];
 
-    { text: 'Reach and impact by pillar', fontSize: 13, bold: true, color: NAVY, margin: [0, 0, 0, 4] },
-    {
-      text: 'Reach counts everyone a programme interacted with. Impact counts only those who received the intervention. They are reported separately so scale is visible without overstating the result.',
-      fontSize: 8.5,
-      color: MUTED,
-      margin: [0, 0, 0, 12],
-      lineHeight: 1.35,
-    },
-    reachChart(pillars.map((p) => ({ pillar: p.pillar, reach: p.reach, impact: p.impact }))),
-    conversionBar(totals.reach, totals.impact),
+    case 'spend':
+      return [
+        { text: block.title, fontSize: 13, bold: true, color: NAVY, margin: [0, 0, 0, 4] },
+        { text: block.intro, fontSize: 8.5, color: MUTED, margin: [0, 0, 0, 10] },
+        budgetChart(block.rows),
+      ];
 
-    { text: 'Investment by programme', fontSize: 13, bold: true, color: NAVY, margin: [0, 0, 0, 4] },
-    {
-      text: 'Budget by programme, largest first. The darker segment is the share drawn down to date.',
-      fontSize: 8.5,
-      color: MUTED,
-      margin: [0, 0, 0, 10],
-    },
-    budgetChart(projects),
-
-    { text: '', pageBreak: 'after' },
-    ...sectionBlocks(sections),
-  ];
-
-  if (totals.unmapped.length > 0) {
-    content.push({
-      margin: [0, 22, 0, 0],
-      table: {
-        widths: [CONTENT_WIDTH - 2],
-        body: [
-          [
-            {
-              text: `${totals.unmapped.join(', ')} ${
-                totals.unmapped.length === 1 ? 'has' : 'have'
-              } not had reach separated from impact, so ${
-                totals.unmapped.length === 1 ? 'it is' : 'they are'
-              } excluded from the totals above rather than counted as zero.`,
-              fontSize: 8,
-              color: '#4A3A22',
-              margin: [10, 8, 10, 8],
-            },
+    case 'section':
+      return [
+        { text: block.heading, fontSize: 13, bold: true, color: NAVY, margin: [0, 18, 0, 8] },
+        { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 44, y2: 0, lineWidth: 2, lineColor: ACCENT }], margin: [0, 0, 0, 10] },
+        ...block.lines.map((line) => ({
+          // Without this a long bullet splits at a page break and strands its marker
+          // at the foot of the previous page, on top of the footer.
+          unbreakable: true,
+          columns: [
+            { width: 10, canvas: [{ type: 'ellipse', x: 3, y: 5, r1: 2, r2: 2, color: ACCENT }] },
+            { width: '*', text: richText(line), fontSize: 9.5, color: INK, lineHeight: 1.4 },
           ],
-        ],
-      },
-      layout: {
-        hLineWidth: () => 0,
-        vLineWidth: (i: number) => (i === 0 ? 3 : 0),
-        vLineColor: () => ACCENT,
-        fillColor: () => '#F7F4EC',
-      },
-    });
+          margin: [0, 0, 0, 6],
+        })),
+      ];
+
+    case 'callout':
+      return [calloutBox(block.text)];
+
+    default:
+      return assertNever(block);
   }
+}
+
+export function buildPdfDefinition(spec: ReportSpec): PdfDoc {
+  const content = spec.blocks.flatMap((block) => renderBlock(block, spec.meta));
 
   return {
     pageSize: 'A4',
     pageMargins: [40, 40, 40, 52],
-    info: { title: `${report.name} — ${fy}`, author: org.orgName },
+    info: { title: `${spec.meta.title} — ${spec.meta.financialYear}`, author: spec.meta.organisation },
     defaultStyle: { font: 'Poppins', fontSize: 9.5, color: INK },
     content,
     footer: (currentPage: number, pageCount: number) =>
@@ -357,7 +325,7 @@ function buildDefinition(input: ReportPdfInput, generated: string): PdfDoc {
         : {
             margin: [40, 12, 40, 0],
             columns: [
-              { text: `${report.name} · ${fy}`, fontSize: 7.5, color: MUTED },
+              { text: `${spec.meta.title} · ${spec.meta.financialYear}`, fontSize: 7.5, color: MUTED },
               { text: `${currentPage - 1} of ${pageCount - 1}`, fontSize: 7.5, color: MUTED, alignment: 'right' },
             ],
           },
@@ -365,7 +333,7 @@ function buildDefinition(input: ReportPdfInput, generated: string): PdfDoc {
 }
 
 /** Builds and downloads the report. Returns the filename written. */
-export async function exportReportPdf(input: ReportPdfInput, filename: string): Promise<string> {
+export async function renderReportPdf(spec: ReportSpec, filename: string): Promise<string> {
   const [{ default: pdfMake }, fonts] = await Promise.all([import('pdfmake/build/pdfmake'), import('./pdfFonts')]);
 
   // pdfmake 0.3 registers fonts through these functions; assigning .vfs and .fonts
@@ -399,12 +367,6 @@ export async function exportReportPdf(input: ReportPdfInput, filename: string): 
     },
   });
 
-  const generated = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
-  make.createPdf(buildDefinition(input, generated)).download(filename);
+  make.createPdf(buildPdfDefinition(spec)).download(filename);
   return filename;
-}
-
-/** Exposed for tests: the document definition without the browser download step. */
-export function reportPdfDefinition(input: ReportPdfInput, generated: string): PdfDoc {
-  return buildDefinition(input, generated);
 }

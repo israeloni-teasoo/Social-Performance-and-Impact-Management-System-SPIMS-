@@ -126,6 +126,7 @@ must never be used where real data lives, since its passwords are in this reposi
 - **[docs/TECHNICAL-SPECIFICATION.md](docs/TECHNICAL-SPECIFICATION.md)** — for Seplat IT.
 - **[docs/SELF-HOSTING.md](docs/SELF-HOSTING.md)** — operator runbook.
 - **[docs/SSO-SCOPE.md](docs/SSO-SCOPE.md)** — single sign-on options, effort and what Seplat must supply.
+- **[docs/REPORTING-ARCHITECTURE.md](docs/REPORTING-ARCHITECTURE.md)** — how reporting is structured, and which architectural proposals were deliberately declined.
 
 These are **generated** — edit `docs/status-report/content.cjs` (full report) or
 `docs/status-report/note.cjs` (short note) and run `npm run report`, which rewrites both

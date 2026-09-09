@@ -1,4 +1,4 @@
-import { formatCount } from '../reach';
+import { formatCount } from '../analytics/metrics';
 import { InfoTip } from './Tooltip';
 import type { ReachProfile } from '../types';
 

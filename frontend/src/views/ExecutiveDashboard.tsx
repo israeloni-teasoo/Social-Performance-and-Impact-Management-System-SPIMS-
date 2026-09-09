@@ -1,6 +1,6 @@
 import { ReachVsImpactTip } from '../components/ReachPanel';
 import { InfoTip } from '../components/Tooltip';
-import { byPillar, formatCompact, formatCount, totalsFor } from '../reach';
+import { analysePortfolio, formatCompact, formatCount } from '../analytics/metrics';
 import { card } from '../ui';
 import type { Project, ProjectImpact } from '../types';
 
@@ -55,8 +55,8 @@ export function ExecutiveDashboard({
   projects: Project[];
   impacts: Record<string, ProjectImpact>;
 }) {
-  const totals = totalsFor(projects, impacts);
-  const pillars = byPillar(projects, impacts);
+  const totals = analysePortfolio(projects, impacts);
+  const pillars = totals.pillars;
 
   const atAGlance = [
     SPEND_TILE,
