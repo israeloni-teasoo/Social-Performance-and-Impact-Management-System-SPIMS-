@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { InfoTip } from '../components/Tooltip';
-import { formField, h1, input, label as labelStyle, pill, primaryBtn, secondaryBtn, sectionCardTitle, subtitle } from '../ui';
+import { formField, input, label as labelStyle, pill, primaryBtn, secondaryBtn, sectionCardTitle } from '../ui';
 import { changeOwnPassword, useUsersStore } from '../useUsersStore';
 import type { ManagedUser, Role } from '../types';
 import type { ToastTone } from '../useToastQueue';
@@ -115,7 +115,7 @@ function UserRow({
   );
 }
 
-function ChangeOwnPassword({ pushToast }: { pushToast: (message: string, tone?: ToastTone) => void }) {
+export function ChangeOwnPasswordSection({ pushToast }: { pushToast: (message: string, tone?: ToastTone) => void }) {
   const [current, setCurrent] = useState('');
   const [next, setNext] = useState('');
   const [busy, setBusy] = useState(false);
@@ -157,13 +157,11 @@ function ChangeOwnPassword({ pushToast }: { pushToast: (message: string, tone?: 
   );
 }
 
-export function UserAccounts({
+export function UserAccountsSection({
   currentUserId,
-  canAdminister,
   pushToast,
 }: {
   currentUserId: string;
-  canAdminister: boolean;
   pushToast: (message: string, tone?: ToastTone) => void;
 }) {
   const { users, loading, available, addUser, setRole, setActive, resetPassword } = useUsersStore(pushToast);
@@ -193,13 +191,8 @@ export function UserAccounts({
   const activeExecutives = users.filter((u) => u.role === 'exec' && u.active).length;
 
   return (
-    <div style={{ maxWidth: 940 }}>
-      <h1 style={h1}>User Accounts</h1>
-      <p style={subtitle}>Create accounts, set what each person can do, and deactivate anyone who has left.</p>
-
-      <ChangeOwnPassword pushToast={pushToast} />
-
-      {!canAdminister ? null : loading ? (
+    <div>
+      {loading ? (
         <div style={{ ...card, color: 'var(--muted)', fontSize: 13.5 }}>Loading accounts…</div>
       ) : !available ? (
         <div style={{ ...card, color: 'var(--muted)', fontSize: 13.5 }}>

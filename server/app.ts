@@ -9,6 +9,8 @@ import { listCommunitiesHandler, listEvidenceHandler, listIndicatorsHandler, lis
 import { createCustomFieldHandler, deleteCustomFieldHandler, listCustomFieldsHandler, updateCustomFieldHandler } from './handlers/customFields';
 import { addReportCommentHandler, listReportCommentsHandler } from './handlers/reportComments';
 import { generateReportPreviewHandler } from './handlers/reportPreview';
+import { createProjectHandler, updateProjectHandler } from './handlers/projects';
+import { getIntegrationStatusHandler, getSettingsHandler, updateSettingsHandler } from './handlers/settings';
 import { createStakeholderHandler, listStakeholdersHandler } from './handlers/stakeholders';
 import { closeTargetHandler, createTargetHandler, listTargetsHandler } from './handlers/targets';
 import { assignTaskHandler, listTasksHandler, setTaskStatusHandler } from './handlers/tasks';
@@ -86,6 +88,14 @@ app.get('/api/auth/me', async (req, res) => {
 // --- Read-only content ---
 app.get('/api/projects', async (_req, res) => {
   const r = await listProjectsHandler();
+  res.status(r.status).json(r.body);
+});
+app.post('/api/projects', async (req, res) => {
+  const r = await createProjectHandler(req.body ?? {});
+  res.status(r.status).json(r.body);
+});
+app.post('/api/projects/update', async (req, res) => {
+  const r = await updateProjectHandler(req.body ?? {});
   res.status(r.status).json(r.body);
 });
 app.get('/api/project-impacts', async (_req, res) => {
@@ -202,6 +212,20 @@ app.post('/api/custom-fields/update', async (req, res) => {
 });
 app.post('/api/custom-fields/delete', async (req, res) => {
   const r = await deleteCustomFieldHandler(req.body ?? {});
+  res.status(r.status).json(r.body);
+});
+
+// --- Organisation settings ---
+app.get('/api/settings', async (_req, res) => {
+  const r = await getSettingsHandler();
+  res.status(r.status).json(r.body);
+});
+app.post('/api/settings', async (req, res) => {
+  const r = await updateSettingsHandler(req.body ?? {});
+  res.status(r.status).json(r.body);
+});
+app.get('/api/settings/status', async (_req, res) => {
+  const r = await getIntegrationStatusHandler();
   res.status(r.status).json(r.body);
 });
 

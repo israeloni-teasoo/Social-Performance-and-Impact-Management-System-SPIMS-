@@ -46,6 +46,17 @@ model Project {
   progPct  String
   status   String
 
+  /// Operational detail captured when a project is set up. Optional because the
+  /// programmes seeded from Seplat's published report predate the intake form.
+  startDate     String?
+  endDate       String?
+  fundingSource String?
+  contractor    String?
+  partner       String?
+  community     String?
+  lga           String?
+  owner         String?
+
   impact       ProjectImpact?
   fieldTasks   FieldTask[]
   spendEntries SpendEntry[]
@@ -239,4 +250,18 @@ model CustomField {
   createdAt DateTime @default(now())
 
   @@index([projectCode])
+}
+
+/// Organisation-level settings. A single row (id "org") rather than a key/value table,
+/// so the shape is typed and a missing setting is impossible.
+model OrgSettings {
+  id             String   @id @default("org")
+  orgName        String   @default("Seplat Energy Plc")
+  financialYear  String   @default("FY 2026")
+  currencyLabel  String   @default("\u20a6 Naira")
+  targetYear     Int      @default(2030)
+  /// Shown on the sign-in screen and in exports, so a deployment can state whether it
+  /// holds live data or sample data.
+  dataStatusNote String   @default("Illustrative data \u2014 replace with verified Seplat figures before external reporting.")
+  updatedAt      DateTime @updatedAt
 }

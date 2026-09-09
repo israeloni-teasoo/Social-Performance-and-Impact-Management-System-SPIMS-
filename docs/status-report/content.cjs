@@ -16,9 +16,9 @@ module.exports = {
     subtitle: 'Social Performance & Impact Management System',
     client: 'Prepared for Seplat Energy Plc',
     author: 'Teasoo Consulting',
-    version: '1.1',
-    date: '8 September 2026',
-    commit: '1bee977',
+    version: '1.2',
+    date: '9 September 2026',
+    commit: 'faa4a42',
   },
 
   sections: [
@@ -81,6 +81,8 @@ module.exports = {
             ['AI report generation', 'Claude generates a slide outline from the compiled report content. Runs server-side only; the API key never reaches the browser.'],
             ['Security', 'Every route requires a session except the health check and sign-in. Writes restricted by role from a single permission table. Writes to a route with no rule are refused by default.'],
             ['Account administration', 'Executives create accounts, assign roles, deactivate people who have left and reset passwords, all from the interface. Every user can change their own password. Accounts are deactivated rather than deleted so their contributions survive, and deactivation ends any live session immediately.'],
+            ['Project setup and maintenance', 'Projects are created and kept up to date in the system, by Executives as well as Project Managers. Intake captures the timeline, budget, funding source, community and delivery partners; status, progress and utilisation are edited as the project runs.'],
+            ['Settings', 'Organisation name, financial year, currency, target year and the data-status note are configurable rather than fixed in code, so an installation reflects its own organisation and states whether it holds live or sample data.'],
             ['No third-party calls in normal use', 'The interface typeface is served by the application rather than fetched from Google, so no user’s browser contacts an outside service on page load and the system works on a network with no outbound access.'],
             ['Deployment', 'Docker Compose stack — web, application and database — with the database unreachable from outside the application. Operator runbook and technical specification for Seplat IT.'],
           ],

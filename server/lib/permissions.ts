@@ -42,6 +42,14 @@ export const WRITE_PERMISSIONS: Record<string, Role[]> = {
   '/api/targets': ['exec'],
   '/api/targets/close': ['exec'],
   '/api/bulk-upload': ['exec'],
+  // Organisation settings are administrative, so they sit with the Executive; the
+  // settings themselves are readable by everyone because the interface needs them.
+  '/api/settings': ['exec'],
+
+  // Projects are created and maintained by both, at Seplat's request — in practice
+  // the Executive may be the only person using the system.
+  '/api/projects': ['exec', 'manager'],
+  '/api/projects/update': ['exec', 'manager'],
 
   // Manager — approvals queue and team management are the manager's workspace.
   '/api/approvals/approve': ['manager'],

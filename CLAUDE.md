@@ -5,16 +5,23 @@ Seplat Energy Plc.
 
 ## Standing instruction: keep the status report current
 
-`docs/SPIMS-Project-Status.docx` and `docs/PROJECT-STATUS.md` are the client-facing
-record of where the project stands. **They must be updated in the same commit as any
-change that alters what the system does, what is outstanding, or what is recommended.**
+Four generated files are the client-facing record of where the project stands. **They
+must be updated in the same commit as any change that alters what the system does, what
+is outstanding, or what is recommended.**
 
-Both files are generated. Never edit them by hand:
+| Source | Outputs |
+|---|---|
+| `docs/status-report/content.cjs` | `docs/PROJECT-STATUS.md`, `docs/SPIMS-Project-Status.docx` — the full report |
+| `docs/status-report/note.cjs` | `docs/PROGRESS-NOTE.md`, `docs/SPIMS-Progress-Note.docx` — the short note for circulation |
 
-1. Edit `docs/status-report/content.cjs` — the single source for both.
-2. Run `npm run report`.
-3. Commit the regenerated `docs/PROJECT-STATUS.md` and `docs/SPIMS-Project-Status.docx`
-   alongside the change.
+All four are generated. Never edit them by hand:
+
+1. Edit the relevant source above.
+2. Run `npm run report` — it rebuilds both documents.
+3. Commit the regenerated files alongside the change.
+
+Keep the note brief: if a section grows past a short table, it belongs in the full
+report instead.
 
 Bump `meta.version` and set `meta.date` and `meta.commit` when the substance changes.
 A change that only touches internals — a refactor with no behavioural difference — does

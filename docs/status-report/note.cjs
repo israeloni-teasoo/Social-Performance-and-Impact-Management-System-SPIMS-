@@ -1,0 +1,147 @@
+/**
+ * The short progress note — a two-page summary for circulation, as opposed to the
+ * full status report in content.cjs.
+ *
+ * Rendered by build.cjs into docs/PROGRESS-NOTE.md and docs/SPIMS-Progress-Note.docx.
+ * Keep it brief: if a section is growing past a short table, it belongs in the full
+ * report instead.
+ */
+
+module.exports = {
+  meta: {
+    title: 'SPIMS — Progress Note',
+    subtitle: 'Social Performance & Impact Management System',
+    client: 'Prepared for Seplat Energy Plc',
+    author: 'Teasoo Consulting',
+    version: '1.0',
+    date: '9 September 2026',
+    commit: 'current build',
+  },
+
+  sections: [
+    {
+      heading: 'Where the system stands',
+      blocks: [
+        {
+          type: 'p',
+          text:
+            'SPIMS is a working system with a real database, authenticated users and role-based permissions, ready to be installed on Seplat infrastructure. The three items we regarded as blocking a deployment holding real data are now closed. What remains is mostly waiting on Seplat, not on development.',
+        },
+      ],
+    },
+
+    {
+      heading: 'Done',
+      blocks: [
+        {
+          type: 'bullets',
+          items: [
+            'Reach reported separately from impact, in the data model and throughout the interface — the correction raised in the August review.',
+            'Real database, versioned migrations and an authenticated API; role permissions enforced server-side, not only hidden in the interface.',
+            'Account administration: an Executive creates accounts, assigns roles, deactivates leavers and resets passwords; every user can change their own password.',
+            'Projects can be created and maintained in the system by both Executives and Project Managers.',
+            'Settings: organisation name, financial year, currency and target year are configurable rather than fixed in code.',
+            'Programme custom fields — recurring stakeholder questions answered on the programme page, with sources.',
+            'Bulk upload with downloadable templates, including a project completion template.',
+            'Reports follow Seplat’s own 2025 report structure; exports carry the compiled content, selected programmes and financial year.',
+            'Deployable on Seplat’s own infrastructure, with an operator runbook and a technical specification for IT review.',
+            'No third-party calls in normal use — the interface typeface is served by the system itself.',
+          ],
+        },
+      ],
+    },
+
+    {
+      heading: 'What a completed project must supply',
+      blocks: [
+        {
+          type: 'p',
+          text:
+            'A template, not a free-form report. A narrative document cannot be turned into reliable figures without someone checking every number, and an unchecked figure is exactly what this system exists to prevent. The Project Completion template is now downloadable in Bulk Upload and asks for: final spend; headline output and outcome; reach and impact as separate figures with the note explaining the difference; beneficiary disaggregation; communities served; baseline and endline with the measure used; the evidence source for each figure; and lessons learned.',
+        },
+        {
+          type: 'p',
+          text:
+            'A narrative report can still be attached as supporting evidence. We can also add an assisted step later that reads an uploaded report and pre-fills the template for a person to check — useful, but it must remain a draft for review rather than a direct route into published figures.',
+        },
+      ],
+    },
+
+    {
+      heading: 'Left to do',
+      blocks: [
+        {
+          type: 'table',
+          head: ['Item', 'Waiting on'],
+          rows: [
+            ['Install on Seplat infrastructure', 'Seplat — infrastructure or hosting approval'],
+            ['Worked example on one real programme', 'Seplat — programme data and organisation chart'],
+            ['Single sign-on with Seplat credentials', 'Seplat — decision, then app registration. Scoped separately'],
+            ['Media and social mention monitoring', 'Phase one can start now; phase two needs a budget decision'],
+            ['PowerPoint export preserving charts', 'Seplat IT — approval of the AI service'],
+            ['Evidence file storage', 'Follows installation'],
+            ['Bulk upload writing to live records', 'Seplat — rules on whether a new figure replaces or adds to a total'],
+            ['Live SROI calculation', 'Seplat M&E — validation of the financial proxies'],
+          ],
+        },
+      ],
+    },
+
+    {
+      heading: 'Blockers',
+      blocks: [
+        {
+          type: 'p',
+          text: 'Three, all requiring a Seplat decision rather than development work:',
+        },
+        {
+          type: 'bullets',
+          items: [
+            'No hosting environment yet. This is the single highest-value step — it converts the system from something demonstrated into something in use, and unblocks four later items.',
+            'No real programme data. The system currently runs on figures drawn from Seplat’s published 2025 report; the requested end-to-end worked example needs a complete dataset for one programme, and confirmation of which programme was meant.',
+            'No decision on the AI service used for report generation. Until Seplat IT rules on it, PowerPoint generation cannot proceed. The feature can be left disabled indefinitely without affecting anything else.',
+          ],
+        },
+      ],
+    },
+
+    {
+      heading: 'Cost implications',
+      blocks: [
+        {
+          type: 'p',
+          text:
+            'The platform fee and annual maintenance are as set out in the proposal. Everything below is a third-party cost, recharged at cost and not included in that fee. All are optional — the system functions without any of them, with the corresponding feature disabled and labelled as such.',
+        },
+        {
+          type: 'table',
+          head: ['Item', 'Indicative cost', 'Notes'],
+          rows: [
+            ['Hosting', 'None to Teasoo', 'Runs on Seplat infrastructure. A cloud demonstration instance, if wanted, is minor.'],
+            ['Database', 'None', 'PostgreSQL, open source, no licence fee.'],
+            ['Single sign-on', 'None', 'Uses Seplat’s existing Microsoft licensing. Development effort only.'],
+            ['Claude report generation', 'Usage-based, low', 'Only charged when a report preview is generated. Optional.'],
+            ['Media monitoring — phase one', 'None', 'Free press and web sources.'],
+            ['Media monitoring — phase two', 'A few hundred US dollars per month', 'Adds social media and hashtag tracking. Higher if Seplat wants Nigerian print and broadcast coverage.'],
+          ],
+        },
+        {
+          type: 'note',
+          text:
+            'Figures are indicative and should be confirmed against current vendor pricing before being quoted. The only recurring third-party cost of any size is media monitoring, and only if social coverage is required — no amount of engineering removes that, since the major platforms release mention data solely through licensed partners.',
+        },
+      ],
+    },
+
+    {
+      heading: 'Recommended next step',
+      blocks: [
+        {
+          type: 'p',
+          text:
+            'Settle hosting. Everything else either follows from it or can run alongside it. In the meantime we can begin media monitoring phase one, which needs nothing from Seplat.',
+        },
+      ],
+    },
+  ],
+};

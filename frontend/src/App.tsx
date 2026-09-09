@@ -12,6 +12,7 @@ import { useStakeholdersStore } from './useStakeholdersStore';
 import { useTargetsStore } from './useTargetsStore';
 import { useTasksStore } from './useTasksStore';
 import { useTeamStore } from './useTeamStore';
+import { useSettingsStore } from './useSettingsStore';
 import { useToastQueue } from './useToastQueue';
 import { Approvals } from './views/Approvals';
 import { BulkUpload } from './views/BulkUpload';
@@ -30,15 +31,12 @@ import { ProjectPortfolio } from './views/ProjectPortfolio';
 import { Reports } from './views/Reports';
 import { StakeholderRegister } from './views/StakeholderRegister';
 import { Targets } from './views/Targets';
-import { UserAccounts } from './views/UserAccounts';
+import { Settings } from './views/Settings';
 import { Team } from './views/Team';
 import { useAuth } from './useAuth';
 import type { AuthUser } from './useAuth';
 import { useAppData } from './useAppData';
 import { Login } from './views/Login';
-
-const TARGET_YEAR = 2030;
-const ORG_NAME = 'Seplat Energy Plc';
 
 const splash = (color: string): CSSProperties => ({
   minHeight: '100vh',
@@ -73,7 +71,7 @@ export default function App() {
  * completely healthy.
  */
 function SignedInApp({ user, demoMode, onLogout }: { user: AuthUser; demoMode: boolean; onLogout: () => void }) {
-  const { projects: PROJECTS, projectImpacts: PROJECT_IMPACTS, communities: COMMUNITIES, indicators: INDICATORS, reports: REPORTS, evidence: EVIDENCE_ITEMS, loading: dataLoading, error: dataError } = useAppData();
+  const { projects: PROJECTS, projectImpacts: PROJECT_IMPACTS, communities: COMMUNITIES, indicators: INDICATORS, reports: REPORTS, evidence: EVIDENCE_ITEMS, loading: dataLoading, error: dataError, refresh: refreshData } = useAppData();
   const [view, setViewState] = useState<View>(DEFAULT_VIEW_FOR_ROLE[user.role]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
@@ -81,6 +79,7 @@ function SignedInApp({ user, demoMode, onLogout }: { user: AuthUser; demoMode: b
   const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(null);
 
   const { toasts, push: pushToast, dismiss: dismissToast } = useToastQueue();
+  const { settings, status: integrationStatus, live: settingsLive, save: saveSettings } = useSettingsStore(pushToast);
   const { approvals, approve, returnItem, addComment: addApprovalComment } = useApprovalsStore(pushToast);
   const { stakeholders, addStakeholder } = useStakeholdersStore(pushToast);
   const { targets, addTarget, closeTarget } = useTargetsStore(pushToast);
@@ -122,7 +121,7 @@ function SignedInApp({ user, demoMode, onLogout }: { user: AuthUser; demoMode: b
         setView={setView}
         approvalsCount={approvals.length}
         tasksCount={myTasks.length}
-        orgName={ORG_NAME}
+        orgName={settings.orgName}
         userName={user.name}
         userRole={user.roleLabel}
         userInitials={user.initials}
@@ -131,7 +130,7 @@ function SignedInApp({ user, demoMode, onLogout }: { user: AuthUser; demoMode: b
 
       <div className="spims-main-col">
         <Topbar
-          orgName={ORG_NAME}
+          orgName={settings.orgName}
           crumb={CRUMBS[view]}
           userName={user.name}
           userRole={user.roleLabel}
@@ -145,7 +144,7 @@ function SignedInApp({ user, demoMode, onLogout }: { user: AuthUser; demoMode: b
         />
 
         <main className="spims-scroll" style={{ flex: 1, overflowY: 'auto', padding: '30px 34px 48px' }}>
-          {view === 'dashboard' && <ExecutiveDashboard targetYear={TARGET_YEAR} projects={PROJECTS} impacts={PROJECT_IMPACTS} />}
+          {view === 'dashboard' && <ExecutiveDashboard targetYear={settings.targetYear} projects={PROJECTS} impacts={PROJECT_IMPACTS} />}
           {view === 'portfolio' && <ProjectPortfolio projects={PROJECTS} onOpen={(id) => goProjectDetail(id, 'portfolio')} />}
           {view === 'impact' && (
             <ImpactChain
@@ -178,7 +177,16 @@ function SignedInApp({ user, demoMode, onLogout }: { user: AuthUser; demoMode: b
             />
           )}
           {view === 'myprojects' && <MyProjects projects={PROJECTS} goNewProject={() => setView('newproject')} onOpen={(id) => goProjectDetail(id, 'myprojects')} />}
-          {view === 'newproject' && <NewProject goApprovals={() => setView('approvals')} pushToast={pushToast} />}
+          {view === 'newproject' && (
+            <NewProject
+              communities={COMMUNITIES}
+              onCreated={(project) => {
+                refreshData();
+                goProjectDetail(project.id, 'portfolio');
+              }}
+              pushToast={pushToast}
+            />
+          )}
           {view === 'approvals' && (
             <Approvals approvals={approvals} onApprove={approve} onReturn={returnItem} onComment={(id, text) => addApprovalComment(id, user.name, text)} />
           )}
@@ -189,7 +197,17 @@ function SignedInApp({ user, demoMode, onLogout }: { user: AuthUser; demoMode: b
           {view === 'targets' && <Targets targets={targets} onAdd={addTarget} onClose={closeTarget} pushToast={pushToast} />}
           {view === 'team' && <Team members={members} tasks={tasks} projects={PROJECTS} onInvite={inviteMember} onAssignTask={assignTask} />}
           {view === 'bulkupload' && <BulkUpload projects={PROJECTS} pushToast={pushToast} />}
-          {view === 'users' && <UserAccounts currentUserId={user.id} canAdminister={role === 'exec'} pushToast={pushToast} />}
+          {view === 'settings' && (
+            <Settings
+              currentUserId={user.id}
+              canAdminister={role === 'exec'}
+              settings={settings}
+              status={integrationStatus}
+              live={settingsLive}
+              onSave={saveSettings}
+              pushToast={pushToast}
+            />
+          )}
           {view === 'help' && <HelpPage projects={PROJECTS} indicators={INDICATORS} goProjectDetail={(id) => goProjectDetail(id, 'help')} />}
           {view === 'projectdetail' && selectedProject && (
             <ProjectDetail
@@ -197,6 +215,8 @@ function SignedInApp({ user, demoMode, onLogout }: { user: AuthUser; demoMode: b
               impact={PROJECT_IMPACTS[selectedProject.code]}
               customFields={customFields}
               canEditFields={role === 'exec' || role === 'manager'}
+              canEditProject={role === 'exec' || role === 'manager'}
+              onProjectUpdated={refreshData}
               onAddField={addField}
               onUpdateField={updateField}
               onRemoveField={removeField}

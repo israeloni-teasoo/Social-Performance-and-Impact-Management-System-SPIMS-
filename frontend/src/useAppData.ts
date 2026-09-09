@@ -30,6 +30,10 @@ export function useAppData() {
   const [data, setData] = useState<AppData>(EMPTY);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [reloadToken, setReloadToken] = useState(0);
+
+  /** Re-fetches the portfolio — used after a project is created or edited. */
+  const refresh = () => setReloadToken((n) => n + 1);
 
   useEffect(() => {
     let cancelled = false;
@@ -62,7 +66,7 @@ export function useAppData() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [reloadToken]);
 
-  return { ...data, loading, error };
+  return { ...data, loading, error, refresh };
 }

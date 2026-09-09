@@ -52,7 +52,7 @@ weaker.
 | Table | Holds |
 |---|---|
 | `User` | Login accounts — email, bcrypt hash, role, active flag |
-| `Project` | Programme master record — budget, pillar, state, status |
+| `Project` | Programme master record — budget, pillar, state, status, plus intake detail (timeline, funding source, community, partners) |
 | `ProjectImpact` | Impact chain per programme: inputs, activities, outputs, outcomes, **reach**, impact, methodology, provenance |
 | `CustomField` | Per-programme question/answer pairs with sources |
 | `Community` | Host communities |
@@ -65,6 +65,7 @@ weaker.
 | `EvidenceItem` | Evidence register (metadata only — see §11) |
 | `Indicator` | Indicator library mapping local to global frameworks |
 | `BulkUpload` | Audit record of CSV uploads |
+| `OrgSettings` | Organisation name, financial year, currency, target year, data-status note |
 
 Schema changes are managed as versioned Prisma migrations under
 `prisma/migrations/`, applied by `prisma migrate deploy` before the API starts. No
@@ -142,6 +143,8 @@ exposes — so the API permits exactly what the interface offers and nothing mor
 | Stakeholder register | Community Relations |
 | Report preview, report comments, programme custom fields | Executive, Project Manager |
 | Account administration — create, set role, deactivate, reset password | Executive |
+| Organisation settings | Executive (readable by any signed-in user, since the interface needs them) |
+| Creating and updating projects | Executive, Project Manager |
 | Changing your own password | Any signed-in user |
 
 The account list is also restricted to the Executive on read, since it carries email
@@ -291,9 +294,10 @@ stack is open source and the source is delivered to Seplat.
 ### Possible future integration
 
 Single sign-on against Seplat's existing identity provider (Entra ID / Active
-Directory) is not built, but the auth layer is isolated enough that adding OIDC would
-not disturb the rest of the system. Worth raising if SSO is a requirement — it is
-easier to plan for now than to retrofit later.
+Directory) is not built. It is now scoped in full — options, what changes, what Seplat
+must supply, effort and risk — in **docs/SSO-SCOPE.md**. Summary: OpenID Connect
+against Entra ID, 3–5 days of development plus testing against Seplat's tenant, no
+third-party cost, and a local break-glass Executive account retained permanently.
 
 ---
 

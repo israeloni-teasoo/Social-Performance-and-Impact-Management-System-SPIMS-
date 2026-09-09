@@ -130,6 +130,7 @@ export function Sidebar({
 
             <div style={SECTION_LABEL}>Plan &amp; Track</div>
             <NavButton icon="portfolio" label="Project Portfolio" active={view === 'portfolio'} onClick={() => setView('portfolio')} />
+            <NavButton icon="newproject" label="New Project" active={view === 'newproject'} onClick={() => setView('newproject')} />
             <NavButton icon="communities" label="Communities" active={view === 'communities'} onClick={() => setView('communities')} />
 
             <div style={SECTION_LABEL}>Measure</div>
@@ -176,12 +177,7 @@ export function Sidebar({
         )}
 
         <div style={{ marginTop: 'auto', paddingTop: 12 }}>
-          <NavButton
-            icon="team"
-            label={role === 'exec' ? 'User Accounts' : 'My Account'}
-            active={view === 'users'}
-            onClick={() => setView('users')}
-          />
+          <NavButton icon="settings" label="Settings" active={view === 'settings'} onClick={() => setView('settings')} />
           <NavButton icon="help" label="Help & Standards" active={view === 'help'} onClick={() => setView('help')} />
         </div>
       </nav>

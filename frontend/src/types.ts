@@ -2,7 +2,7 @@ export type Role = 'exec' | 'manager' | 'field' | 'relations';
 
 export type View =
   | 'dashboard'
-  | 'users'
+  | 'settings'
   | 'portfolio'
   | 'impact'
   | 'communities'
@@ -286,4 +286,43 @@ export interface NewUserInput {
   name: string;
   role: Role;
   password: string;
+}
+
+/** Organisation settings, editable by an Executive under Settings. */
+export interface OrgSettings {
+  orgName: string;
+  financialYear: string;
+  currencyLabel: string;
+  targetYear: number;
+  dataStatusNote: string;
+}
+
+/** What this deployment has connected. Never carries any key or secret. */
+export interface IntegrationStatus {
+  claudeConfigured: boolean;
+  mediaMonitoringConfigured: boolean;
+  database: string;
+  projects: number;
+  activeUsers: number;
+  uploads: number;
+}
+
+export interface NewProjectInput {
+  code: string;
+  name: string;
+  pillar: string;
+  state: string;
+  budget: string;
+  output?: string;
+  status?: string;
+  progPct?: string;
+  utilPct?: string;
+  startDate?: string;
+  endDate?: string;
+  fundingSource?: string;
+  contractor?: string;
+  partner?: string;
+  community?: string;
+  lga?: string;
+  owner?: string;
 }

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { CustomFieldsPanel } from '../components/CustomFieldsPanel';
+import { ProjectEditPanel } from '../components/ProjectEditPanel';
 import { ImpactStageCard as StageCard } from '../components/ImpactStageCard';
 import { ProvenanceTip } from '../components/ImpactExplainers';
 import { ImpactPanel } from '../components/ImpactPanel';
@@ -22,6 +23,8 @@ export function ProjectDetail({
   impact,
   customFields,
   canEditFields,
+  canEditProject,
+  onProjectUpdated,
   onAddField,
   onUpdateField,
   onRemoveField,
@@ -32,6 +35,8 @@ export function ProjectDetail({
   impact: ProjectImpact | undefined;
   customFields: CustomField[];
   canEditFields: boolean;
+  canEditProject: boolean;
+  onProjectUpdated: () => void;
   onAddField: (input: NewCustomFieldInput) => void;
   onUpdateField: (id: string, answer: string, source: string) => void;
   onRemoveField: (id: string) => void;
@@ -107,9 +112,12 @@ export function ProjectDetail({
               ))}
             </div>
           ) : (
-            <button onClick={() => setFormatOpen(true)} style={primaryBtn}>
-              Download project report →
-            </button>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+              {canEditProject && <ProjectEditPanel project={project} onUpdated={onProjectUpdated} pushToast={pushToast} />}
+              <button onClick={() => setFormatOpen(true)} style={primaryBtn}>
+                Download project report →
+              </button>
+            </div>
           )}
         </div>
       </div>

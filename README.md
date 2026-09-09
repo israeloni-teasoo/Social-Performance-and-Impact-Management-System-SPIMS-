@@ -80,7 +80,9 @@ The target setup is **Vercel** (hosts the frontend build and the `api/` function
 
 ## What's implemented
 
-- **Executive**: Dashboard, Project Portfolio, Impact Chain, Communities, Reports & Exports (with Claude slide preview), Targets, Bulk Upload.
+- **Executive**: Dashboard, Project Portfolio, New Project, Impact Chain, Communities, Reports & Exports (with Claude slide preview), Targets, Bulk Upload, Settings.
+- **Project setup**: projects are created and maintained in the system by Executives and Project Managers — intake captures timeline, budget, funding source, community and partners; status, progress and utilisation are edited as delivery proceeds.
+- **Settings**: organisation name, financial year, currency, target year and data-status note are configurable; user accounts and integration status live here too.
 - **Reach, reported separately from Impact**: reach counts everyone a programme interacted with (applicants, attendees, people screened, catchment residents); impact counts only those who received the intervention. Both appear on the Executive Dashboard with a per-pillar breakdown, on every programme page with a conversion rate and a programme-specific note, and in exports. STEAM is the worked example — 120,000 scholarship applicants, 48 awards.
 - **Custom fields per programme**: questions a programme keeps being asked, answered on its own page with a source and a last-updated stamp, and carried into that programme's export.
 - **Manager**: My Projects, New Project (intake form), Approvals Queue, My Team.
@@ -119,12 +121,15 @@ must never be used where real data lives, since its passwords are in this reposi
   is built, what the system does, what is outstanding, the options for each and the
   recommendation. `docs/SPIMS-Project-Status.docx` is the same content as a Word
   document for the client.
+- **[docs/PROGRESS-NOTE.md](docs/PROGRESS-NOTE.md)** — the short version: done, left, blockers,
+  cost implications. `docs/SPIMS-Progress-Note.docx` is the same as a Word document.
 - **[docs/TECHNICAL-SPECIFICATION.md](docs/TECHNICAL-SPECIFICATION.md)** — for Seplat IT.
 - **[docs/SELF-HOSTING.md](docs/SELF-HOSTING.md)** — operator runbook.
+- **[docs/SSO-SCOPE.md](docs/SSO-SCOPE.md)** — single sign-on options, effort and what Seplat must supply.
 
-The status report is **generated** — edit `docs/status-report/content.cjs` and run
-`npm run report`, which rewrites both the Markdown and the Word file. Never edit either
-output by hand. Keep it current in the same commit as any change it describes; see
+These are **generated** — edit `docs/status-report/content.cjs` (full report) or
+`docs/status-report/note.cjs` (short note) and run `npm run report`, which rewrites both
+Markdown and Word outputs. Never edit an output by hand. Keep it current in the same commit as any change it describes; see
 [CLAUDE.md](CLAUDE.md).
 
 ## Roadmap

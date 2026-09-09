@@ -26,5 +26,5 @@ export const CRUMBS: Record<View, string> = {
   targets: 'Targets',
   team: 'My Team',
   bulkupload: 'Bulk Upload',
-  users: 'User Accounts',
+  settings: 'Settings',
 };
