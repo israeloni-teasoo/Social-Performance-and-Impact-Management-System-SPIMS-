@@ -16,6 +16,7 @@ import {
   runMentionIngestionHandler,
   setMentionSourceActiveHandler,
 } from './handlers/mentions';
+import { checkCronAuth } from './lib/cronAuth';
 import { addReportCommentHandler, listReportCommentsHandler } from './handlers/reportComments';
 import { generateReportPreviewHandler } from './handlers/reportPreview';
 import { createProjectHandler, updateProjectHandler } from './handlers/projects';
@@ -251,6 +252,22 @@ app.post('/api/mentions/sources/active', async (req, res) => {
 });
 app.post('/api/mentions/sources/delete', async (req, res) => {
   const r = await deleteMentionSourceHandler(req.body ?? {});
+  res.status(r.status).json(r.body);
+});
+
+/**
+ * Scheduled media collection.
+ *
+ * Present in both adapters so a self-hosted install can drive it from system cron
+ * exactly as Vercel drives it from vercel.json — the same path, the same bearer token.
+ * It authenticates itself rather than going through the session guard, because a
+ * scheduler has no session.
+ */
+app.get('/api/cron/collect-mentions', async (req, res) => {
+  const auth = checkCronAuth(req.headers.authorization);
+  if (!auth.ok) return res.status(auth.status).json({ error: auth.error });
+  const r = await runMentionIngestionHandler();
+  if (r.status === 400) return res.status(200).json({ skipped: true, ...(r.body as object) });
   res.status(r.status).json(r.body);
 });
 

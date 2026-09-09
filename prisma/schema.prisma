@@ -4,7 +4,14 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  /// The pooled connection the application uses. On serverless this must point at the
+  /// provider's transaction pooler, or connections outlive the invocations that made
+  /// them and the database runs out.
+  url = env("DATABASE_URL")
+  /// A direct connection, used only for migrations. Schema changes cannot run through
+  /// a transaction pooler. Falls back to DATABASE_URL when unset, which is correct for
+  /// a self-hosted install where the two are the same.
+  directUrl = env("DIRECT_URL")
 }
 
 enum Role {

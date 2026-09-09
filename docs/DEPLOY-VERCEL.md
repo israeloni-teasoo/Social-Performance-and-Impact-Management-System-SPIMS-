@@ -1,0 +1,168 @@
+# SPIMS — Deploying on Vercel
+
+The managed deployment model. For the self-hosted model see `SELF-HOSTING.md`; for what
+the two mean for data ownership, see §2.1 and §10 of `TECHNICAL-SPECIFICATION.md`
+before starting — the difference is not technical.
+
+Version 1.0 · 9 September 2026
+
+---
+
+## What you need
+
+1. A **Vercel** account, owned by Seplat rather than by Teasoo. Whoever owns it can
+   read every environment variable, including the session signing key.
+2. A **PostgreSQL** database. Vercel does not provide one. Supabase is the
+   recommendation: it is standard PostgreSQL, so the schema and migrations apply
+   unchanged, and unlike the alternatives it can also be self-hosted later — which is
+   what keeps the move back onto Seplat infrastructure a dump-and-restore rather than a
+   migration project.
+3. Nothing else. No API key is required for the system to work; the two optional
+   integrations are described below.
+
+---
+
+## 1. The database, and the one setting that matters
+
+Create the database and take **two** connection strings from it. This is the step that
+is easy to get wrong and expensive to diagnose.
+
+| Variable | Which string | Why |
+|---|---|---|
+| `DATABASE_URL` | The **pooled** connection — Supabase port `6543`, or a Neon `-pooler` host — with `?pgbouncer=true&connection_limit=1` appended | Serverless functions come and go constantly. Without a pooler, each one opens its own connections and the database runs out of them under quite ordinary load. The failure looks like an outage, not like a configuration mistake. |
+| `DIRECT_URL` | The **direct** connection, port `5432` | Migrations alter the schema, which cannot be done through a transaction pooler. Prisma uses this for migrations only. |
+
+Example:
+
+```
+DATABASE_URL="postgresql://postgres.abc:PASSWORD@aws-0-eu-west-1.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1"
+DIRECT_URL="postgresql://postgres.abc:PASSWORD@aws-0-eu-west-1.pooler.supabase.com:5432/postgres"
+```
+
+---
+
+## 2. Environment variables
+
+Set these in **Project → Settings → Environment Variables**, for Production (and
+Preview, if you use preview deployments).
+
+| Variable | Required | Notes |
+|---|---|---|
+| `DATABASE_URL` | Yes | Pooled. See above. |
+| `DIRECT_URL` | Yes | Direct. See above. |
+| `JWT_SECRET` | Yes | Signs session cookies. Generate with `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`. Changing it signs everyone out, which is the emergency lever if a session is ever suspected compromised. |
+| `CRON_SECRET` | Only for scheduled media collection | Generate the same way. Leave it unset and scheduled collection refuses every request — see §4. |
+| `ANTHROPIC_API_KEY` | No | Only for AI-drafted report commentary. Every export works without it. |
+| `MEDIA_FETCH_TIMEOUT_MS` | No | Defaults to 20000. Lower it if a collection run is being cut short. |
+| `SESSION_COOKIE_SECURE` | No | Defaults to on in production, which is right for Vercel. Do not set it to `false` here. |
+
+`NODE_ENV` is set to `production` by Vercel; do not set it yourself.
+
+---
+
+## 3. Deploy
+
+Import the repository. `vercel.json` already carries the build configuration:
+
+```
+npx prisma migrate deploy && cd frontend && npm install && npm run build
+```
+
+Migrations run as part of the build, so a schema change ships with the code that needs
+it. A failing migration fails the build — deliberately, since the alternative is a
+deployment whose code and database disagree.
+
+### Create the first account
+
+There is no self-registration, so the first account is created from a machine with the
+database credentials to hand:
+
+```bash
+DATABASE_URL="<direct connection>" npm run create:user
+```
+
+It prompts for name, email, role and password. Make it an `exec`; that role can then
+create everyone else from **Settings → User accounts**.
+
+**Do not seed the demo dataset into a production database.** The demo account passwords
+are in the repository and therefore public.
+
+---
+
+## 4. Scheduled media collection
+
+`vercel.json` registers a cron job that collects mentions twice daily:
+
+```json
+{ "path": "/api/cron/collect-mentions", "schedule": "0 6,18 * * *" }
+```
+
+Runs overlap on purpose — de-duplication makes an overlap free, whereas a gap between
+windows loses coverage silently.
+
+**Set `CRON_SECRET` or this does nothing.** Vercel sends it as an `Authorization:
+Bearer` header; the endpoint refuses every request when the variable is unset. That is
+deliberate: the alternative — allowing the call when no secret is configured — would
+leave a deployment that forgot the variable exposing an unauthenticated endpoint that
+makes outbound network requests. Off until configured is the safe end of that trade.
+
+The job reports success with `skipped: true` when no sources are configured, so an
+unconfigured install does not show as a failing job every night.
+
+To turn scheduled collection off, remove the `crons` block, or simply pause every
+source under **Media & Mentions → Sources**. Collection remains available on demand
+from the button on that screen either way.
+
+---
+
+## 5. Checking it worked
+
+```bash
+curl https://<your-deployment>/api/health
+# {"status":"ok","database":"connected"}
+```
+
+A `503` here means the functions are running but cannot reach the database — almost
+always `DATABASE_URL`. HTML instead of JSON means the API functions did not deploy at
+all, in which case the interface will silently fall back to its bundled sample data and
+look like it is working. **That is the failure mode worth checking for deliberately:**
+sign in and confirm a change you make survives a reload in a different browser. If it
+does not, you are looking at demo data.
+
+Then confirm, in order:
+
+1. Sign in with the account created above.
+2. **Settings** shows `Database: PostgreSQL` and a real user count.
+3. Create a project; reload; it is still there.
+4. Export a report as PDF and as PowerPoint.
+5. **Media & Mentions → Sources**, add a source, then *Check for new mentions*. A
+   failing source names its own error rather than returning an empty queue.
+
+---
+
+## 6. Costs
+
+| Item | Cost |
+|---|---|
+| Vercel | Free tier is adequate for this usage; a Pro seat is roughly $20/month if their policy requires it for commercial use. |
+| Database | Supabase and Neon both have free tiers that fit this dataset. Paid tiers start around $25/month. |
+| Media monitoring, press and web | None. The sources are public. |
+| AI commentary | Usage-based and small. Optional. |
+
+Third-party costs are recharged at cost and are not part of the platform fee.
+
+---
+
+## 7. Moving to Seplat infrastructure later
+
+Not a rewrite, and worth knowing before committing to managed hosting:
+
+1. `pg_dump` from the managed database.
+2. Restore into Postgres on Seplat infrastructure.
+3. Follow `SELF-HOSTING.md`, pointing `DATABASE_URL` at it.
+4. Replace the Vercel cron entry with a system cron job against the same path and
+   bearer token.
+
+No application code changes. The Express adapter that makes this possible is exercised
+in development every day, which is what stops it rotting into a path that only works in
+theory.

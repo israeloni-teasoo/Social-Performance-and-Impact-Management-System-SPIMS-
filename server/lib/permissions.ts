@@ -15,6 +15,21 @@ import type { Role } from '@prisma/client';
 
 export const PUBLIC_ROUTES = ['/api/health', '/api/auth/login', '/api/auth/logout', '/api/auth/me'];
 
+/**
+ * Routes that authenticate themselves and must therefore be let past the session gate.
+ *
+ * There is exactly one, and it is not public: the scheduled media collection endpoint
+ * is called by a cron trigger, which has no session to present, so it verifies a
+ * bearer secret instead (see `server/lib/cronAuth.ts`) and refuses everything when no
+ * secret is configured.
+ *
+ * **Anything added here must do its own authentication.** This list is the one place
+ * the default-deny rule is set aside, so it is deliberately short and deliberately
+ * conspicuous. If a route here ever stops checking its own caller, it becomes an
+ * unauthenticated endpoint.
+ */
+export const SELF_AUTHENTICATED_ROUTES = ['/api/cron/collect-mentions'];
+
 /** Any signed-in role. */
 const ANY: Role[] = ['exec', 'manager', 'field', 'relations'];
 
@@ -98,6 +113,9 @@ export interface AccessDenial {
 export function checkAccess(method: string, path: string, role: Role | null): AccessDenial | null {
   const route = path.replace(/\/+$/, '') || path;
   if (PUBLIC_ROUTES.includes(route)) return null;
+  // Let a self-authenticating route through to its own check, which is stricter than
+  // a session: it requires a configured shared secret and fails closed without one.
+  if (SELF_AUTHENTICATED_ROUTES.includes(route)) return null;
 
   if (!role) return { status: 401, body: { error: 'Not signed in.' } };
 

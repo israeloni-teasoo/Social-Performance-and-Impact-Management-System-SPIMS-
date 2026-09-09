@@ -13,7 +13,7 @@ module.exports = {
     subtitle: 'Social Performance & Impact Management System',
     client: 'Prepared for Seplat Energy Plc',
     author: 'Teasoo Consulting',
-    version: '1.3',
+    version: '1.4',
     date: '9 September 2026',
     commit: 'current build',
   },
@@ -77,7 +77,7 @@ module.exports = {
           type: 'table',
           head: ['Item', 'Waiting on'],
           rows: [
-            ['Install on Seplat infrastructure', 'Seplat — infrastructure or hosting approval'],
+            ['Deploy to Vercel with a managed database', 'Seplat — a Vercel account and a database account, both in Seplat’s name'],
             ['Worked example on one real programme', 'Seplat — programme data and organisation chart'],
             ['Single sign-on with Seplat credentials', 'Seplat — decision, then app registration. Scoped separately'],
             ['Social media and hashtag tracking', 'A budget decision. Press and web monitoring is built and running'],
@@ -99,7 +99,7 @@ module.exports = {
         {
           type: 'bullets',
           items: [
-            'No hosting environment yet. This is the single highest-value step — it converts the system from something demonstrated into something in use, and unblocks four later items.',
+            'No hosting environment yet. Seplat has chosen Vercel with a managed PostgreSQL database, which removes the infrastructure work entirely; what is needed now is the two accounts. Worth noting plainly: under managed hosting the data sits with those providers rather than on Seplat infrastructure, so it is a decision for information security as well as for IT. Moving onto Seplat’s own servers later is a database restore, not a rewrite.',
             'No real programme data. The system currently runs on figures drawn from Seplat’s published 2025 report; the requested end-to-end worked example needs a complete dataset for one programme, and confirmation of which programme was meant.',
           ],
         },

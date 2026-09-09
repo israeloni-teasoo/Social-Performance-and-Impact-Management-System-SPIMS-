@@ -12,7 +12,9 @@
     "postinstall": "prisma generate",
     "start:api": "tsx server/main.ts",
     "create:user": "tsx prisma/createUser.ts",
-    "report": "node docs/status-report/build.cjs"
+    "report": "node docs/status-report/build.cjs",
+    "check:routes": "node scripts/check-route-parity.mjs",
+    "test:parsers": "tsx server/lib/media/parse.test.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.1",

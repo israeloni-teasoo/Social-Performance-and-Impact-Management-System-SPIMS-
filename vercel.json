@@ -1,5 +1,20 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "npx prisma migrate deploy && cd frontend && npm install && npm run build",
   "outputDirectory": "frontend/dist",
-  "installCommand": "npm install"
+  "installCommand": "npm install",
+  "functions": {
+    "api/mentions/run.ts": {
+      "maxDuration": 60
+    },
+    "api/cron/collect-mentions.ts": {
+      "maxDuration": 60
+    }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/collect-mentions",
+      "schedule": "0 6,18 * * *"
+    }
+  ]
 }

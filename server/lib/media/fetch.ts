@@ -17,8 +17,16 @@ import type { FetchOutcome, RawMention, SourceKind } from './types';
  * that anyone changing this file knows they are changing that undertaking.
  */
 
-/** Long enough for a slow Nigerian outlet, short enough not to hang an ingestion run. */
-const TIMEOUT_MS = 20_000;
+/**
+ * Long enough for a slow Nigerian outlet, short enough not to hang an ingestion run.
+ *
+ * Configurable because a serverless platform caps how long a function may run, and a
+ * run killed by that cap writes no record at all — the operator sees an empty queue
+ * with nothing to say why, which is the failure this module is otherwise built to
+ * avoid. Sources are fetched in parallel, so a run costs roughly the slowest source,
+ * not the sum.
+ */
+const TIMEOUT_MS = Number(process.env.MEDIA_FETCH_TIMEOUT_MS) || 20_000;
 
 /**
  * Identifies us to the outlets we read.

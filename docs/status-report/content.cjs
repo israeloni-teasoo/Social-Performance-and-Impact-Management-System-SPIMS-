@@ -16,7 +16,7 @@ module.exports = {
     subtitle: 'Social Performance & Impact Management System',
     client: 'Prepared for Seplat Energy Plc',
     author: 'Teasoo Consulting',
-    version: '1.5',
+    version: '1.6',
     date: '9 September 2026',
     commit: '337d07a',
   },
@@ -182,7 +182,7 @@ module.exports = {
           type: 'table',
           head: ['Item', 'Constraint', 'Priority'],
           rows: [
-            ['Production hosting', 'Accounts and credentials, then a short deployment', 'High'],
+            ['Production hosting', 'Seplat proceeding with Vercel plus a managed PostgreSQL. Needs the two accounts and their credentials, then a short deployment', 'High'],
             ['Social media and hashtag tracking', 'Budget decision on a paid provider. Press and web monitoring is built and needs nothing', 'Medium'],
             ['Evidence file storage', 'Engineering. The register records descriptions, not documents', 'Medium'],
             ['Bulk upload writing to live records', 'Seplat decision on aggregation rules', 'Medium'],
@@ -325,7 +325,7 @@ module.exports = {
           type: 'table',
           head: ['Needed', 'Unblocks'],
           rows: [
-            ['Infrastructure for the production instance, or approval to host a demonstration instance in the cloud', 'Installation and evaluation on real infrastructure'],
+            ['A Vercel account and a managed PostgreSQL database, both owned by Seplat', 'Deployment. Seplat has chosen the managed hosting model; see the technical specification §2.1 for what that means for where the data sits'],
             ['Complete data for one programme, plus the organisation chart', 'The full worked example requested in the August review'],
             ['Seplat’s own data templates or reporting scope', 'Aligning bulk upload to their actual records rather than our assumptions'],
             ['Aggregation rules for uploaded beneficiary and activity data', 'Bulk upload writing directly to live records'],

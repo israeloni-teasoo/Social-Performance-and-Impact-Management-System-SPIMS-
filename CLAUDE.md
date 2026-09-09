@@ -31,7 +31,8 @@ The other two documents follow the same rule when they are affected:
 
 - `docs/TECHNICAL-SPECIFICATION.md` — for Seplat IT. Architecture, data model, auth,
   outbound data flows, known gaps.
-- `docs/SELF-HOSTING.md` — the operator runbook.
+- `docs/SELF-HOSTING.md` — the operator runbook for the self-hosted model.
+- `docs/DEPLOY-VERCEL.md` — the runbook for the managed (Vercel) model.
 - `docs/REPORTING-ARCHITECTURE.md` — reporting decisions, and what was deliberately
   not adopted.
 - `docs/SSO-SCOPE.md` — single sign-on options and effort.
@@ -105,7 +106,28 @@ does **not** prove the backend is being used. To verify live mode genuinely read
 database, insert a row that exists nowhere in the seed and confirm it appears.
 
 Before pushing: `npx tsc --noEmit -p tsconfig.json`, `cd frontend && npx tsc -b`,
-`npx oxlint src`, `npm run build`, and exercise both demo and live modes.
+`npx oxlint src`, `npm run build`, and exercise both demo and live modes. Also
+`npm run check:routes` (both adapters expose the same routes) and `npm run test:parsers`
+(the media source parsers).
+
+## Deployment
+
+Two models, both live: self-hosted (Docker, Express) and managed (Vercel, serverless
+functions). They run identical handlers. Things that bite on the serverless side:
+
+- **Every Express route needs a matching file under `api/`**, or it answers with the
+  single-page application's HTML on Vercel and the frontend silently falls back to seed
+  data. Diff the two route sets after adding a route.
+- **`server/lib/db.ts` caches the Prisma client on `globalThis` unconditionally.** The
+  usual dev-only guard leaks a connection pool per invocation on serverless. Do not
+  "tidy" it back.
+- **`DATABASE_URL` must be the pooled connection** on serverless; `DIRECT_URL` is the
+  unpooled one migrations need.
+- **Long-running routes need `maxDuration`** in `vercel.json`. A mention run cut short
+  by the platform writes no run record, which is precisely the silent-empty-queue
+  failure the run log exists to prevent.
+- `SELF_AUTHENTICATED_ROUTES` in `permissions.ts` is the one place default-deny is set
+  aside. Anything listed there must authenticate its own caller and fail closed.
 
 ## Media monitoring
 
