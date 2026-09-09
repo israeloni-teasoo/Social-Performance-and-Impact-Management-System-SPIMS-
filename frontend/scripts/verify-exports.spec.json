@@ -1,0 +1,151 @@
+{
+  "meta": {
+    "title": "Block Coverage Check",
+    "subtitle": "Every block type, rendered once, so none can regress unseen.",
+    "organisation": "Seplat Energy Plc",
+    "financialYear": "FY2026",
+    "currencyLabel": "₦ Naira",
+    "scopeNote": "Scope: FY2026 · synthetic data.",
+    "dataStatusNote": "Synthetic — for renderer verification only.",
+    "generatedOn": "09 September 2026"
+  },
+  "blocks": [
+    {
+      "kind": "cover"
+    },
+    {
+      "kind": "chapter",
+      "title": "Performance",
+      "tone": "overview"
+    },
+    {
+      "kind": "metricGrid",
+      "title": "At a glance",
+      "metrics": [
+        {
+          "key": "a",
+          "label": "Programmes",
+          "value": 8,
+          "display": "8",
+          "unit": "count",
+          "provenance": {
+            "metric": "Programmes in scope",
+            "calculation": "x"
+          }
+        },
+        {
+          "key": "b",
+          "label": "Reach",
+          "value": 169841,
+          "display": "169,841",
+          "unit": "people",
+          "provenance": {
+            "metric": "People interacted with",
+            "calculation": "x"
+          }
+        },
+        {
+          "key": "c",
+          "label": "Impact",
+          "value": 20464,
+          "display": "20,464",
+          "unit": "people",
+          "provenance": {
+            "metric": "People who received the intervention",
+            "calculation": "x"
+          }
+        },
+        {
+          "key": "d",
+          "label": "Total budget",
+          "value": 4680,
+          "display": "₦4.68B",
+          "unit": "currency",
+          "provenance": {
+            "metric": "Combined programme budget",
+            "calculation": "x"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "reachComparison",
+      "title": "Reach and impact by pillar",
+      "intro": "Reach counts everyone a programme interacted with.",
+      "rows": [
+        {
+          "pillar": "Education",
+          "projectCount": 4,
+          "reach": 134585,
+          "impact": 7531,
+          "conversionPct": 5.6
+        },
+        {
+          "pillar": "Health",
+          "projectCount": 1,
+          "reach": 13726,
+          "impact": 7545,
+          "conversionPct": 55
+        }
+      ]
+    },
+    {
+      "kind": "progress",
+      "pct": 12,
+      "caption": "12% of interactions converted into a delivered intervention."
+    },
+    {
+      "kind": "break"
+    },
+    {
+      "kind": "chapter",
+      "title": "Investment",
+      "tone": "impact"
+    },
+    {
+      "kind": "spend",
+      "title": "Investment by programme",
+      "intro": "Budget by programme, largest first.",
+      "rows": [
+        {
+          "code": "A",
+          "name": "Mini-grid Electrification",
+          "budgetMillions": 710,
+          "budgetLabel": "₦710M",
+          "utilisedPct": 62
+        },
+        {
+          "code": "B",
+          "name": "Eye Can See Outreach",
+          "budgetMillions": 640,
+          "budgetLabel": "₦640M",
+          "utilisedPct": 81
+        }
+      ]
+    },
+    {
+      "kind": "chapter",
+      "title": "Commentary",
+      "tone": "communities"
+    },
+    {
+      "kind": "section",
+      "heading": "A section long enough to split across slides",
+      "lines": [
+        "Point 1 — a line of narrative carrying a figure such as ₦520M and 13,726 people.",
+        "Point 2 — a line of narrative carrying a figure such as ₦520M and 13,726 people.",
+        "Point 3 — a line of narrative carrying a figure such as ₦520M and 13,726 people.",
+        "Point 4 — a line of narrative carrying a figure such as ₦520M and 13,726 people.",
+        "Point 5 — a line of narrative carrying a figure such as ₦520M and 13,726 people.",
+        "Point 6 — a line of narrative carrying a figure such as ₦520M and 13,726 people.",
+        "Point 7 — a line of narrative carrying a figure such as ₦520M and 13,726 people.",
+        "Point 8 — a line of narrative carrying a figure such as ₦520M and 13,726 people.",
+        "Point 9 — a line of narrative carrying a figure such as ₦520M and 13,726 people."
+      ]
+    },
+    {
+      "kind": "callout",
+      "text": "PEARLs Academic Quiz has no reach profile and is excluded rather than counted as zero."
+    }
+  ]
+}

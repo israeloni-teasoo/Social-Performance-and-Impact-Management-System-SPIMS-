@@ -16,9 +16,9 @@ module.exports = {
     subtitle: 'Social Performance & Impact Management System',
     client: 'Prepared for Seplat Energy Plc',
     author: 'Teasoo Consulting',
-    version: '1.2',
+    version: '1.3',
     date: '9 September 2026',
-    commit: 'faa4a42',
+    commit: '7c6c76f',
   },
 
   sections: [
@@ -76,7 +76,8 @@ module.exports = {
             ['Application interface', '32 API endpoints, all authenticated. Written as hosting-agnostic handlers so the same logic runs self-hosted or serverless without a second implementation.'],
             ['Reach and impact', 'Reach recorded separately from impact for every programme, with the interaction channels, the conversion between them, and a written explanation of what separates the two for that specific programme.'],
             ['Programme custom fields', 'Recurring stakeholder questions answered on the programme’s own page, each with a source and a last-updated stamp, and carried into that programme’s export.'],
-            ['Reporting', 'Report structure mirrors Seplat’s published 2025 Social Performance Report. Exports carry the compiled content, the selected programmes and the financial year, in PDF, Excel and Word.'],
+            ['Reporting', 'Report structure mirrors Seplat’s published 2025 Social Performance Report, and now its visual language too — the typeface, colours, chapter tabs and the way figures are set were taken from that document. Exports carry the compiled content, the selected programmes and the financial year, in PDF, PowerPoint, Excel and Word.'],
+            ['PowerPoint export', 'A designed deck built from the same verified figures as the PDF, with native PowerPoint charts rather than pictures of charts — a recipient can edit a bar or correct a label without coming back to us, and the figures travel with the file.'],
             ['Bulk upload', 'Self-serve CSV upload with four downloadable templates, server-side validation and parsing, and an audit record of every upload.'],
             ['AI report generation', 'Claude generates a slide outline from the compiled report content. Runs server-side only; the API key never reaches the browser.'],
             ['Security', 'Every route requires a session except the health check and sign-in. Writes restricted by role from a single permission table. Writes to a route with no rule are refused by default.'],
@@ -181,7 +182,6 @@ module.exports = {
           rows: [
             ['Production hosting', 'Accounts and credentials, then a short deployment', 'High'],
             ['Media and social mention monitoring', 'Engineering plus a decision on paid data', 'Medium'],
-            ['PowerPoint export preserving charts', 'Engineering, plus Seplat IT approval of the AI used', 'Medium'],
             ['Evidence file storage', 'Engineering. The register records descriptions, not documents', 'Medium'],
             ['Bulk upload writing to live records', 'Seplat decision on aggregation rules', 'Medium'],
             ['Live SROI and compliance calculation', 'Seplat M&E validation of financial proxies', 'Medium'],
@@ -261,7 +261,17 @@ module.exports = {
         {
           type: 'p',
           text:
-            'Seplat confirmed the PDF export is satisfactory and asked that PowerPoint preserve charts as graphics rather than flattened text. Options are to keep the current outline, to generate a genuine PowerPoint file with chart images rendered server-side, or to populate a Seplat-supplied template. Recommendation: generate a real file with rendered charts, and ask Seplat for their own deck template so the output arrives already in their house style.',
+            'Delivered. The deck is a genuine PowerPoint file whose charts are native chart objects, not images — better than the graphics Seplat asked for, because a recipient can edit them. The figures behind each chart travel with the file in an embedded worksheet.',
+        },
+        {
+          type: 'p',
+          text:
+            'One point worth stating plainly, because the August review tied this feature to it: the deck does not depend on the AI decision. It is built entirely from figures the system calculates, so it works whether or not Seplat IT approves any AI service. The AI question now affects only optional drafting of commentary.',
+        },
+        {
+          type: 'p',
+          text:
+            'The remaining improvement is Seplat’s own deck template. Both exports are modelled on the published 2025 report, which is close, but a master template would let the deck adopt their layouts exactly. Fonts are the known gap: PowerPoint files cannot embed a typeface the way a PDF does, so the deck names Space Grotesk and Poppins and falls back to a standard sans-serif on a machine without them. Installing the two fonts on the machines that present from this deck removes the difference.',
         },
         {
           type: 'p',
@@ -308,7 +318,7 @@ module.exports = {
             ['Seplat’s own data templates or reporting scope', 'Aligning bulk upload to their actual records rather than our assumptions'],
             ['Aggregation rules for uploaded beneficiary and activity data', 'Bulk upload writing directly to live records'],
             ['M&E validation of SROI financial proxies', 'Live SROI calculation instead of an illustrative figure'],
-            ['IT decision on the AI service used for report generation', 'PowerPoint generation and continued use of the report preview'],
+            ['IT decision on the AI service used for drafting commentary', 'Optional AI-drafted narrative. No longer blocks any export — both PDF and PowerPoint are built from calculated figures alone'],
             ['Budget decision on paid media monitoring', 'Social media and hashtag tracking'],
             ['Whether single sign-on is required', 'Authentication scope'],
           ],
@@ -331,10 +341,9 @@ module.exports = {
             ['1', 'Install on Seplat infrastructure, or stand up a cloud demonstration instance', 'Seplat infrastructure or hosting approval'],
             ['2', 'Worked example on one real programme, end to end', 'Seplat programme data and organisation chart'],
             ['3', 'Media monitoring, phase one (press and web)', 'Nothing — can proceed immediately'],
-            ['4', 'PowerPoint export with charts', 'Seplat IT decision on AI; ideally their deck template'],
-            ['5', 'Evidence file storage', 'Stage 1'],
-            ['6', 'Bulk upload write-through and live SROI', 'Seplat aggregation rules and M&E validation'],
-            ['7', 'Media monitoring, phase two (social and hashtags)', 'Budget approval for a monitoring subscription'],
+            ['4', 'Evidence file storage', 'Stage 1'],
+            ['5', 'Bulk upload write-through and live SROI', 'Seplat aggregation rules and M&E validation'],
+            ['6', 'Media monitoring, phase two (social and hashtags)', 'Budget approval for a monitoring subscription'],
           ],
         },
         {

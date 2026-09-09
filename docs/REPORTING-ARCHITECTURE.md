@@ -3,7 +3,7 @@
 Decision record. What SPIMS adopts from the proposed reporting architecture, what it
 does not, and why.
 
-Version 1.0 · 9 September 2026
+Version 1.1 · 9 September 2026
 
 ---
 
@@ -32,7 +32,8 @@ The proposal's core insight is right and is now implemented:
 | Specification | `frontend/src/report/spec.ts` | A closed set of typed blocks describing a report, independent of output format. |
 | Assembly | `frontend/src/report/buildSpec.ts` | Decides what a report contains and in what order. The only place that decides. |
 | Validation | `frontend/src/report/validate.ts` | Reconciles figures quoted in narrative against the analytics layer. |
-| Rendering | `frontend/src/reportPdf.ts` | Turns a spec into a PDF. PowerPoint will be a sibling, not a parallel implementation. |
+| Rendering | `frontend/src/reportPdf.ts`, `frontend/src/reportPptx.ts` | Turn a spec into a PDF and into a deck. Siblings, not parallel implementations. |
+| Palette | `frontend/src/report/theme.ts` | The colours and tones both renderers draw from, so the two formats cannot drift apart. |
 
 Four ideas from the proposal we took without reservation:
 
@@ -89,19 +90,92 @@ recommendations would add operational cost without buying anything here.
 
 ---
 
-## What this changes about the PowerPoint work
+## PowerPoint, as built
 
-Before this refactor, PowerPoint export meant writing a second report generator. It now
-means writing a renderer against a defined contract:
+The estimate above was 3–4 days for a renderer against a defined contract. That is
+what it turned out to be, and the contract held: `reportPptx.ts` contains no report
+structure at all. It decides how a block looks on a slide. What blocks exist, in what
+order, and carrying which numbers was settled upstream, which is why a figure cannot
+differ between the document and the deck — neither of them works it out.
 
-```ts
-function renderSlide(block: ReportBlock, meta: ReportMeta): Slide
-```
+**The charts are native chart objects, not images.** Seplat asked that PowerPoint
+preserve charts "as graphics rather than flattened text". What is delivered is better
+than that: `ppt/charts/chart1.xml` with an embedded worksheet, and `ppt/media/` empty.
+Someone can restyle a bar or correct a label in PowerPoint without coming back to us,
+and the underlying figures travel with the file.
 
-Eight block types, each with an obvious slide form. PptxGenJS produces native editable
-charts, verified by inspecting a generated file. Estimated at 3–4 days, and it no
-longer depends on Seplat's AI decision — the deck is built from verified data, with AI
-only optionally drafting commentary.
+**It no longer depends on the AI decision.** The August review tied this feature to
+Seplat IT approving an AI service. It does not need one — the deck is built entirely
+from calculated figures. The AI question now affects only optional drafting of prose.
+
+Two honest limitations:
+
+- **Fonts are named, not embedded.** A `.pptx` cannot carry a typeface the way a PDF
+  does. The deck asks for Space Grotesk and Poppins and degrades to a standard
+  sans-serif without them. Installing both on the machines that present from the deck
+  removes the difference; there is no way to solve it inside the file.
+- **A long section splits across slides rather than shrinking to fit.** Silently
+  dropping the tail of a paragraph is the failure the original PDF writer had, and
+  auto-shrinking type is the same failure with better manners.
+
+---
+
+## Modelling the output on Seplat's own report
+
+Both exports are now set in the visual language of Seplat's published 2025 Social
+Performance Report. That was not done by eye. The report was rendered to bitmaps, its
+dominant colours sampled, and its font table read directly:
+
+| Taken from their report | What we do with it |
+|---|---|
+| Deep green `#006B42`, mid green `#67B432`, amber `#F8B006`, teal `#1A8980`, orange `#EA5B1A` | The palette in `theme.ts`. Sampled, not guessed. |
+| Space Grotesk for display type | Embedded in the PDF, named in the deck. Headings and every headline figure. |
+| Aeonik for body copy | **Not used** — it is a commercial licence we do not hold. Poppins stands in. |
+| Chapters colour-coded, with a tab strip showing which one you are in | The `chapter` block, and the strip both renderers draw. |
+| A figure set very large, its label small above, its unit small below | The metric tiles. |
+| Footer: organisation left, page number centred in green, report title right | Both formats, verbatim. |
+
+The chapter block was added to the specification for this. A renderer cannot work out
+which chapter a page belongs to after the fact — layout decides where pages fall — so
+the structure had to be declared rather than inferred.
+
+**Neither export carries Seplat's logo or claims to be their document.** They are
+SPIMS output set in a matching house style, which is the point: a page from the system
+can sit beside a page of their report without announcing itself as coming from
+somewhere else.
+
+---
+
+## How the exports are verified
+
+`frontend/scripts/verify-exports.mjs`. Two passes, because each catches what the other
+cannot:
+
+- **End-to-end** signs into the built application and clicks the export buttons. This
+  is the pass that proves the renderers are reached. A renderer that works when called
+  directly and is never wired to a button is this project's characteristic failure.
+- **Block coverage** pushes a synthetic specification containing every block type
+  through both renderers. The flagship report contains no callout — every programme
+  currently has a reach profile, so there is no caveat to state — which left the block
+  carrying the report's honesty qualification as the one block the end-to-end pass
+  never exercises.
+
+It asserts that the PDF embeds its faces and renders the naira sign, that the deck
+contains native chart XML and no chart images, and that the callout renders. It does
+not assert that the output looks right; that needs eyes.
+
+Two false results were found while writing it, both worth recording because both are
+the failure mode a check like this has:
+
+1. Reading the PDF's inflated content streams reported every string as missing. The
+   fonts are embedded with Identity-H encoding, so a stream holds glyph indices, not
+   characters. The check was accusing a working renderer. It now shells out to poppler,
+   and skips with a clear message where poppler is absent.
+2. The callout's label is letter-spaced, so poppler extracts it as
+   `B A S I S O F P R EP ARAT ION`. Whitespace is stripped before matching.
+
+Playwright is deliberately **not** a dependency — a large install to serve one script.
+The script says how to get it.
 
 ---
 

@@ -267,13 +267,34 @@ Stated plainly so they can be weighed during review.
 | 4 | **Bulk upload is partial** | Financial spend writes to live records; beneficiary counts, activity logs and project data are validated and logged for review only | Needs Seplat's decision on aggregation rules before automating |
 | 5 | **SROI and compliance figures are illustrative** | Labelled as such in the interface, with methodology shown, but not computed from live data | Agree financial proxies with Seplat M&E, then compute |
 | 6 | ~~Google Fonts dependency~~ — **closed** (§7.2) | Was: a third-party request from each user's browser on every page load | Font files are served by the application; verified that a signed-in session makes zero external requests |
-| 7 | **PowerPoint export produces an outline, not a file** | No `.pptx` with chart graphics | Generation library plus chart rendering |
+| 7 | ~~PowerPoint export produces an outline, not a file~~ — **closed** | Was: no `.pptx` file at all | A real `.pptx` with native, editable chart objects and embedded worksheets. See §11.1 for the one dependency advisory it introduces |
 | 8 | **No audit log** | Data changes record who and when on the row, but there is no immutable append-only trail | Dedicated audit table if required for assurance |
 | 9 | **Demo dataset ships in the repository** | Demo account passwords are public | Do not seed production; delete demo accounts (runbook §4) |
 
-Items 1, 2 and 6 are closed — the three we considered blocking for a production
-go-live holding real data. Of what remains, items 4 and 5 depend on decisions only
-Seplat can make; 3, 7 and 8 are scheduled work.
+Items 1, 2, 6 and 7 are closed. Of what remains, items 4 and 5 depend on decisions
+only Seplat can make; 3 and 8 are scheduled work.
+
+### 11.1 One open advisory, disclosed
+
+`npm audit` reports **two high-severity advisories** in `image-size`, reached as a
+transitive dependency of PptxGenJS (the PowerPoint library). We are not able to close
+them and are not going to pretend otherwise, so here is the full position:
+
+- **The advisory range is `*`.** Every published version of `image-size` is affected,
+  including the newest. There is no version to upgrade to. `npm audit fix --force`
+  "resolves" it by downgrading PptxGenJS from 4.0.1 to 1.1.5, which is not a fix.
+- **The vulnerable code is never loaded.** The advisories describe infinite loops in
+  the ICNS, JXL and HEIF image parsers. `image-size` is a Node-only dependency;
+  PptxGenJS's browser build imports JSZip and nothing else, which we verified against
+  the shipped bundle. It does not enter the code a user's browser runs.
+- **Nothing feeds it an image.** SPIMS decks contain no images at all — the charts are
+  native chart objects. There is no path by which a file, trusted or otherwise, reaches
+  an image parser.
+
+Our assessment is that the exposure is nil and the risk of downgrading the library is
+real. If Seplat IT's policy is that no dependency may carry an open high-severity
+advisory regardless of reachability, tell us and we will remove PowerPoint export
+rather than argue the point — the rest of the system is unaffected.
 
 ---
 

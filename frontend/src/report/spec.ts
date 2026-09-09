@@ -28,6 +28,28 @@ export interface CoverBlock {
   kind: 'cover';
 }
 
+/**
+ * The colour families a chapter can be set in.
+ *
+ * Seplat's own report colour-codes its chapters and carries a tab strip showing which
+ * one the reader is in. Naming the tone rather than the colour keeps the palette a
+ * renderer's decision — a slide deck and a PDF need not tint it identically.
+ */
+export type ChapterTone = 'overview' | 'impact' | 'communities' | 'governance';
+
+/**
+ * Starts a chapter: a break, a tab strip with this chapter active, and its title.
+ *
+ * Chapters are what make the tab strip possible. A renderer cannot work out which
+ * chapter a given page belongs to after the fact — layout decides where pages fall —
+ * so the structure has to be declared here rather than inferred downstream.
+ */
+export interface ChapterBlock {
+  kind: 'chapter';
+  title: string;
+  tone: ChapterTone;
+}
+
 /** A row of headline figures. */
 export interface MetricGridBlock {
   kind: 'metricGrid';
@@ -79,6 +101,7 @@ export interface BreakBlock {
 
 export type ReportBlock =
   | CoverBlock
+  | ChapterBlock
   | MetricGridBlock
   | ReachComparisonBlock
   | ProgressBlock
@@ -101,4 +124,14 @@ export interface ReportSpec {
  */
 export function assertNever(value: never): never {
   throw new Error(`Unhandled report block: ${JSON.stringify(value)}`);
+}
+
+/**
+ * The chapters a report declares, in order.
+ *
+ * A tab strip has to name every chapter, not just the one being drawn, so renderers
+ * need the whole list before they render any single chapter.
+ */
+export function chaptersOf(spec: ReportSpec): ChapterBlock[] {
+  return spec.blocks.filter((b): b is ChapterBlock => b.kind === 'chapter');
 }

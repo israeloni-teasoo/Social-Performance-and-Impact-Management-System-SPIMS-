@@ -26,10 +26,12 @@ export function buildReportSpec(input: BuildSpecInput): ReportSpec {
   const { report, sections, fy, scopeNote, org, projects, impacts, generatedOn } = input;
   const analytics = analysePortfolio(projects, impacts);
 
+  // Chapters follow Seplat's own report: performance first, then what it bought, then
+  // the narrative. Each is colour-coded and named in the tab strip every renderer draws.
   const blocks: ReportBlock[] = [
     { kind: 'cover' },
-    { kind: 'break' },
 
+    { kind: 'chapter', title: 'Performance', tone: 'overview' },
     { kind: 'metricGrid', title: 'At a glance', metrics: analytics.headline.slice(0, 4) },
 
     {
@@ -48,14 +50,15 @@ export function buildReportSpec(input: BuildSpecInput): ReportSpec {
       ).toLocaleString('en-NG')} reached but not served`,
     },
 
+    { kind: 'chapter', title: 'Investment', tone: 'impact' },
     {
       kind: 'spend',
       title: 'Investment by programme',
-      intro: 'Budget by programme, largest first. The darker segment is the share drawn down to date.',
+      intro: 'Budget by programme, largest first. The solid segment is the share drawn down to date.',
       rows: analytics.spend.slice(0, 8),
     },
 
-    { kind: 'break' },
+    { kind: 'chapter', title: 'Commentary', tone: 'communities' },
     ...sections.map((s): ReportBlock => ({ kind: 'section', heading: s.heading, lines: s.lines })),
   ];
 

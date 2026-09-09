@@ -35,14 +35,17 @@ export function Reports({
   const canComment = role === 'manager';
 
   const handleFormat = async (report: Report, format: 'pdf' | 'excel' | 'word' | 'powerpoint', sections: ReportSection[], fy: string, scopeNote: string) => {
-    if (format === 'powerpoint') {
-      pushToast('PowerPoint export is planned for Phase 2 — it will produce real, editable charts rather than pictures of them. Use PDF or Word for now.', 'info');
-      return;
-    }
-    if (format === 'pdf') {
-      // The designed exporter pulls in its engine on demand, so give feedback first.
-      pushToast('Building the report…', 'info');
+    // PDF and PowerPoint are two renderers of one specification, so they share
+    // everything up to the point of rendering — including the validation pass. A deck
+    // and a document of the same report cannot disagree, because neither works out its
+    // own figures.
+    if (format === 'pdf' || format === 'powerpoint') {
+      const isDeck = format === 'powerpoint';
+      const label = isDeck ? 'deck' : 'report';
+      // Both exporters pull in their engine on demand, so give feedback first.
+      pushToast(`Building the ${label}…`, 'info');
       const base = report.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      const filename = `${base}.${isDeck ? 'pptx' : 'pdf'}`;
       try {
         const generatedOn = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
         const spec = buildReportSpec({ report, sections, fy, scopeNote, org, projects, impacts, generatedOn });
@@ -55,10 +58,15 @@ export function Reports({
           pushToast(`${describeValidation(validation)} ${validation.findings[0]?.message ?? ''}`, 'warning');
         }
 
-        await renderReportPdf(spec, `${base}.pdf`);
-        pushToast(`Downloaded ${base}.pdf.`, 'success');
+        if (isDeck) {
+          const { renderReportPptx } = await import('../reportPptx');
+          await renderReportPptx(spec, filename);
+        } else {
+          await renderReportPdf(spec, filename);
+        }
+        pushToast(`Downloaded ${filename}.`, 'success');
       } catch {
-        pushToast('Could not build that PDF — try again.', 'warning');
+        pushToast(`Could not build that ${label} — try again.`, 'warning');
       }
       return;
     }

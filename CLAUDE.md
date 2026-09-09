@@ -60,6 +60,20 @@ Reports flow: **analytics layer → report spec → renderer**. See
   before export. When it flags something, check the validator's verified set before
   assuming the report is wrong — a false positive there is worse than no check.
 - Adding an output format means a new renderer of the spec. Never a second pipeline.
+- `frontend/src/report/theme.ts` holds the palette, sampled from Seplat's published
+  2025 report. Both renderers draw from it; neither defines a colour of its own.
+- The exports are modelled on that report deliberately — typeface, colours, chapter
+  tabs, the way figures are set. Changing those is a brand decision, not a styling
+  preference. They carry no Seplat logo and must not claim to be their document.
+
+### Verifying an export
+
+`cd frontend && npm i --no-save playwright && npm run build && node scripts/verify-exports.mjs`
+
+Run it after touching either renderer. It exports through the real UI — a renderer that
+works when called directly and is never wired to a button is the failure this catches —
+and separately pushes every block type through both renderers, because the flagship
+report contains no callout to exercise.
 
 ## Conventions
 
