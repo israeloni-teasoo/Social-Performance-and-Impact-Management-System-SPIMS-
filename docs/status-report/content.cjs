@@ -18,7 +18,7 @@ module.exports = {
     author: 'Teasoo Consulting',
     version: '1.6',
     date: '9 September 2026',
-    commit: '337d07a',
+    commit: '9ce26d7',
   },
 
   sections: [
