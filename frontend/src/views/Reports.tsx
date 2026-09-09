@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { ReportPreviewModal } from '../components/ReportPreviewModal';
 import { exportReport } from '../reportExport';
+import { exportReportPdf } from '../reportPdf';
 import { card, h1, pill, REPORT_LENS_COLORS, subtitle } from '../ui';
 import type { ReportSection } from '../reportContent';
-import type { Project, ProjectImpact, Report, ReportComment, Role } from '../types';
+import type { OrgSettings, Project, ProjectImpact, Report, ReportComment, Role } from '../types';
 import type { ToastTone } from '../useToastQueue';
 
 export function Reports({
@@ -14,6 +15,7 @@ export function Reports({
   userName,
   comments,
   onComment,
+  org,
   pushToast,
 }: {
   reports: Report[];
@@ -23,14 +25,27 @@ export function Reports({
   userName: string;
   comments: ReportComment[];
   onComment: (reportId: string, author: string, text: string, requestsCorrection: boolean) => void;
+  org: OrgSettings;
   pushToast: (message: string, tone?: ToastTone) => void;
 }) {
   const [previewing, setPreviewing] = useState<Report | null>(null);
   const canComment = role === 'manager';
 
-  const handleFormat = (report: Report, format: 'pdf' | 'excel' | 'word' | 'powerpoint', sections: ReportSection[], fy: string, scopeNote: string) => {
+  const handleFormat = async (report: Report, format: 'pdf' | 'excel' | 'word' | 'powerpoint', sections: ReportSection[], fy: string, scopeNote: string) => {
     if (format === 'powerpoint') {
-      pushToast('PowerPoint export — with charts kept as real graphics, not flattened text — is planned for Phase 2 using Claude to generate the slides. Use PDF or Word for now.', 'info');
+      pushToast('PowerPoint export is planned for Phase 2 — it will produce real, editable charts rather than pictures of them. Use PDF or Word for now.', 'info');
+      return;
+    }
+    if (format === 'pdf') {
+      // The designed exporter pulls in its engine on demand, so give feedback first.
+      pushToast('Building the report…', 'info');
+      const base = report.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      try {
+        await exportReportPdf({ report, sections, fy, scopeNote, org, projects, impacts }, `${base}.pdf`);
+        pushToast(`Downloaded ${base}.pdf.`, 'success');
+      } catch {
+        pushToast('Could not build that PDF — try again.', 'warning');
+      }
       return;
     }
     const filename = exportReport(report, format, sections, fy, scopeNote);

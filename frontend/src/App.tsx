@@ -173,6 +173,7 @@ function SignedInApp({ user, demoMode, onLogout }: { user: AuthUser; demoMode: b
               userName={user.name}
               comments={comments}
               onComment={addComment}
+              org={settings}
               pushToast={pushToast}
             />
           )}

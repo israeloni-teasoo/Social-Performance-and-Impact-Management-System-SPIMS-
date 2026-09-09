@@ -133,12 +133,8 @@ function reportBodyLines(report: Report, sections: ReportSection[], fy: string, 
   return lines;
 }
 
-export function exportReport(report: Report, format: 'pdf' | 'excel' | 'word', sections: ReportSection[], fy: string, scopeNote: string): string {
+export function exportReport(report: Report, format: 'excel' | 'word', sections: ReportSection[], fy: string, scopeNote: string): string {
   const base = slug(report.name);
-  if (format === 'pdf') {
-    downloadBlob(new Blob([buildPdfFromLines(report.name, reportBodyLines(report, sections, fy, scopeNote))], { type: 'application/pdf' }), `${base}.pdf`);
-    return `${base}.pdf`;
-  }
   if (format === 'excel') {
     const rows: string[][] = [
       ['Field', 'Value'],
