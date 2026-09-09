@@ -72,6 +72,16 @@ export const WRITE_PERMISSIONS: Record<string, Role[]> = {
   '/api/custom-fields': ['exec', 'manager'],
   '/api/custom-fields/update': ['exec', 'manager'],
   '/api/custom-fields/delete': ['exec', 'manager'],
+
+  // Media mentions. Reviewing coverage is Community Relations' work, and the
+  // Executive holds it too because in practice they may be the only user. Which
+  // sources are configured decides what leaves Seplat's network, so that is
+  // administrative and sits with the Executive alone.
+  '/api/mentions/review': ['exec', 'relations'],
+  '/api/mentions/run': ['exec', 'relations'],
+  '/api/mentions/sources': ['exec'],
+  '/api/mentions/sources/active': ['exec'],
+  '/api/mentions/sources/delete': ['exec'],
 };
 
 export interface AccessDenial {

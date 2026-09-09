@@ -206,11 +206,41 @@ application itself.** The files are held in the repository and bundled at build 
 so no browser contacts Google, and the interface renders correctly with no outbound
 access at all. Poppins is used under the SIL Open Font License 1.1.
 
-### 7.3 Media monitoring — planned, not built
+### 7.3 Media and web monitoring — built (press and web only)
 
-The requested media and social mention tracking module will require a third-party
-monitoring API (Meltwater, Brand24 or similar). That is an additional outbound
-integration and would need its own review. It is not present in the current system.
+Phase one is implemented and is the second outbound flow in the system. It reads three
+kinds of free, public source:
+
+| Source | Host contacted | What is sent |
+|---|---|---|
+| GDELT DOC 2.0 article index | `api.gdeltproject.org` | A search term, e.g. `"Seplat Energy"` |
+| A news outlet's own RSS/Atom feed | that outlet's domain | Nothing — a plain GET of a public feed |
+| A Google Alerts feed | `google.com` | Nothing — a plain GET of the feed URL you created |
+
+Four properties this integration is built to hold, which are worth checking during
+review because they are the whole basis on which it is acceptable:
+
+1. **Server-side only.** The application server makes these calls. No user's browser
+   ever contacts these hosts, so outbound traffic comes from one address your firewall
+   can see and control.
+2. **No Seplat data is transmitted.** A search term and nothing else. Not programme
+   names, not figures, not who is signed in, not any beneficiary record.
+3. **Opt-in and default-off.** Sources are configured in the interface by an Executive.
+   With none configured, nothing is contacted at all — a fresh install makes no
+   outbound request of any kind.
+4. **No credentials, no subscription, no account.** All three source types are public
+   and unauthenticated. There is no API key to hold or to leak.
+
+Requests carry a `User-Agent` identifying SPIMS, time out after 20 seconds, and a
+failing source is reported to the operator rather than silently swallowed.
+
+If this must be blocked entirely, deactivating every source stops it, and blocking the
+hosts above at the firewall stops it independently of the application.
+
+**Not included:** social media and hashtag tracking. The major platforms release
+mention data only through licensed partners, so that requires a paid provider — no
+amount of engineering removes that. The limitation is stated in the API response and
+shown on the screen, not only here.
 
 ### 7.4 Nothing else
 
@@ -268,6 +298,7 @@ Stated plainly so they can be weighed during review.
 | 5 | **SROI and compliance figures are illustrative** | Labelled as such in the interface, with methodology shown, but not computed from live data | Agree financial proxies with Seplat M&E, then compute |
 | 6 | ~~Google Fonts dependency~~ — **closed** (§7.2) | Was: a third-party request from each user's browser on every page load | Font files are served by the application; verified that a signed-in session makes zero external requests |
 | 7 | ~~PowerPoint export produces an outline, not a file~~ — **closed** | Was: no `.pptx` file at all | A real `.pptx` with native, editable chart objects and embedded worksheets. See §11.1 for the one dependency advisory it introduces |
+| 8a | **Mention monitoring covers press and web only** | No social media or hashtag tracking; the queue is not a complete picture of coverage | A paid provider (§7.3). Stated in the interface, not only in this document |
 | 8 | **No audit log** | Data changes record who and when on the row, but there is no immutable append-only trail | Dedicated audit table if required for assurance |
 | 9 | **Demo dataset ships in the repository** | Demo account passwords are public | Do not seed production; delete demo accounts (runbook §4) |
 

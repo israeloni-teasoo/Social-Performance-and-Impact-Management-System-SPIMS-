@@ -136,7 +136,7 @@ function SystemSection({ status, live }: { status: IntegrationStatus | null; liv
           />
           <Row
             label="Media & social mention monitoring"
-            value={status.mediaMonitoringConfigured ? 'Configured' : 'Not built yet'}
+            value={status.mediaMonitoringConfigured ? 'Press and web · active' : 'No sources active'}
             tone="off"
           />
           <Row label="Projects on record" value={String(status.projects)} />

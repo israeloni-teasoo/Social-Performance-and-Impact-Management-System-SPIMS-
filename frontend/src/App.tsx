@@ -26,6 +26,7 @@ import { LogActivity } from './views/LogActivity';
 import { MyProjects } from './views/MyProjects';
 import { MyTasks } from './views/MyTasks';
 import { NewProject } from './views/NewProject';
+import { MediaMentions } from './views/MediaMentions';
 import { ProjectDetail } from './views/ProjectDetail';
 import { ProjectPortfolio } from './views/ProjectPortfolio';
 import { Reports } from './views/Reports';
@@ -210,6 +211,8 @@ function SignedInApp({ user, demoMode, onLogout }: { user: AuthUser; demoMode: b
             />
           )}
           {view === 'help' && <HelpPage projects={PROJECTS} indicators={INDICATORS} goProjectDetail={(id) => goProjectDetail(id, 'help')} />}
+          {view === 'mentions' && <MediaMentions projects={PROJECTS} role={role} pushToast={pushToast} />}
+
           {view === 'projectdetail' && selectedProject && (
             <ProjectDetail
               project={selectedProject}

@@ -21,6 +21,7 @@ export const CRUMBS: Record<View, string> = {
   logactivity: 'Log Activity',
   evidence: 'Evidence Repository',
   stakeholders: 'Stakeholder Register',
+  mentions: 'Media & Web Mentions',
   projectdetail: 'Project Detail',
   help: 'Help & Standards',
   targets: 'Targets',

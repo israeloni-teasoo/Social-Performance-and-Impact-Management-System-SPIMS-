@@ -16,7 +16,7 @@ module.exports = {
     subtitle: 'Social Performance & Impact Management System',
     client: 'Prepared for Seplat Energy Plc',
     author: 'Teasoo Consulting',
-    version: '1.4',
+    version: '1.5',
     date: '9 September 2026',
     commit: '8a49ca7',
   },
@@ -79,6 +79,7 @@ module.exports = {
             ['Reporting', 'Report structure mirrors Seplat’s published 2025 Social Performance Report, and now its visual language too — the typeface, colours, chapter tabs and the way figures are set were taken from that document. Exports carry the compiled content, the selected programmes and the financial year, in PDF, PowerPoint, Excel and Word.'],
             ['PowerPoint export', 'A designed deck built from the same verified figures as the PDF, with native PowerPoint charts rather than pictures of charts — a recipient can edit a bar or correct a label without coming back to us, and the figures travel with the file.'],
             ['Programme reports', 'A report downloaded from a programme’s own page is now the same designed document as the portfolio report, in PDF and PowerPoint. It previously had an exporter of its own that produced a single page of plain text and rendered every naira figure as “NGN”.'],
+            ['Media and web mentions', 'Coverage of Seplat found automatically in the press and on the web, de-duplicated across sources and held in a review queue until a person confirms what it is. Free sources only — GDELT, Nigerian news feeds and Google Alerts — with no subscription, no account and no API key.'],
             ['Bulk upload', 'Self-serve CSV upload with four downloadable templates, server-side validation and parsing, and an audit record of every upload.'],
             ['AI report generation', 'Claude generates a slide outline from the compiled report content. Runs server-side only; the API key never reaches the browser.'],
             ['Security', 'Every route requires a session except the health check and sign-in. Writes restricted by role from a single permission table. Writes to a route with no rule are refused by default.'],
@@ -182,7 +183,7 @@ module.exports = {
           head: ['Item', 'Constraint', 'Priority'],
           rows: [
             ['Production hosting', 'Accounts and credentials, then a short deployment', 'High'],
-            ['Media and social mention monitoring', 'Engineering plus a decision on paid data', 'Medium'],
+            ['Social media and hashtag tracking', 'Budget decision on a paid provider. Press and web monitoring is built and needs nothing', 'Medium'],
             ['Evidence file storage', 'Engineering. The register records descriptions, not documents', 'Medium'],
             ['Bulk upload writing to live records', 'Seplat decision on aggregation rules', 'Medium'],
             ['Live SROI and compliance calculation', 'Seplat M&E validation of financial proxies', 'Medium'],
@@ -245,7 +246,12 @@ module.exports = {
         {
           type: 'p',
           text:
-            'Recommendation: build in two phases. Phase one uses the free press sources and delivers the whole of our side of the work — ingestion, de-duplication, the review queue that separates corporate mentions from social investment mentions, source links and per-programme tagging. It is labelled in the interface as covering press and web only. Phase two adds a paid provider for social media and hashtag tracking.',
+            'Phase one is now built and needs nothing from Seplat. It ingests from GDELT, from Nigerian news feeds and from a Google Alerts feed; de-duplicates the same story arriving from several sources; and holds everything in a review queue where a person accepts or rejects it, says whether it is social investment or corporate coverage, and tags it to a programme. Every item keeps its source link. It is labelled throughout as covering press and web only. There is no subscription, no account and no API key — the sources are public.',
+        },
+        {
+          type: 'p',
+          text:
+            'Phase two adds a paid provider for social media and hashtag tracking, and is the only part still requiring a decision.',
         },
         {
           type: 'p',
@@ -346,10 +352,9 @@ module.exports = {
           rows: [
             ['1', 'Install on Seplat infrastructure, or stand up a cloud demonstration instance', 'Seplat infrastructure or hosting approval'],
             ['2', 'Worked example on one real programme, end to end', 'Seplat programme data and organisation chart'],
-            ['3', 'Media monitoring, phase one (press and web)', 'Nothing — can proceed immediately'],
-            ['4', 'Evidence file storage', 'Stage 1'],
-            ['5', 'Bulk upload write-through and live SROI', 'Seplat aggregation rules and M&E validation'],
-            ['6', 'Media monitoring, phase two (social and hashtags)', 'Budget approval for a monitoring subscription'],
+            ['3', 'Evidence file storage', 'Stage 1'],
+            ['4', 'Bulk upload write-through and live SROI', 'Seplat aggregation rules and M&E validation'],
+            ['5', 'Media monitoring, phase two (social and hashtags)', 'Budget approval for a monitoring subscription'],
           ],
         },
         {

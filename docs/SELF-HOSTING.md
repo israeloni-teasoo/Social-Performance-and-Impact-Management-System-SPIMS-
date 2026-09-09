@@ -234,10 +234,21 @@ normal use.
 
 ## 8. Running with no internet access
 
-SPIMS works air-gapped, with two caveats.
+SPIMS works air-gapped, with three caveats.
 
 **Claude report generation** calls Anthropic's API. Leave `ANTHROPIC_API_KEY` empty
 and the feature returns a clear "not configured" message; nothing else is affected.
+
+**Media and web monitoring** reaches out to GDELT, to news outlets' RSS feeds and to
+Google Alerts. It is off until somebody configures a source, so an air-gapped install
+does nothing here unless asked to. If sources have been configured and the host has no
+outbound access, each run reports the failure per source rather than appearing to
+succeed with an empty result. To switch it off, pause every source under
+**Media & Mentions → Sources**, or block those hosts at the firewall — the two are
+independent, so either alone is sufficient.
+
+Nothing about Seplat is transmitted by this: the request carries a search term, and
+for feed sources not even that. There is no API key and no account.
 
 **Fonts** are served by the application itself — the Poppins files are held in the
 repository and bundled at build time. No browser contacts Google, and the interface

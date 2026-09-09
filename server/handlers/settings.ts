@@ -66,16 +66,19 @@ export async function updateSettingsHandler(input: Record<string, unknown>): Pro
  * Claude key is configured — never the key itself.
  */
 export async function getIntegrationStatusHandler(): Promise<HandlerResult> {
-  const [projects, users, uploads] = await Promise.all([
+  const [projects, users, uploads, mentionSources] = await Promise.all([
     prisma.project.count(),
     prisma.user.count({ where: { active: true } }),
     prisma.bulkUpload.count(),
+    // Configured means a source is switched on, not that the feature exists. With
+    // none active nothing is ever contacted, and the status must say so.
+    prisma.mentionSource.count({ where: { active: true } }),
   ]);
   return {
     status: 200,
     body: {
       claudeConfigured: Boolean(process.env.ANTHROPIC_API_KEY),
-      mediaMonitoringConfigured: false,
+      mediaMonitoringConfigured: mentionSources > 0,
       database: 'PostgreSQL',
       projects,
       activeUsers: users,

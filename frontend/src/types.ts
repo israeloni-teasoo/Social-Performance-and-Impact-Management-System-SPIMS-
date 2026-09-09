@@ -15,6 +15,7 @@ export type View =
   | 'logactivity'
   | 'evidence'
   | 'stakeholders'
+  | 'mentions'
   | 'projectdetail'
   | 'help'
   | 'targets'
@@ -325,4 +326,64 @@ export interface NewProjectInput {
   community?: string;
   lga?: string;
   owner?: string;
+}
+
+/* ------------------------------------------------------------ media mentions */
+
+export type MentionStatus = 'pending' | 'accepted' | 'rejected';
+export type MentionCategory = 'socialInvestment' | 'corporate' | 'unrelated';
+export type MentionSourceKind = 'gdelt' | 'rss' | 'googleAlerts';
+
+/** A source SPIMS looks in. Phase one carries only free press and web sources. */
+export interface MentionSource {
+  id: string;
+  name: string;
+  kind: MentionSourceKind;
+  /** A search query for GDELT; a feed URL for the others. */
+  target: string;
+  active: boolean;
+}
+
+/**
+ * One article that mentions Seplat.
+ *
+ * Never a reported figure — a mention is evidence that somebody published something,
+ * which is a different kind of claim from the counted figures in the analytics layer.
+ */
+export interface Mention {
+  id: string;
+  url: string;
+  title: string;
+  publisher: string;
+  snippet: string;
+  language: string;
+  country: string;
+  publishedAt: string | null;
+  status: MentionStatus;
+  category: MentionCategory | null;
+  projectCode: string | null;
+  reviewedBy: string | null;
+  reviewedAt: string | null;
+  foundAt: string;
+  sourceName: string;
+  sourceKind: string;
+}
+
+/** What the last ingestion did, so an empty queue can be told from a broken fetch. */
+export interface MentionRun {
+  startedAt: string;
+  status: 'ok' | 'partial' | 'failed';
+  found: number;
+  added: number;
+  duplicates: number;
+  detail: { source: string; ok: boolean; items: number; error?: string }[];
+}
+
+export interface MentionFeed {
+  /** The coverage limitation, carried with the data rather than left in a document. */
+  coverageNote: string;
+  activeSources: number;
+  counts: Partial<Record<MentionStatus, number>>;
+  lastRun: MentionRun | null;
+  mentions: Mention[];
 }

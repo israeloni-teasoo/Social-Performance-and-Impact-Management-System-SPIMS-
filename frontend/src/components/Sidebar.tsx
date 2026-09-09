@@ -138,6 +138,7 @@ export function Sidebar({
 
             <div style={SECTION_LABEL}>Report &amp; Comply</div>
             <NavButton icon="reports" label="Reports & Exports" active={view === 'reports'} onClick={() => setView('reports')} />
+            <NavButton icon="stakeholders" label="Media & Mentions" active={view === 'mentions'} onClick={() => setView('mentions')} />
 
             <div style={SECTION_LABEL}>Configure</div>
             <NavButton icon="target" label="Targets" active={view === 'targets'} onClick={() => setView('targets')} />
@@ -173,6 +174,7 @@ export function Sidebar({
             <div style={SECTION_LABEL}>Engagement</div>
             <NavButton icon="stakeholders" label="Stakeholders" active={view === 'stakeholders'} onClick={() => setView('stakeholders')} />
             <NavButton icon="communities" label="Communities" active={view === 'communities'} onClick={() => setView('communities')} />
+            <NavButton icon="stakeholders" label="Media & Mentions" active={view === 'mentions'} onClick={() => setView('mentions')} />
           </div>
         )}
 

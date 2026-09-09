@@ -61,6 +61,7 @@ model Project {
   fieldTasks   FieldTask[]
   spendEntries SpendEntry[]
   customFields CustomField[]
+  mentions     Mention[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -264,4 +265,80 @@ model OrgSettings {
   /// holds live data or sample data.
   dataStatusNote String   @default("Illustrative data \u2014 replace with verified Seplat figures before external reporting.")
   updatedAt      DateTime @updatedAt
+}
+
+/// A place SPIMS looks for mentions of Seplat and its programmes.
+///
+/// Phase one carries only free sources — GDELT's article index, an outlet's own RSS
+/// feed, and a Google Alerts feed. Each is reached through the same adapter interface,
+/// so adding a paid provider later is a new `kind`, not a new module.
+model MentionSource {
+  id     String  @id @default(cuid())
+  name   String
+  /// gdelt | rss | googleAlerts
+  kind   String
+  /// For gdelt, the search query. For the feed kinds, the feed URL.
+  target String
+  /// A source is configured before it is switched on, so a bad query cannot start
+  /// filling the queue with noise before anyone has looked at it.
+  active Boolean @default(true)
+
+  mentions Mention[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([kind, target])
+}
+
+/// One article that mentions Seplat, awaiting or having had human review.
+///
+/// Nothing here is reported as a Seplat figure. A mention is evidence that someone
+/// wrote something, which is a different kind of claim from the counted figures in the
+/// analytics layer, and the two are deliberately not mixed.
+model Mention {
+  id       String        @id @default(cuid())
+  source   MentionSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  sourceId String
+
+  /// The article URL, normalised. Unique, because the same story reaches us from
+  /// several sources and the queue must not show it twice.
+  url         String    @unique
+  title       String
+  publisher   String
+  snippet     String    @default("")
+  language    String    @default("")
+  country     String    @default("")
+  /// When the outlet published it. Null when the source does not say.
+  publishedAt DateTime?
+
+  /// pending | accepted | rejected
+  status      String   @default("pending")
+  /// Set on review: socialInvestment | corporate | unrelated
+  category    String?
+  /// Which programme this mention is about, when it is about one.
+  project     Project? @relation(fields: [projectCode], references: [code], onDelete: SetNull)
+  projectCode String?
+
+  reviewedBy String?
+  reviewedAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([status])
+  @@index([projectCode])
+  @@index([publishedAt])
+}
+
+/// What one ingestion run did, so an empty queue can be told from a broken fetch.
+model MentionRun {
+  id         String   @id @default(cuid())
+  startedAt  DateTime @default(now())
+  /// ok | partial | failed
+  status     String
+  /// Per-source outcome, including the error text for any source that failed.
+  detail     Json
+  found      Int      @default(0)
+  added      Int      @default(0)
+  duplicates Int      @default(0)
 }

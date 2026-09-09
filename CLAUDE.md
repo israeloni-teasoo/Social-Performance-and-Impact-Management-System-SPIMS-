@@ -107,6 +107,24 @@ database, insert a row that exists nowhere in the seed and confirm it appears.
 Before pushing: `npx tsc --noEmit -p tsconfig.json`, `cd frontend && npx tsc -b`,
 `npx oxlint src`, `npm run build`, and exercise both demo and live modes.
 
+## Media monitoring
+
+Phase one only: free press and web sources (GDELT, news RSS, Google Alerts). Social
+platforms need a paid provider and are not built.
+
+- **Fetching is server-side, always.** It is the only reason no user's browser contacts
+  an outside host. Never move it into the frontend.
+- **Nothing about Seplat is sent** — a search term, and for feed sources not even that.
+  Keep it that way; the technical specification undertakes it in §7.3.
+- **Sources are opt-in.** With none active, nothing is contacted at all.
+- A mention is evidence someone published something. It is **never** a reported figure
+  and must not be mixed into the analytics layer.
+- The coverage limitation travels with the data (`COVERAGE_NOTE`, duplicated server and
+  client), not only in documentation.
+- Parsers live in `server/lib/media/parse.ts` and are tested against fixtures:
+  `npx tsx server/lib/media/parse.test.ts`. The fixtures were written from documented
+  formats, not captured live, so treat the first real run as the real test.
+
 ## Never commit
 
 `.env`, real credentials, or any API key. `ANTHROPIC_API_KEY`, `DATABASE_URL` and

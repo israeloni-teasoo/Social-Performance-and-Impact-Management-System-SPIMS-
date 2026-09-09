@@ -7,6 +7,15 @@ import { loginHandler, meHandler } from './handlers/auth';
 import { bulkUploadHandler } from './handlers/bulkUpload';
 import { listCommunitiesHandler, listEvidenceHandler, listIndicatorsHandler, listProjectImpactsHandler, listProjectsHandler, listReportsHandler } from './handlers/content';
 import { createCustomFieldHandler, deleteCustomFieldHandler, listCustomFieldsHandler, updateCustomFieldHandler } from './handlers/customFields';
+import {
+  createMentionSourceHandler,
+  deleteMentionSourceHandler,
+  listMentionSourcesHandler,
+  listMentionsHandler,
+  reviewMentionHandler,
+  runMentionIngestionHandler,
+  setMentionSourceActiveHandler,
+} from './handlers/mentions';
 import { addReportCommentHandler, listReportCommentsHandler } from './handlers/reportComments';
 import { generateReportPreviewHandler } from './handlers/reportPreview';
 import { createProjectHandler, updateProjectHandler } from './handlers/projects';
@@ -212,6 +221,36 @@ app.post('/api/custom-fields/update', async (req, res) => {
 });
 app.post('/api/custom-fields/delete', async (req, res) => {
   const r = await deleteCustomFieldHandler(req.body ?? {});
+  res.status(r.status).json(r.body);
+});
+
+// --- Media mentions (press and web monitoring) ---
+app.get('/api/mentions', async (req, res) => {
+  const r = await listMentionsHandler((req.query as Record<string, unknown>) ?? {});
+  res.status(r.status).json(r.body);
+});
+app.post('/api/mentions/review', async (req, res) => {
+  const r = await reviewMentionHandler(req.body ?? {}, await currentUser(req));
+  res.status(r.status).json(r.body);
+});
+app.post('/api/mentions/run', async (_req, res) => {
+  const r = await runMentionIngestionHandler();
+  res.status(r.status).json(r.body);
+});
+app.get('/api/mentions/sources', async (_req, res) => {
+  const r = await listMentionSourcesHandler();
+  res.status(r.status).json(r.body);
+});
+app.post('/api/mentions/sources', async (req, res) => {
+  const r = await createMentionSourceHandler(req.body ?? {});
+  res.status(r.status).json(r.body);
+});
+app.post('/api/mentions/sources/active', async (req, res) => {
+  const r = await setMentionSourceActiveHandler(req.body ?? {});
+  res.status(r.status).json(r.body);
+});
+app.post('/api/mentions/sources/delete', async (req, res) => {
+  const r = await deleteMentionSourceHandler(req.body ?? {});
   res.status(r.status).json(r.body);
 });
 
