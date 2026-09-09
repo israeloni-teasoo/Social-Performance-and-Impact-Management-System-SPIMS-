@@ -62,6 +62,13 @@ Reports flow: **analytics layer → report spec → renderer**. See
 - Adding an output format means a new renderer of the spec. Never a second pipeline.
 - `frontend/src/report/theme.ts` holds the palette, sampled from Seplat's published
   2025 report. Both renderers draw from it; neither defines a colour of its own.
+- **Every export surface goes through `frontend/src/report/download.ts`.** It is what
+  reconciles the narrative against analytics before a file is written. A screen that
+  wires up its own export would silently issue an unvalidated report.
+- Chapters are read off the section headings (`Our Impact — what changed`), not
+  invented. Adding a report means writing headings in that form, not editing renderers.
+- In the deck, `line: { width: 0 }` does **not** remove a shape's border — PptxGenJS
+  ignores the zero and draws a grey stroke. Use `line: { type: 'none' }`.
 - The exports are modelled on that report deliberately — typeface, colours, chapter
   tabs, the way figures are set. Changing those is a brand decision, not a styling
   preference. They carry no Seplat logo and must not claim to be their document.

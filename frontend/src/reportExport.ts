@@ -7,20 +7,16 @@ function todayLabel(): string {
 }
 
 /** Strip characters outside single-byte printable ASCII so hand-built byte-offset formats (PDF) stay valid. */
+/**
+ * Kept only for line wrapping, which counts characters rather than measuring them.
+ *
+ * It no longer strips anything: the hand-rolled PDF writer that needed single-byte
+ * ASCII — because its cross-reference table counted UTF-16 code units as bytes — has
+ * been deleted, and both remaining formats carry Unicode. Every naira sign in every
+ * Word and Excel export used to come out as "NGN " for want of this.
+ */
 function toAscii(s: string): string {
-  const replaced = s
-    .replace(/[–—]/g, '-')
-    .replace(/[‘’]/g, "'")
-    .replace(/[“”]/g, '"')
-    .replace(/…/g, '...')
-    .replace(/×/g, 'x')
-    .replace(/₦/g, 'NGN ');
-  let out = '';
-  for (const ch of replaced) {
-    const code = ch.codePointAt(0) ?? 63;
-    out += code >= 32 && code <= 126 ? ch : '?';
-  }
-  return out;
+  return s;
 }
 
 function wrap(text: string, width: number): string[] {
@@ -51,56 +47,24 @@ export function downloadBlob(blob: Blob, filename: string) {
   URL.revokeObjectURL(url);
 }
 
-/**
- * Hand-rolled minimal single-page PDF - no dependency, but a genuinely valid PDF file.
- * Content is forced to single-byte ASCII so `pdf.length` (UTF-16 code units) exactly
- * matches its encoded byte length; otherwise the xref byte offsets below would be wrong
- * for any title/body containing an em dash, curly quote, or the Naira sign.
- */
-function buildPdfFromLines(title: string, bodyLines: string[]): string {
-  const escape = (s: string) => toAscii(s).replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)');
-
-  const contentParts: string[] = ['BT', '/F1 18 Tf', '50 770 Td', `(${escape(title)}) Tj`, '/F1 11 Tf'];
-  let first = true;
-  for (const line of bodyLines) {
-    contentParts.push(first ? '0 -32 Td' : '0 -16 Td');
-    first = false;
-    if (line) contentParts.push(`(${escape(line)}) Tj`);
-  }
-  contentParts.push('ET');
-  const content = contentParts.join('\n');
-
-  const objects = [
-    '<< /Type /Catalog /Pages 2 0 R >>',
-    '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
-    '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>',
-    '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
-    `<< /Length ${content.length} >>\nstream\n${content}\nendstream`,
-  ];
-
-  let pdf = '%PDF-1.4\n';
-  const offsets: number[] = [];
-  objects.forEach((obj, i) => {
-    offsets.push(pdf.length);
-    pdf += `${i + 1} 0 obj\n${obj}\nendobj\n`;
-  });
-  const xrefStart = pdf.length;
-  pdf += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
-  for (const off of offsets) {
-    pdf += `${off.toString().padStart(10, '0')} 00000 n \n`;
-  }
-  pdf += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF`;
-
-  return pdf;
-}
-
 export function buildCsvFromRows(rows: string[][]): string {
   const esc = (s: string) => `"${s.replace(/"/g, '""')}"`;
-  return rows.map((r) => r.map(esc).join(',')).join('\r\n');
+  // A byte-order mark, so Excel opens the file as UTF-8 rather than guessing at the
+  // local code page and rendering the naira sign as mojibake.
+  return `\uFEFF${rows.map((r) => r.map(esc).join(',')).join('\r\n')}`;
 }
 
 function buildRtfFromLines(title: string, bodyLines: string[]): string {
-  const esc = (s: string) => toAscii(s).replace(/\\/g, '\\\\').replace(/{/g, '\\{').replace(/}/g, '\\}');
+  /** RTF is a 7-bit format; anything above it is written as a signed 16-bit escape. */
+  const esc = (s: string) =>
+    s
+      .replace(/\\/g, '\\\\')
+      .replace(/{/g, '\\{')
+      .replace(/}/g, '\\}')
+      .replace(/[\u0080-\uFFFF]/g, (ch) => {
+        const code = ch.charCodeAt(0);
+        return `\\u${code > 32767 ? code - 65536 : code}?`;
+      });
   const body = bodyLines.map((l) => (l ? `${esc(l)}\\par` : '\\par')).join('\n');
   return `{\\rtf1\\ansi\\deff0{\\fonttbl{\\f0 Arial;}}\\f0\\fs32\\b ${esc(title)}\\b0\\fs20\\par\\par${body}}`;
 }
@@ -151,7 +115,7 @@ export function exportReport(report: Report, format: 'excel' | 'word', sections:
       rows.push([section.heading, '']);
       for (const line of section.lines) rows.push(['', line]);
     }
-    downloadBlob(new Blob([buildCsvFromRows(rows)], { type: 'text/csv' }), `${base}.csv`);
+    downloadBlob(new Blob([buildCsvFromRows(rows)], { type: 'text/csv;charset=utf-8' }), `${base}.csv`);
     return `${base}.csv`;
   }
   downloadBlob(new Blob([buildRtfFromLines(report.name, reportBodyLines(report, sections, fy, scopeNote))], { type: 'application/rtf' }), `${base}.rtf`);
@@ -232,13 +196,16 @@ function projectBodyLines(project: Project, impact: ProjectImpact | undefined, c
   return lines;
 }
 
-export function exportProjectReport(project: Project, impact: ProjectImpact | undefined, format: 'pdf' | 'excel' | 'word', customFields: CustomField[] = []): string {
+/**
+ * The data formats for a single programme.
+ *
+ * PDF and PowerPoint are not here: those are designed documents, built from the report
+ * specification and rendered by the shared renderers. This handles the two formats
+ * whose job is to carry the numbers somewhere else.
+ */
+export function exportProjectReport(project: Project, impact: ProjectImpact | undefined, format: 'excel' | 'word', customFields: CustomField[] = []): string {
   const base = slug(`${project.code}-${project.name}`);
   const title = `${project.name} — Project Report`;
-  if (format === 'pdf') {
-    downloadBlob(new Blob([buildPdfFromLines(title, projectBodyLines(project, impact, customFields))], { type: 'application/pdf' }), `${base}.pdf`);
-    return `${base}.pdf`;
-  }
   if (format === 'excel') {
     const rows: string[][] = [
       ['Field', 'Value'],
@@ -282,7 +249,7 @@ export function exportProjectReport(project: Project, impact: ProjectImpact | un
     for (const f of customFields.filter((x) => x.projectCode === project.code)) {
       rows.push([`Q: ${f.question}`, `${f.answer} — source: ${f.source} (updated ${f.updatedAt} by ${f.updatedBy})`]);
     }
-    downloadBlob(new Blob([buildCsvFromRows(rows)], { type: 'text/csv' }), `${base}.csv`);
+    downloadBlob(new Blob([buildCsvFromRows(rows)], { type: 'text/csv;charset=utf-8' }), `${base}.csv`);
     return `${base}.csv`;
   }
   downloadBlob(new Blob([buildRtfFromLines(title, projectBodyLines(project, impact, customFields))], { type: 'application/rtf' }), `${base}.rtf`);

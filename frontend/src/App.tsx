@@ -215,6 +215,7 @@ function SignedInApp({ user, demoMode, onLogout }: { user: AuthUser; demoMode: b
               project={selectedProject}
               impact={PROJECT_IMPACTS[selectedProject.code]}
               customFields={customFields}
+              org={settings}
               canEditFields={role === 'exec' || role === 'manager'}
               canEditProject={role === 'exec' || role === 'manager'}
               onProjectUpdated={refreshData}

@@ -1,10 +1,8 @@
 import { useState } from 'react';
 import { ReportPreviewModal } from '../components/ReportPreviewModal';
 import { exportReport } from '../reportExport';
-import { analysePortfolio } from '../analytics/metrics';
 import { buildReportSpec } from '../report/buildSpec';
-import { describeValidation, validateReport } from '../report/validate';
-import { renderReportPdf } from '../reportPdf';
+import { downloadDesignedReport, generatedOnLabel, slugForFile } from '../report/download';
 import { card, h1, pill, REPORT_LENS_COLORS, subtitle } from '../ui';
 import type { ReportSection } from '../reportContent';
 import type { OrgSettings, Project, ProjectImpact, Report, ReportComment, Role } from '../types';
@@ -40,34 +38,12 @@ export function Reports({
     // and a document of the same report cannot disagree, because neither works out its
     // own figures.
     if (format === 'pdf' || format === 'powerpoint') {
-      const isDeck = format === 'powerpoint';
-      const label = isDeck ? 'deck' : 'report';
-      // Both exporters pull in their engine on demand, so give feedback first.
-      pushToast(`Building the ${label}…`, 'info');
-      const base = report.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-      const filename = `${base}.${isDeck ? 'pptx' : 'pdf'}`;
-      try {
-        const generatedOn = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
-        const spec = buildReportSpec({ report, sections, fy, scopeNote, org, projects, impacts, generatedOn });
-
-        // Reconcile the narrative against the analytics layer before the report leaves
-        // the building. A figure that cannot be tied back to the data is surfaced
-        // rather than silently exported.
-        const validation = validateReport(spec, analysePortfolio(projects, impacts));
-        if (!validation.ok) {
-          pushToast(`${describeValidation(validation)} ${validation.findings[0]?.message ?? ''}`, 'warning');
-        }
-
-        if (isDeck) {
-          const { renderReportPptx } = await import('../reportPptx');
-          await renderReportPptx(spec, filename);
-        } else {
-          await renderReportPdf(spec, filename);
-        }
-        pushToast(`Downloaded ${filename}.`, 'success');
-      } catch {
-        pushToast(`Could not build that ${label} — try again.`, 'warning');
-      }
+      const spec = buildReportSpec({
+        report, sections, fy, scopeNote, org, projects, impacts, generatedOn: generatedOnLabel(),
+      });
+      await downloadDesignedReport({
+        spec, format, base: slugForFile(report.name), projects, impacts, notify: pushToast,
+      });
       return;
     }
     const filename = exportReport(report, format, sections, fy, scopeNote);

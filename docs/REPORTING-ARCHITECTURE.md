@@ -3,7 +3,7 @@
 Decision record. What SPIMS adopts from the proposed reporting architecture, what it
 does not, and why.
 
-Version 1.1 · 9 September 2026
+Version 1.2 · 9 September 2026
 
 ---
 
@@ -33,6 +33,7 @@ The proposal's core insight is right and is now implemented:
 | Assembly | `frontend/src/report/buildSpec.ts` | Decides what a report contains and in what order. The only place that decides. |
 | Validation | `frontend/src/report/validate.ts` | Reconciles figures quoted in narrative against the analytics layer. |
 | Rendering | `frontend/src/reportPdf.ts`, `frontend/src/reportPptx.ts` | Turn a spec into a PDF and into a deck. Siblings, not parallel implementations. |
+| Delivery | `frontend/src/report/download.ts` | The one route from a specification to a file. Every export surface goes through it, so none can skip validation. |
 | Palette | `frontend/src/report/theme.ts` | The colours and tones both renderers draw from, so the two formats cannot drift apart. |
 
 Four ideas from the proposal we took without reservation:
@@ -196,3 +197,81 @@ The points that would need attention first, in order:
 
 None of these is blocking. Recording them means the trigger is known in advance rather
 than discovered under load.
+
+
+---
+
+## Every export surface, not just the reports screen
+
+The programme report on a programme's own page was still being written by a separate
+hand-rolled exporter: one fixed page of single-byte ASCII, which turned every naira
+sign into `NGN ` and dropped anything past the foot of the page. It was the same code
+the portfolio PDF had already been rescued from, surviving in a second place because
+nothing forced the two to agree.
+
+A programme is now expressed as a specification (`buildProgrammeSpec`) and rendered by
+the same renderers as everything else. It gained the design, the paging, the naira
+sign and PowerPoint output at no cost, and it cannot drift again.
+
+`report/download.ts` is the single route from a specification to a downloaded file.
+That matters because the steps in between are not incidental — the narrative is
+reconciled against the analytics layer before anything is written. A screen wiring up
+its own export would quietly issue an unvalidated report; there is now nowhere to do
+that.
+
+Word and Excel remain data formats rather than designed documents. They stopped
+mangling the naira sign at the same time: the CSV carries a byte-order mark so Excel
+reads it as UTF-8, and the RTF writes non-ASCII as `\uN` escapes. Both had been passing
+through the ASCII filter that only the deleted PDF writer ever needed.
+
+---
+
+## Chapters come from the content, not from us
+
+The first version of chaptering invented three: Performance, Investment, Commentary.
+That was wrong, and the report itself said so — its section headings are written as
+`Our Impact — what changed`, `Our Communities — Host Community Development Trust`.
+The content had been authored against Seplat's four chapters all along, and the
+renderer was flattening that structure away and replacing it with one of its own.
+
+Chapters are now read back off the headings. The prefix is stripped, the remainder
+regains its capital, and the charts are attached to the chapter whose argument they
+make — reach against impact to Our Impact, spend to Our Communities. A chapter is
+therefore never a heading followed by nothing.
+
+Reports whose sections carry no prefix — the community and SROI reports — come back as
+a single group, which is correct. Inventing chapters for content that has none would
+put empty tabs across the top of every page.
+
+---
+
+## What "the deck looks broken" turned out to be
+
+Three separate faults, only one of which was visible as a layout problem:
+
+**Every shape had an outline nobody asked for.** `line: { width: 0 }` does not suppress
+a border in PptxGenJS — it ignores the zero and emits `<a:ln w="12700">` with a dark
+grey stroke. Every KPI tile, progress bar, rule and tab in the deck was drawn with a
+1pt border. Only `line: { type: 'none' }` removes it. This is the kind of defect that
+survives review because each shape looks *nearly* right.
+
+**One section per slide.** Eighteen slides for a six-page report, most of them four
+bullets above two-thirds of empty white, which reads as unfinished work rather than as
+a designed document. Sections are now packed onto a slide until it is full, using a
+cost model that accounts for how many lines a bullet wraps to. A section too long for
+one slide continues onto the next rather than being shrunk to fit — silently dropping
+the tail is the failure the original PDF writer had, and auto-shrinking type is the
+same failure with better manners.
+
+**Chapter dividers.** Correct in a document: a page break and a title is how a report
+signals a new part. Wrong in a deck, where a slide carrying one word reads as one
+someone forgot to finish — and with five chapters, that was five of them. The deck
+drops them; the tab strip on every slide and the chapter-coloured heading carry the
+same information. The PDF keeps them.
+
+Fifteen slides now, from nineteen, with the content filling them.
+
+The corner wash also had to move. At full height its diagonal ran straight through the
+footer text; it is now smaller, semi-transparent, and stops above the footer band. It is
+suppressed entirely on chart slides, because a chart's plot area is transparent and a
+tint behind it shows through the gridlines.

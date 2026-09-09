@@ -227,6 +227,51 @@ console.log('\nend-to-end — exporting through the built application');
   server.close();
 }
 
+console.log('\nprogramme report — exporting from a programme page');
+{
+  const server = await serveDist(4179);
+  const page = await newPage();
+  await page.goto('http://localhost:4179/', { waitUntil: 'networkidle' });
+
+  await page.locator('input[type="email"]').first().fill(ACCOUNT.email);
+  await page.locator('input[type="password"]').first().fill(ACCOUNT.password);
+  await page.getByRole('button', { name: /sign in/i }).click();
+  await page.waitForTimeout(1200);
+
+  await page.getByRole('button', { name: /Project Portfolio/i }).first().click();
+  await page.waitForTimeout(700);
+  // Programme rows are clickable containers rather than buttons, so this matches on
+  // the programme's name rather than on a role.
+  await page.getByText('Teachers Empowerment (STEP)').first().click();
+  await page.waitForTimeout(800);
+  await page.getByRole('button', { name: /Download project report/i }).first().click();
+  await page.waitForTimeout(400);
+
+  const pdf = await capture(page, 'programme.pdf', () => page.getByRole('button', { name: /^PDF$/i }).first().click());
+  await page.waitForTimeout(1200);
+  await page.getByRole('button', { name: /Download project report/i }).first().click().catch(() => {});
+  await page.waitForTimeout(400);
+  const pptx = await capture(page, 'programme.pptx', () => page.getByRole('button', { name: /^PowerPoint$/i }).first().click());
+
+  const p = inspectPdf(await readFile(pdf));
+  check(p.embedded, 'programme PDF embeds its font files');
+  check(p.fonts.some((f) => /Grotesk/.test(f)), 'programme PDF is set in the designed faces');
+
+  const text = pdfText(pdf);
+  if (text === null) skip('programme PDF renders the naira sign (install poppler-utils to check)');
+  else {
+    // The exporter this replaced substituted "NGN " for every naira sign.
+    check(!/NGN /.test(text), 'programme PDF no longer substitutes "NGN " for the naira sign');
+  }
+
+  const d = await inspectPptx(pptx);
+  check(d.slides > 1, `programme deck has ${d.slides} slides`);
+  check(d.media.length === 0, 'programme deck contains no images');
+
+  await page.context().close();
+  server.close();
+}
+
 console.log('\nblock coverage — every block type, both formats');
 {
   const server = await serveRenderers(4187);

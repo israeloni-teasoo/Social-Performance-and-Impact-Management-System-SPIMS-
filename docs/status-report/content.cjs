@@ -16,7 +16,7 @@ module.exports = {
     subtitle: 'Social Performance & Impact Management System',
     client: 'Prepared for Seplat Energy Plc',
     author: 'Teasoo Consulting',
-    version: '1.3',
+    version: '1.4',
     date: '9 September 2026',
     commit: 'a9d9f44',
   },
@@ -78,6 +78,7 @@ module.exports = {
             ['Programme custom fields', 'Recurring stakeholder questions answered on the programme’s own page, each with a source and a last-updated stamp, and carried into that programme’s export.'],
             ['Reporting', 'Report structure mirrors Seplat’s published 2025 Social Performance Report, and now its visual language too — the typeface, colours, chapter tabs and the way figures are set were taken from that document. Exports carry the compiled content, the selected programmes and the financial year, in PDF, PowerPoint, Excel and Word.'],
             ['PowerPoint export', 'A designed deck built from the same verified figures as the PDF, with native PowerPoint charts rather than pictures of charts — a recipient can edit a bar or correct a label without coming back to us, and the figures travel with the file.'],
+            ['Programme reports', 'A report downloaded from a programme’s own page is now the same designed document as the portfolio report, in PDF and PowerPoint. It previously had an exporter of its own that produced a single page of plain text and rendered every naira figure as “NGN”.'],
             ['Bulk upload', 'Self-serve CSV upload with four downloadable templates, server-side validation and parsing, and an audit record of every upload.'],
             ['AI report generation', 'Claude generates a slide outline from the compiled report content. Runs server-side only; the API key never reaches the browser.'],
             ['Security', 'Every route requires a session except the health check and sign-in. Writes restricted by role from a single permission table. Writes to a route with no rule are refused by default.'],
@@ -267,6 +268,11 @@ module.exports = {
           type: 'p',
           text:
             'One point worth stating plainly, because the August review tied this feature to it: the deck does not depend on the AI decision. It is built entirely from figures the system calculates, so it works whether or not Seplat IT approves any AI service. The AI question now affects only optional drafting of commentary.',
+        },
+        {
+          type: 'p',
+          text:
+            'Every screen that offers a report now produces the same designed document — the reports screen and each programme’s own page alike — because all of them build the same specification and hand it to the same renderers. Word and Excel remain data formats rather than designed documents, and they stopped corrupting the naira sign at the same time.',
         },
         {
           type: 'p',

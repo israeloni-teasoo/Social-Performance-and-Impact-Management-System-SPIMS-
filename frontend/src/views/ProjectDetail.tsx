@@ -8,12 +8,15 @@ import { ReachPanel, ReachVsImpactTip } from '../components/ReachPanel';
 import { InfoTip } from '../components/Tooltip';
 import { formatCount } from '../analytics/metrics';
 import { exportProjectReport } from '../reportExport';
+import { buildProgrammeSpec } from '../report/buildSpec';
+import { downloadDesignedReport, generatedOnLabel, slugForFile } from '../report/download';
 import { h1, PILLAR_COLORS, pill, primaryBtn, STATUS_COLORS } from '../ui';
-import type { CustomField, NewCustomFieldInput, Project, ProjectImpact } from '../types';
+import type { CustomField, NewCustomFieldInput, OrgSettings, Project, ProjectImpact } from '../types';
 import type { ToastTone } from '../useToastQueue';
 
-const FORMATS: { key: 'pdf' | 'excel' | 'word'; label: string }[] = [
+const FORMATS: { key: 'pdf' | 'powerpoint' | 'excel' | 'word'; label: string }[] = [
   { key: 'pdf', label: 'PDF' },
+  { key: 'powerpoint', label: 'PowerPoint' },
   { key: 'excel', label: 'Excel' },
   { key: 'word', label: 'Word' },
 ];
@@ -22,6 +25,7 @@ export function ProjectDetail({
   project,
   impact,
   customFields,
+  org,
   canEditFields,
   canEditProject,
   onProjectUpdated,
@@ -34,6 +38,7 @@ export function ProjectDetail({
   project: Project;
   impact: ProjectImpact | undefined;
   customFields: CustomField[];
+  org: OrgSettings;
   canEditFields: boolean;
   canEditProject: boolean;
   onProjectUpdated: () => void;
@@ -47,8 +52,33 @@ export function ProjectDetail({
   const [statusBg, statusFg] = STATUS_COLORS[project.status] ?? ['#eee', '#555'];
   const [formatOpen, setFormatOpen] = useState(false);
 
-  const handleFormat = (format: (typeof FORMATS)[number]['key']) => {
+  const handleFormat = async (format: (typeof FORMATS)[number]['key']) => {
     setFormatOpen(false);
+
+    // A programme report is a report like any other: same specification, same
+    // renderers, same design. It used to have an exporter of its own that wrote a
+    // single page of ASCII and turned every naira sign into "NGN ".
+    if (format === 'pdf' || format === 'powerpoint') {
+      const spec = buildProgrammeSpec({
+        project,
+        impact,
+        customFields,
+        org,
+        fy: org.financialYear,
+        generatedOn: generatedOnLabel(),
+      });
+      // Reconciled against this programme's own figures — the only ones it quotes.
+      await downloadDesignedReport({
+        spec,
+        format,
+        base: slugForFile(`${project.code}-${project.name}`),
+        projects: [project],
+        impacts: impact ? { [project.code]: impact } : {},
+        notify: pushToast,
+      });
+      return;
+    }
+
     const filename = exportProjectReport(project, impact, format, customFields);
     pushToast(`Downloaded ${filename}.`, 'success');
   };
@@ -104,7 +134,7 @@ export function ProjectDetail({
               {FORMATS.map((f) => (
                 <button
                   key={f.key}
-                  onClick={() => handleFormat(f.key)}
+                  onClick={() => { void handleFormat(f.key); }}
                   style={{ fontFamily: 'inherit', fontSize: 12.5, fontWeight: 600, color: 'var(--navy)', background: '#fff', border: '1px solid var(--line)', borderRadius: 8, padding: '8px 14px', cursor: 'pointer' }}
                 >
                   {f.label}

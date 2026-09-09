@@ -38,6 +38,15 @@ const H = 7.5;
 const MARGIN = 0.62;
 const BODY_W = W - MARGIN * 2;
 
+/**
+ * No outline.
+ *
+ * `{ width: 0 }` does not suppress one — PptxGenJS ignores the zero and emits a 1pt
+ * dark grey stroke, so every tile, bar and rule in the deck was drawn with a border
+ * nobody asked for. Only `type: 'none'` removes it.
+ */
+const NO_LINE = { type: 'none' as const };
+
 /** PptxGenJS wants hex without the leading hash. */
 function hex(colour: string): string {
   return colour.replace('#', '');
@@ -98,7 +107,7 @@ function tabStrip(slide: Slide, deck: Deck, chapters: ChapterBlock[], activeInde
       w,
       h: active ? 0.035 : 0.014,
       fill: { color: hex(active ? tone.base : LINE) },
-      line: { width: 0 },
+      line: NO_LINE,
     });
     slide.addText(chapter.title.toUpperCase(), {
       x,
@@ -129,30 +138,50 @@ function footer(slide: Slide, meta: ReportMeta, page: number) {
   });
 }
 
-/** A content slide with its strip, footer and heading already placed. */
-function contentSlide(deck: Deck, meta: ReportMeta, chapters: ChapterBlock[], state: RenderState, heading: string, intro?: string) {
+/** Top of the body area, below the heading — and below an intro line when there is one. */
+const BODY_TOP = 1.62;
+const BODY_TOP_WITH_INTRO = 2.35;
+/** Bottom of the body area. Everything below belongs to the footer. */
+const BODY_BOTTOM = 6.6;
+
+/**
+ * A content slide with its strip, footer and heading already placed.
+ *
+ * `wash` is off for a slide carrying a chart: a chart's plot area is transparent, so a
+ * tint behind it shows through the gridlines.
+ */
+function contentSlide(
+  deck: Deck, meta: ReportMeta, chapters: ChapterBlock[], state: RenderState,
+  heading: string, intro?: string, wash = true,
+) {
   const slide = deck.addSlide();
   slide.background = { color: hex(WHITE) };
   state.page += 1;
 
-  // The corner wash the PDF carries, so the two formats read as one document. A
-  // triangle rather than a rectangle: as a rectangle it reads as a stray panel sitting
-  // behind the footer instead of as a corner.
-  slide.addShape(deck.ShapeType.rtTriangle, {
-    x: W - 3.4, y: H - 1.3, w: 3.4, h: 1.3, fill: { color: hex(GREEN_WASH_SOFT) }, line: { width: 0 }, flipH: true,
-  });
+  if (wash) {
+    // The corner wash the PDF carries, so the two formats read as one document. It
+    // stops above the footer band rather than running into the corner: at full height
+    // its diagonal cut straight through the footer text.
+    slide.addShape(deck.ShapeType.rtTriangle, {
+      x: W - 2.6, y: BODY_BOTTOM - 1.15, w: 2.6, h: 1.15,
+      fill: { color: hex(GREEN_WASH_SOFT), transparency: 45 }, line: NO_LINE, flipH: true,
+    });
+  }
 
   tabStrip(slide, deck, chapters, state.chapterIndex);
   footer(slide, meta, state.page);
 
   slide.addText(heading, {
-    x: MARGIN, y: 0.85, w: BODY_W, h: 0.5,
+    x: MARGIN, y: 0.85, w: BODY_W, h: 0.6,
     fontFace: FONT_DISPLAY, fontSize: 26, bold: true, color: hex(state.tone.deep),
+  });
+  slide.addShape(deck.ShapeType.rect, {
+    x: MARGIN, y: 1.45, w: 1.1, h: 0.05, fill: { color: hex(state.tone.base) }, line: NO_LINE,
   });
   if (intro) {
     slide.addText(intro, {
-      x: MARGIN, y: 1.4, w: BODY_W, h: 0.5,
-      fontFace: FONT_BODY, fontSize: 11, color: hex(MUTED), lineSpacingMultiple: 1.2,
+      x: MARGIN, y: 1.62, w: BODY_W, h: 0.6,
+      fontFace: FONT_BODY, fontSize: 12, color: hex(MUTED), lineSpacingMultiple: 1.25,
     });
   }
   return slide;
@@ -172,7 +201,7 @@ function coverSlide(deck: Deck, meta: ReportMeta) {
 
   // The angled wash from the PDF cover, as a right triangle.
   slide.addShape(deck.ShapeType.rtTriangle, {
-    x: W - 6, y: 0, w: 6, h: H, fill: { color: hex(GREEN), transparency: 55 }, line: { width: 0 }, flipH: true,
+    x: W - 6, y: 0, w: 6, h: H, fill: { color: hex(GREEN), transparency: 55 }, line: NO_LINE, flipH: true,
   });
 
   slide.addText(meta.organisation.toUpperCase(), {
@@ -193,24 +222,15 @@ function coverSlide(deck: Deck, meta: ReportMeta) {
   });
 }
 
-/** A chapter divider, in the chapter's own colour. */
-function chapterSlide(deck: Deck, meta: ReportMeta, chapters: ChapterBlock[], block: ChapterBlock, state: RenderState) {
-  const slide = deck.addSlide();
-  const tone = TONES[block.tone];
-  slide.background = { color: hex(tone.wash) };
-  state.page += 1;
-
-  tabStrip(slide, deck, chapters, state.chapterIndex);
-  footer(slide, meta, state.page);
-
-  slide.addText(block.title, {
-    x: MARGIN, y: 3, w: BODY_W, h: 1.2,
-    fontFace: FONT_DISPLAY, fontSize: 48, bold: true, color: hex(tone.deep),
-  });
-  slide.addShape(deck.ShapeType.rect, {
-    x: MARGIN, y: 4.25, w: 1.4, h: 0.06, fill: { color: hex(tone.base) }, line: { width: 0 },
-  });
-}
+/**
+ * A chapter does not get a slide of its own.
+ *
+ * In the PDF a chapter opener is right: a page break and a title is how a document
+ * signals a new part. A deck has no equivalent — a slide carrying one word and nothing
+ * else reads as a slide someone forgot to finish, and with five chapters that is five
+ * of them. The tab strip across every slide already says which chapter you are in, and
+ * each heading is set in that chapter's colour, so the information is not lost.
+ */
 
 /** Headline figures as blocks of colour — Seplat's performance-spread treatment. */
 function metricSlide(
@@ -234,7 +254,7 @@ function metricSlide(
     const y = 1.75 + Math.floor(i / perRow) * (h + gap);
 
     slide.addShape(deck.ShapeType.roundRect, {
-      x, y, w, h, rectRadius: 0.04, fill: { color: hex(fill) }, line: { width: 0 },
+      x, y, w, h, rectRadius: 0.04, fill: { color: hex(fill) }, line: NO_LINE,
     });
     slide.addText(metric.label, {
       x: x + 0.3, y: y + 0.18, w: w - 0.6, h: 0.28, fontFace: FONT_BODY, fontSize: 12, bold: true, color: hex(ink),
@@ -258,7 +278,7 @@ function reachSlide(
   deck: Deck, meta: ReportMeta, chapters: ChapterBlock[], state: RenderState,
   title: string, intro: string, rows: { pillar: string; reach: number; impact: number }[],
 ) {
-  const slide = contentSlide(deck, meta, chapters, state, title, intro);
+  const slide = contentSlide(deck, meta, chapters, state, title, intro, false);
   const labels = rows.map((r) => r.pillar);
 
   slide.addChart(
@@ -268,7 +288,7 @@ function reachSlide(
       { name: 'Impact — people who received the intervention', labels, values: rows.map((r) => r.impact) },
     ],
     {
-      x: MARGIN, y: 2.35, w: BODY_W, h: 4.2,
+      x: MARGIN, y: BODY_TOP_WITH_INTRO, w: BODY_W, h: BODY_BOTTOM - BODY_TOP_WITH_INTRO + 0.35,
       barDir: 'bar',
       barGrouping: 'clustered',
       chartColors: [hex(TEAL), hex(GREEN_DEEP)],
@@ -308,11 +328,11 @@ function progressSlide(
     x: MARGIN, y: 1.9, w: BODY_W, h: 1.5, fontFace: FONT_DISPLAY, fontSize: 96, bold: true, color: hex(GREEN_DEEP),
   });
   slide.addShape(deck.ShapeType.roundRect, {
-    x: MARGIN, y: 3.5, w: BODY_W, h: 0.32, rectRadius: 0.16, fill: { color: hex(GREEN_WASH) }, line: { width: 0 },
+    x: MARGIN, y: 3.5, w: BODY_W, h: 0.32, rectRadius: 0.16, fill: { color: hex(GREEN_WASH) }, line: NO_LINE,
   });
   slide.addShape(deck.ShapeType.roundRect, {
     x: MARGIN, y: 3.5, w: Math.max(0.32, (pctValue / 100) * BODY_W), h: 0.32, rectRadius: 0.16,
-    fill: { color: hex(GREEN) }, line: { width: 0 },
+    fill: { color: hex(GREEN) }, line: NO_LINE,
   });
   slide.addText(caption, {
     x: MARGIN, y: 4.0, w: BODY_W, h: 0.8, fontFace: FONT_BODY, fontSize: 12, color: hex(MUTED), lineSpacingMultiple: 1.3,
@@ -324,7 +344,7 @@ function spendSlide(
   deck: Deck, meta: ReportMeta, chapters: ChapterBlock[], state: RenderState,
   title: string, intro: string, rows: { name: string; budgetMillions: number; utilisedPct: number }[],
 ) {
-  const slide = contentSlide(deck, meta, chapters, state, title, intro);
+  const slide = contentSlide(deck, meta, chapters, state, title, intro, false);
   const labels = rows.map((r) => r.name);
 
   slide.addChart(
@@ -338,7 +358,7 @@ function spendSlide(
       },
     ],
     {
-      x: MARGIN, y: 2.35, w: BODY_W, h: 4.2,
+      x: MARGIN, y: BODY_TOP_WITH_INTRO, w: BODY_W, h: BODY_BOTTOM - BODY_TOP_WITH_INTRO + 0.35,
       barDir: 'bar',
       barGrouping: 'clustered',
       chartColors: [hex(GREEN_WASH), hex(GREEN)],
@@ -367,38 +387,115 @@ function spendSlide(
   );
 }
 
-/**
- * Narrative, as bullets.
- *
- * Long sections are split across slides rather than shrunk to fit. A deck that
- * silently drops the tail of a paragraph is the same failure the old PDF writer had.
- */
-function sectionSlides(
-  deck: Deck, meta: ReportMeta, chapters: ChapterBlock[], state: RenderState,
-  heading: string, lines: string[],
-) {
-  const PER_SLIDE = 6;
-  const pages = Math.max(1, Math.ceil(lines.length / PER_SLIDE));
+/* ------------------------------------------------------------ narrative slides */
 
-  for (let page = 0; page < pages; page += 1) {
-    const slice = lines.slice(page * PER_SLIDE, (page + 1) * PER_SLIDE);
+const BODY_FONT_SIZE = 15;
+/** Characters that fit on one line of body text across the slide, near enough. */
+const CHARS_PER_LINE = 105;
+/** Vertical units a slide's body can hold. One unit is roughly one line of body text. */
+const SLIDE_CAPACITY = 13;
+/** What a section's own heading costs, in the same units. */
+const HEADING_COST = 2.2;
+
+interface NarrativeSection {
+  heading: string;
+  lines: string[];
+}
+
+/** How many lines a bullet wraps to, so a slide is filled rather than guessed at. */
+function bulletCost(line: string): number {
+  return Math.max(1, Math.ceil(line.length / CHARS_PER_LINE)) + 0.35;
+}
+
+/**
+ * Packs sections onto as few slides as will hold them.
+ *
+ * One section per slide produced a deck of eighteen slides for a six-page report, most
+ * of them four bullets above two-thirds of empty white — which reads as unfinished
+ * work rather than as a designed document. Sections are therefore filled onto a slide
+ * until it is full, and a section too long for one slide is continued onto the next
+ * rather than shrunk to fit. Silently dropping the tail of a section is the failure
+ * the original PDF writer had, and auto-shrinking type is the same failure with better
+ * manners.
+ */
+function packSections(sections: NarrativeSection[]): { heading: string; lines: string[]; continued: boolean }[][] {
+  const slides: { heading: string; lines: string[]; continued: boolean }[][] = [];
+  let current: { heading: string; lines: string[]; continued: boolean }[] = [];
+  let used = 0;
+
+  const flush = () => {
+    if (current.length > 0) slides.push(current);
+    current = [];
+    used = 0;
+  };
+
+  for (const section of sections) {
+    let pending = [...section.lines];
+    let continued = false;
+
+    while (pending.length > 0) {
+      const room = SLIDE_CAPACITY - used - HEADING_COST;
+      // Not enough room left for a heading and at least two bullets under it.
+      if (room < bulletCost(pending[0]!) + 1) {
+        flush();
+        continue;
+      }
+
+      const taken: string[] = [];
+      let cost = 0;
+      while (pending.length > 0 && cost + bulletCost(pending[0]!) <= room) {
+        cost += bulletCost(pending[0]!);
+        taken.push(pending.shift()!);
+      }
+
+      current.push({ heading: section.heading, lines: taken, continued });
+      used += HEADING_COST + cost;
+      continued = true;
+
+      if (pending.length > 0) flush();
+    }
+  }
+
+  flush();
+  return slides;
+}
+
+/** Narrative, as bullets, several sections to a slide where they fit. */
+function narrativeSlides(
+  deck: Deck, meta: ReportMeta, chapters: ChapterBlock[], state: RenderState, sections: NarrativeSection[],
+) {
+  for (const group of packSections(sections)) {
+    const first = group[0]!;
     const slide = contentSlide(
       deck, meta, chapters, state,
-      pages > 1 ? `${heading} (${page + 1}/${pages})` : heading,
+      first.continued ? `${first.heading} (continued)` : first.heading,
     );
-    slide.addShape(deck.ShapeType.rect, {
-      x: MARGIN, y: 1.5, w: 1.1, h: 0.05, fill: { color: hex(state.tone.base) }, line: { width: 0 },
+
+    let y = BODY_TOP;
+    group.forEach((part, index) => {
+      if (index > 0) {
+        // Subsequent sections carry their own heading inside the slide.
+        slide.addText(part.continued ? `${part.heading} (continued)` : part.heading, {
+          x: MARGIN, y, w: BODY_W, h: 0.34,
+          fontFace: FONT_DISPLAY, fontSize: 15, bold: true, color: hex(state.tone.deep),
+        });
+        y += 0.42;
+      }
+
+      const height = part.lines.reduce((sum, line) => sum + bulletCost(line), 0) * 0.29;
+      slide.addText(
+        part.lines.map((line) => ({
+          text: line,
+          options: { bullet: { characterCode: '25AA' }, breakLine: true, paraSpaceAfter: 8 },
+        })),
+        {
+          x: MARGIN, y, w: BODY_W, h: Math.min(height, BODY_BOTTOM - y),
+          fontFace: FONT_BODY, fontSize: BODY_FONT_SIZE, color: hex(INK),
+          lineSpacingMultiple: 1.25, valign: 'top',
+        },
+      );
+      y += height + 0.24;
     });
-    slide.addText(
-      slice.map((line) => ({
-        text: line,
-        options: { bullet: { characterCode: '25AA' }, breakLine: true, paraSpaceAfter: 10 },
-      })),
-      {
-        x: MARGIN, y: 1.85, w: BODY_W, h: 4.7,
-        fontFace: FONT_BODY, fontSize: 13, color: hex(INK), lineSpacingMultiple: 1.25, valign: 'top',
-      },
-    );
   }
 }
 
@@ -407,14 +504,14 @@ function calloutSlide(deck: Deck, meta: ReportMeta, chapters: ChapterBlock[], st
   const slide = contentSlide(deck, meta, chapters, state, 'Basis of preparation');
 
   slide.addShape(deck.ShapeType.rect, {
-    x: MARGIN, y: 1.8, w: BODY_W, h: 0.4, fill: { color: hex(ORANGE) }, line: { width: 0 },
+    x: MARGIN, y: 1.8, w: BODY_W, h: 0.4, fill: { color: hex(ORANGE) }, line: NO_LINE,
   });
   slide.addText('READ THIS ALONGSIDE THE FIGURES', {
     x: MARGIN + 0.2, y: 1.83, w: BODY_W - 0.4, h: 0.34,
     fontFace: FONT_BODY, fontSize: 10, bold: true, charSpacing: 0.7, color: hex(WHITE),
   });
   slide.addShape(deck.ShapeType.rect, {
-    x: MARGIN, y: 2.2, w: BODY_W, h: 1.6, fill: { color: hex(GREEN_WASH_SOFT) }, line: { width: 0 },
+    x: MARGIN, y: 2.2, w: BODY_W, h: 1.6, fill: { color: hex(GREEN_WASH_SOFT) }, line: NO_LINE,
   });
   slide.addText(text, {
     x: MARGIN + 0.25, y: 2.4, w: BODY_W - 0.5, h: 1.2,
@@ -438,9 +535,10 @@ function renderBlock(
       return;
 
     case 'chapter':
+      // Changes the tone every following slide is drawn in; see above for why it does
+      // not produce a slide of its own.
       state.chapterIndex = chapters.indexOf(block);
       state.tone = TONES[block.tone];
-      chapterSlide(deck, meta, chapters, block, state);
       return;
 
     case 'break':
@@ -465,7 +563,9 @@ function renderBlock(
       return;
 
     case 'section':
-      sectionSlides(deck, meta, chapters, state, block.heading, block.lines);
+      // Reached only when a section stands alone; buildDeck batches consecutive ones
+      // so they share a slide.
+      narrativeSlides(deck, meta, chapters, state, [{ heading: block.heading, lines: block.lines }]);
       return;
 
     case 'callout':
@@ -488,7 +588,23 @@ export function buildDeck(deck: Deck, spec: ReportSpec): Deck {
   const chapters = chaptersOf(spec);
   const state: RenderState = { page: 0, chapterIndex: 0, tone: TONES.overview };
 
-  for (const block of spec.blocks) renderBlock(deck, block, spec.meta, chapters, state);
+  // Consecutive narrative sections are rendered together so they can share a slide.
+  // Every other block renders on its own.
+  for (let i = 0; i < spec.blocks.length; i += 1) {
+    const block = spec.blocks[i]!;
+    if (block.kind !== 'section') {
+      renderBlock(deck, block, spec.meta, chapters, state);
+      continue;
+    }
+    const run: NarrativeSection[] = [];
+    while (i < spec.blocks.length && spec.blocks[i]!.kind === 'section') {
+      const next = spec.blocks[i] as Extract<ReportBlock, { kind: 'section' }>;
+      run.push({ heading: next.heading, lines: next.lines });
+      i += 1;
+    }
+    i -= 1;
+    narrativeSlides(deck, spec.meta, chapters, state, run);
+  }
   return deck;
 }
 
