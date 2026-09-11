@@ -28,7 +28,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const CATCH_ALL = '[...path].ts';
+const CATCH_ALL = 'index.ts';
 
 /** Vercel's per-deployment function ceiling on the Hobby plan. */
 const HOBBY_FUNCTION_LIMIT = 12;
@@ -47,14 +47,21 @@ async function functionFiles(dir = path.join(ROOT, 'api'), prefix = '') {
   return found;
 }
 
-/** Routes the Express adapter registers — the surface the catch-all therefore serves. */
+/** Routes the Express adapter registers — the surface the function therefore serves. */
 async function expressRoutes() {
   const source = await readFile(path.join(ROOT, 'server/app.ts'), 'utf8');
-  return new Set([...source.matchAll(/app\.(?:get|post)\('(\/api\/[^']*)'/g)].map((m) => m[1]));
+  return new Set([...source.matchAll(/^(?:get|post)\('(\/api\/[^']*)'/gm)].map((m) => m[1]));
 }
 
 const [files, routes] = await Promise.all([functionFiles(), expressRoutes()]);
 const problems = [];
+
+// A pattern that has stopped matching reports a clean zero and looks like a pass, which
+// is how this check quietly stopped counting anything when the route registrations were
+// renamed. Nothing legitimate takes this file to zero routes.
+if (routes.size === 0) {
+  problems.push('No routes were found in server/app.ts. The pattern this check relies on has stopped matching.');
+}
 
 const strays = files.filter((f) => f !== CATCH_ALL).sort();
 if (!files.includes(CATCH_ALL)) {
@@ -76,13 +83,45 @@ if (files.includes(CATCH_ALL)) {
   if (!/from '\.\.\/server\/app'/.test(source)) {
     problems.push(`api/${CATCH_ALL} no longer delegates to server/app.ts, so the two adapters can diverge again.`);
   }
+  if (!/__path/.test(source)) {
+    problems.push(`api/${CATCH_ALL} no longer restores the original path from __path, so every nested route would 404.`);
+  }
+}
+
+// A bracketed filename looks like a catch-all and is not one: Vercel compiles any
+// [segment] under api/ to ([^/]+), matching exactly one path segment. `api/[...path].ts`
+// served /api/health and 404'd /api/auth/me, and the 404 is HTML, which the frontend
+// reads as "no API here". Named here so the next person does not rediscover it in
+// production.
+const bracketed = files.filter((f) => f.includes('['));
+if (bracketed.length > 0) {
+  problems.push(
+    `Bracketed filename(s) under api/: ${bracketed.join(', ')}. Vercel matches one segment per\n` +
+      `    bracket and has no catch-all for a plain api/ directory. Routing belongs in vercel.json.`,
+  );
+}
+
+/**
+ * The file and the rewrite have to agree. They are edited in different places and
+ * nothing else notices when they stop matching — which is exactly how every nested
+ * route came to 404 in production while the local server was perfect.
+ */
+const vercelConfig = JSON.parse(await readFile(path.join(ROOT, 'vercel.json'), 'utf8'));
+const rewrite = (vercelConfig.rewrites ?? []).find((r) => /^\/api\//.test(r.source ?? ''));
+if (!rewrite) {
+  problems.push('vercel.json has no /api rewrite, so only single-segment paths would reach the function.');
+} else if (!rewrite.destination?.startsWith(`/api/${CATCH_ALL.replace(/\.ts$/, '')}`)) {
+  problems.push(`vercel.json rewrites /api to "${rewrite.destination}", which is not the function at api/${CATCH_ALL}.`);
+} else if (!rewrite.destination.includes('__path')) {
+  problems.push('The /api rewrite does not forward the original path as __path, so Express would have nothing to route on.');
 }
 
 console.log(`Vercel functions:  ${files.length} (ceiling ${HOBBY_FUNCTION_LIMIT} on Hobby)`);
 console.log(`Express routes:    ${routes.size} (all served through the catch-all)`);
 
 if (problems.length === 0) {
-  console.log('\nThe API is exposed as one catch-all over a single route table.');
+  console.log('\nThe API is exposed as one function over a single route table.');
+  console.log('`npm run check:vercel` proves it against the routing Vercel actually builds.');
   process.exit(0);
 }
 

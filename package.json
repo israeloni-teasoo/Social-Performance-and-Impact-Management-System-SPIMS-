@@ -14,6 +14,7 @@
     "create:user": "tsx prisma/createUser.ts",
     "report": "node docs/status-report/build.cjs",
     "check:routes": "node scripts/check-api-surface.mjs",
+    "check:vercel": "node scripts/check-vercel-routes.mjs",
     "smoke:api": "tsx scripts/smoke-catchall.ts",
     "smoke:alerts": "tsx scripts/smoke-alerts.ts",
     "test:parsers": "tsx server/lib/media/parse.test.ts && tsx server/lib/media/alerts.test.ts"

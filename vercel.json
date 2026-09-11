@@ -8,6 +8,12 @@
       "maxDuration": 60
     }
   },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index?__path=$1"
+    }
+  ],
   "crons": [
     {
       "path": "/api/cron/collect-mentions",

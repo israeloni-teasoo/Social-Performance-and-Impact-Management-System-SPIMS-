@@ -119,12 +119,21 @@ which a development sandbox does not have.
 Two models, both live: self-hosted (Docker, Express) and managed (Vercel). Both run the
 same Express app. Things that bite on the serverless side:
 
-- **`api/` must hold exactly one file, the catch-all `api/[...path].ts`.** Vercel makes
-  a function per file, and 41 of them exceeds the Hobby ceiling of twelve, so the
-  deployment fails outright. A per-route file also shadows the catch-all for its path,
-  and a route missing from `api/` answers with the single-page application's HTML —
-  which the frontend reads as "no API" and silently falls back to seed data. Adding
-  routes is free; adding files under `api/` is not.
+- **`api/` must hold exactly one file, `api/index.ts`,** with routing done by the
+  `/api/(.*)` rewrite in `vercel.json`. Vercel makes a function per file, and 48 of them
+  exceeds the Hobby ceiling of twelve. A route missing from `api/` answers with the
+  single-page application's HTML, which the frontend reads as "no API" and silently falls
+  back to seed data. Adding routes is free; adding files under `api/` is not.
+- **A bracketed filename is not a catch-all.** `api/[...path].ts` was tried and shipped
+  broken: Vercel compiles any `[segment]` under `api/` to `([^/]+)`, one path segment
+  only, so `/api/health` worked and `/api/auth/me` returned an HTML 404 and put the whole
+  interface into demo mode. `[...]` is a Next.js convention. Routing belongs in
+  `vercel.json`, and the rewrite passes the original path as `__path` for `api/index.ts`
+  to restore.
+- **Run `npm run check:vercel` before deploying.** It runs `vercel build` locally (no
+  account needed) and replays the real generated route table against every Express route.
+  Nothing else in the toolchain can see a routing mistake, because locally Express does
+  the routing and Express is never the problem.
 - **The catch-all works because Vercel skips its request helpers for Express.** The
   launcher injects a lazy `req.body` only when the default export has no `.listen`
   method, so an Express app receives an untouched stream for `express.json()`. Exporting
@@ -144,6 +153,12 @@ same Express app. Things that bite on the serverless side:
   failure the run log exists to prevent.
 - `SELF_AUTHENTICATED_ROUTES` in `permissions.ts` is the one place default-deny is set
   aside. Anything listed there must authenticate its own caller and fail closed.
+- **Routes are registered through the local `get`/`post` wrappers in `app.ts`, never
+  `app.get`/`app.post` directly.** Express 4 lets a rejected promise from an async
+  handler go unhandled, which terminates the process — on serverless that is a crashed
+  invocation answering with the host's HTML error page, i.e. demo mode again. The
+  wrappers route the rejection to the error handler at the foot of the file, which
+  always replies JSON and keeps the detail in the log.
 
 ## Media monitoring
 

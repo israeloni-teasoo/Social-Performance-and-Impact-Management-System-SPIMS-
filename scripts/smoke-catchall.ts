@@ -14,7 +14,7 @@
  * installed at all. This harness reproduces that branch rather than assuming it.
  */
 import http from 'node:http';
-import handler from '../api/[...path]';
+import handler from '../api/index';
 
 const listener = handler as unknown as ((q: unknown, s: unknown) => void) & { listen?: unknown };
 
@@ -67,6 +67,19 @@ const cases: Case[] = [
   // The guard sits ahead of the route table, so an unknown path is refused for want of
   // a session rather than 404-ing — an anonymous caller learns nothing about what exists.
   { name: 'unknown route', method: 'GET', path: '/api/not-a-route', expect: 401 },
+
+  // The shape Vercel's rewrite actually delivers. `vercel.json` sends every /api path to
+  // this one function as `/api/index?__path=<the original path>`, so if the middleware
+  // that puts the path back ever breaks, every nested route 404s in production while
+  // looking fine locally. That is the failure this pair of cases exists to catch.
+  { name: 'rewritten: health', method: 'GET', path: '/api/index?__path=health', expect: 200 },
+  { name: 'rewritten: nested', method: 'GET', path: '/api/index?__path=auth/me', expect: 401 },
+  {
+    name: 'rewritten: keeps query',
+    method: 'GET',
+    path: '/api/index?__path=mentions&status=pending',
+    expect: 401,
+  },
 ];
 
 server.listen(0, async () => {

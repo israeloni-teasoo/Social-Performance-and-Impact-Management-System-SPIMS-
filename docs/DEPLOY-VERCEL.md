@@ -206,22 +206,40 @@ Then confirm, in order:
 
 ---
 
-## 6. How the API is deployed, and the one thing not to change
+## 6. How the API is deployed, and the two things not to change
 
 Vercel turns **every file under `api/` into its own function**. There is exactly one:
-`api/[...path].ts`, a catch-all that hands the request to the same Express app used when
-self-hosting.
+`api/index.ts`, which hands the request to the same Express app used when self-hosting.
+`vercel.json` sends every `/api` path to it:
 
-Do not add a file per route. It looks tidy and it breaks two things at once. Vercel's
-Hobby plan refuses a deployment carrying more than twelve functions and this project has
-41 routes, so the deployment simply fails. Worse, on a plan where it succeeds, a route
-that exists in `server/app.ts` but has no file under `api/` does not 404 — the
-single-page application answers it with HTML, the interface reads HTML as "no API here",
-and the whole thing falls back to bundled sample data while looking like it works. One
-adapter cannot disagree with itself.
+```json
+"rewrites": [{ "source": "/api/(.*)", "destination": "/api/index?__path=$1" }]
+```
 
-`npm run check:routes` enforces this and is worth running before a deploy. To exercise
-the catch-all against a real database, `npm run smoke:api`.
+**Do not add a file per route.** Vercel's Hobby plan refuses a deployment carrying more
+than twelve functions and this project has 48 routes. And on a plan where it succeeds, a
+route in `server/app.ts` with no file under `api/` does not 404 — the deployment answers
+with HTML, the interface reads HTML as "no API here", and the whole thing falls back to
+bundled sample data while looking like it works.
+
+**Do not replace the rewrite with a bracketed filename.** `api/[...path].ts` looks like a
+catch-all and is not one: that is a Next.js convention, and Vercel compiles any
+`[segment]` under `api/` to `([^/]+)` — exactly one path segment. It was tried, and the
+result was a deployment where `/api/health` worked and `/api/auth/me` returned Vercel's
+HTML 404, so every screen reported that there was no server. Routing belongs in
+`vercel.json`.
+
+Three checks, in increasing order of cost and confidence:
+
+| Command | What it proves |
+|---|---|
+| `npm run check:routes` | The file and the rewrite still agree, and nothing has been added under `api/` |
+| `npm run smoke:api` | The function answers, including in the rewritten `?__path=` form, against a real database |
+| `npm run check:vercel` | Every route reaches the function **in the routing table Vercel actually builds** |
+
+The last one is the one that matters before a deploy. It runs `vercel build` locally —
+no account needed — and replays the generated route table. Reasoning about Vercel's
+routing was wrong twice; reading its own build output was right the first time.
 
 ---
 
