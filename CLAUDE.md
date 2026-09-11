@@ -108,8 +108,11 @@ database, insert a row that exists nowhere in the seed and confirm it appears.
 Before pushing: `npx tsc --noEmit -p tsconfig.json`, `cd frontend && npx tsc -b`,
 `npx oxlint src`, `npm run build`, and exercise both demo and live modes. Also
 `npm run check:routes` (the API is still one catch-all function) and `npm run test:parsers`
-(the media source parsers). `npm run smoke:api` drives the catch-all against a real
-database when the deployment shape itself is in question.
+(the media source parsers and the alert matcher). `npm run smoke:api` drives the
+catch-all against a real database when the deployment shape itself is in question, and
+`npm run smoke:alerts` drives collection through to alert delivery against a local feed
+and a local webhook — the only way to exercise that path without real outbound access,
+which a development sandbox does not have.
 
 ## Deployment
 
@@ -149,16 +152,28 @@ platforms need a paid provider and are not built.
 
 - **Fetching is server-side, always.** It is the only reason no user's browser contacts
   an outside host. Never move it into the frontend.
-- **Nothing about Seplat is sent** — a search term, and for feed sources not even that.
-  Keep it that way; the technical specification undertakes it in §7.3.
+- **Collection sends nothing about Seplat** — a search term, and for feed sources not
+  even that. Keep it that way; the specification undertakes it in §7.3. **Alerting is
+  the exception and is scoped deliberately**: it sends the org name, the article's
+  headline, outlet and public URL, and the rule names it matched. Never widen that to
+  carry programme data, figures or user identity — §7.4 undertakes it, and the payload
+  builders in `lib/media/alerts.ts` are the only place it is constructed.
 - **Sources are opt-in.** With none active, nothing is contacted at all.
 - A mention is evidence someone published something. It is **never** a reported figure
   and must not be mixed into the analytics layer.
 - The coverage limitation travels with the data (`COVERAGE_NOTE`, duplicated server and
   client), not only in documentation.
 - Parsers live in `server/lib/media/parse.ts` and are tested against fixtures:
-  `npx tsx server/lib/media/parse.test.ts`. The fixtures were written from documented
-  formats, not captured live, so treat the first real run as the real test.
+  `npm run test:parsers`. The fixtures were written from documented formats, not
+  captured live, so treat the first real run as the real test.
+- **A webhook URL is a credential.** It never reaches the browser — `maskUrl` returns
+  the host only — and configuration refuses plain http.
+- **Alerts are at-most-once**, marked on the attempt rather than on confirmed delivery.
+  Do not "fix" this into a retry: it would double-post alerts that did arrive, and a
+  webhook broken for a week would dump a week of backlog when repaired. Failures are
+  recorded on the channel and shown on screen instead.
+- The queue polls every 45s while it is open and visible, pausing on a hidden tab. That
+  interval is a cost decision as much as a freshness one on a per-invocation platform.
 
 ## Never commit
 

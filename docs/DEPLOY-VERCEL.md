@@ -61,6 +61,8 @@ Preview, if you use preview deployments).
 | `CRON_SECRET` | Only for scheduled media collection | Generate the same way. Leave it unset and scheduled collection refuses every request — see §4. |
 | `ANTHROPIC_API_KEY` | No | Only for AI-drafted report commentary. Every export works without it. |
 | `MEDIA_FETCH_TIMEOUT_MS` | No | Defaults to 20000. Lower it if a collection run is being cut short. |
+| `PUBLIC_APP_URL` | No | The deployment's public address, e.g. `https://spims.seplat.com`. Alerts use it for the link back to the review queue; without it they still send, but carry no link. On Vercel it falls back to the project's production domain, so a custom domain is the case that needs it. |
+| `ALERT_WEBHOOK_TIMEOUT_MS` | No | Defaults to 10000. |
 | `SESSION_COOKIE_SECURE` | No | Defaults to on in production, which is right for Vercel. Do not set it to `false` here. |
 
 `NODE_ENV` is set to `production` by Vercel; do not set it yourself.
@@ -148,6 +150,34 @@ unconfigured install does not show as a failing job every night.
 To turn scheduled collection off, remove the `crons` block, or simply pause every
 source under **Media & Mentions → Sources**. Collection remains available on demand
 from the button on that screen either way.
+
+### Being told, rather than having to look
+
+Collection on its own only means the queue fills sooner. Under **Media & Mentions →
+Alerts** an Executive sets a watchlist — named rules, each a short list of terms — and
+one or more webhooks to post to when a newly collected mention matches one.
+
+Keep the rules narrow. A rule matching most coverage teaches people to ignore the
+alerts, and everything else still arrives in the queue regardless; rules decide what is
+urgent, not what is collected. Matching ignores case and picks up word endings, so
+`spill` also catches "spills" and "spillage", but it will not fire inside another word.
+
+For **Microsoft Teams**, the webhook must come from a *Workflows* template — channel →
+Workflows → "Post to a channel when a webhook request is received". The old Office 365
+connector webhooks were switched off in May 2026 and a URL from that flow will not work
+however valid it looks. For **Slack**, an Incoming Webhook for the channel. Anything
+else receives a documented JSON body naming the flagged mentions and the rules they
+matched.
+
+Two things worth knowing before you configure one:
+
+- **The webhook URL is a credential.** Anyone holding it can post into that channel. It
+  is stored server-side and never shown again — the screen displays only its host — and
+  it must be `https`.
+- **An alert is sent at most once per mention.** If a webhook is broken at the moment a
+  story lands, that alert is not re-sent when it is fixed; the mention still sits in the
+  queue. Use *Send a test* after configuring, and watch for a channel showing a failed
+  last attempt. §7.4 of the technical specification explains the reasoning.
 
 ---
 

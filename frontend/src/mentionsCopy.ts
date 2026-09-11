@@ -21,3 +21,22 @@ export const SOURCE_KIND_LABELS: Record<string, string> = {
   rss: 'News feed',
   googleAlerts: 'Google Alerts',
 };
+
+export const CHANNEL_KIND_LABELS: Record<string, string> = {
+  teams: 'Microsoft Teams',
+  slack: 'Slack',
+  webhook: 'Other webhook',
+};
+
+/**
+ * What to paste in, per channel type.
+ *
+ * Teams is the one people get wrong: the old Office 365 connector webhooks were
+ * switched off in May 2026, so a URL from that flow will not work however valid it
+ * looks. The address must come from a Workflows template.
+ */
+export const CHANNEL_KIND_HINTS: Record<string, string> = {
+  teams: 'In Teams: channel → Workflows → "Post to a channel when a webhook request is received". Connector URLs from the old flow no longer work.',
+  slack: 'In Slack: create an Incoming Webhook for the channel and paste its URL.',
+  webhook: 'Any https endpoint. It receives a JSON body naming the flagged mentions and the rules they matched.',
+};

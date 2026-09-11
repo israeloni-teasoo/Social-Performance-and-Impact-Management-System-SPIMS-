@@ -15,7 +15,8 @@
     "report": "node docs/status-report/build.cjs",
     "check:routes": "node scripts/check-api-surface.mjs",
     "smoke:api": "tsx scripts/smoke-catchall.ts",
-    "test:parsers": "tsx server/lib/media/parse.test.ts"
+    "smoke:alerts": "tsx scripts/smoke-alerts.ts",
+    "test:parsers": "tsx server/lib/media/parse.test.ts && tsx server/lib/media/alerts.test.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.1",

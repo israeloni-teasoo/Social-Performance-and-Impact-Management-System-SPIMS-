@@ -16,6 +16,15 @@ import {
   runMentionIngestionHandler,
   setMentionSourceActiveHandler,
 } from './handlers/mentions';
+import {
+  createAlertChannelHandler,
+  createAlertRuleHandler,
+  deleteAlertChannelHandler,
+  deleteAlertRuleHandler,
+  listAlertConfigHandler,
+  setAlertRuleActiveHandler,
+  testAlertChannelHandler,
+} from './handlers/alerts';
 import { checkCronAuth } from './lib/cronAuth';
 import { addReportCommentHandler, listReportCommentsHandler } from './handlers/reportComments';
 import { generateReportPreviewHandler } from './handlers/reportPreview';
@@ -252,6 +261,36 @@ app.post('/api/mentions/sources/active', async (req, res) => {
 });
 app.post('/api/mentions/sources/delete', async (req, res) => {
   const r = await deleteMentionSourceHandler(req.body ?? {});
+  res.status(r.status).json(r.body);
+});
+
+// --- Mention alerts (what is worth interrupting someone for, and where to send it) ---
+app.get('/api/alerts', async (_req, res) => {
+  const r = await listAlertConfigHandler();
+  res.status(r.status).json(r.body);
+});
+app.post('/api/alerts/rules', async (req, res) => {
+  const r = await createAlertRuleHandler(req.body ?? {});
+  res.status(r.status).json(r.body);
+});
+app.post('/api/alerts/rules/active', async (req, res) => {
+  const r = await setAlertRuleActiveHandler(req.body ?? {});
+  res.status(r.status).json(r.body);
+});
+app.post('/api/alerts/rules/delete', async (req, res) => {
+  const r = await deleteAlertRuleHandler(req.body ?? {});
+  res.status(r.status).json(r.body);
+});
+app.post('/api/alerts/channels', async (req, res) => {
+  const r = await createAlertChannelHandler(req.body ?? {});
+  res.status(r.status).json(r.body);
+});
+app.post('/api/alerts/channels/delete', async (req, res) => {
+  const r = await deleteAlertChannelHandler(req.body ?? {});
+  res.status(r.status).json(r.body);
+});
+app.post('/api/alerts/channels/test', async (req, res) => {
+  const r = await testAlertChannelHandler(req.body ?? {});
   res.status(r.status).json(r.body);
 });
 

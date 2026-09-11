@@ -82,8 +82,8 @@ cheap precisely because there is no separate managed-hosting code path to mainta
 to rot: the function the managed model runs *is* the self-hosted application.
 
 What does **not** change between the models: authentication, the role permission table,
-the absence of any telemetry, and the fact that the only outbound calls are the two in
-§7 — both optional and both off by default.
+the absence of any telemetry, and the fact that the only outbound calls are those in
+§7 — every one optional and off by default.
 
 ---
 
@@ -285,7 +285,48 @@ mention data only through licensed partners, so that requires a paid provider �
 amount of engineering removes that. The limitation is stated in the API response and
 shown on the screen, not only here.
 
-### 7.4 Nothing else
+### 7.4 Alert delivery — built, off until configured
+
+The third outbound flow, and the only one that sends anything **about** Seplat rather
+than only a search term. It must be read differently from §7.3 for that reason.
+
+When a newly collected mention matches a watchlist rule, SPIMS posts a message to the
+webhook URLs configured under **Media & Mentions → Alerts**. Nothing is sent when no
+rule matches, and nothing at all is sent until both a rule and a channel exist — a
+fresh install makes no such call.
+
+| What leaves | Where it goes |
+|---|---|
+| The organisation name as configured in Settings | The webhook host you configured — typically Microsoft Teams or Slack |
+| The headline, outlet and public URL of the article | The same |
+| The names of the rules it matched | The same |
+| A link back to this deployment, when `PUBLIC_APP_URL` is set | The same |
+
+What does **not** leave: any programme data, any figure, any beneficiary record, any
+user identity, and the article text beyond the outlet's own headline. The payload is
+built from the public article and from configuration, never from the portfolio.
+
+Three properties worth checking during review:
+
+1. **The webhook URL is a credential.** Anyone holding it can post into that channel.
+   It is stored server-side, never returned to the browser — only its host is, so that
+   channels can be told apart — and only an Executive can add or remove one.
+2. **https only.** A plaintext webhook is refused at configuration time, because the
+   URL is a bearer credential and the payload names the coverage Seplat is watching for.
+3. **At most once.** A mention is marked notified when the attempt is made, not when
+   delivery is confirmed. A retry risks double-posting an alert that did arrive, and a
+   webhook broken for a week would deliver a week of backlog in one burst when fixed.
+   A failed delivery is recorded against the channel and shown on the screen; the queue
+   remains the durable record, and the alert is only a prompt to go and look at it.
+
+Alerting is narrow by design. Rules are opt-in and named, and a mention matching none
+is collected silently into the queue as before. Alerting on everything collected would
+train people to ignore the alerts, which is worse than having none.
+
+To stop it entirely: remove the channels, or block the webhook host at the firewall.
+Collection and the review queue are unaffected.
+
+### 7.5 Nothing else
 
 No telemetry, analytics, crash reporting, heartbeat, or vendor call-home. Teasoo has
 no network path to a deployed instance.

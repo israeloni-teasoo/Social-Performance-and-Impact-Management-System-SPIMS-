@@ -330,11 +330,60 @@ model Mention {
   reviewedBy String?
   reviewedAt DateTime?
 
+  /// Names of the alert rules this mention matched when it was collected, comma
+  /// separated. Null means it matched none. Recorded even when no channel is
+  /// configured, so the queue can show what would have been alerted on.
+  flags String?
+  /// When an alert naming this mention was sent. Set on the attempt rather than on a
+  /// confirmed delivery — see the at-most-once note in lib/media/alerts.ts.
+  notifiedAt DateTime?
+
   createdAt DateTime @default(now())
 
   @@index([status])
   @@index([projectCode])
   @@index([publishedAt])
+}
+
+/// A watchlist: what makes a mention worth interrupting someone for.
+///
+/// Separate from the source list on purpose. Sources decide what is collected;
+/// rules decide what is urgent. Collecting everything and alerting on everything
+/// would train people to ignore the alerts, which is worse than having none.
+model AlertRule {
+  id String @id @default(cuid())
+  /// Shown in the alert, so the reader knows why they were interrupted.
+  name String
+  /// Terms, one per line or comma separated. Matched case-insensitively against the
+  /// headline and the snippet.
+  terms  String
+  active Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/// Where an alert is delivered.
+///
+/// The URL is a credential: anyone holding it can post into that Teams or Slack
+/// channel. It is never returned to the browser in full, and only an Executive can
+/// add or remove one.
+model AlertChannel {
+  id String @id @default(cuid())
+  name String
+  /// teams | slack | webhook
+  kind   String
+  url    String
+  active Boolean @default(true)
+
+  /// The last delivery outcome, so a webhook that has quietly stopped working is
+  /// visible on the screen rather than discovered when an alert is missed.
+  lastStatus String?
+  lastError  String?
+  lastSentAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 /// What one ingestion run did, so an empty queue can be told from a broken fetch.

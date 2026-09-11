@@ -364,9 +364,47 @@ export interface Mention {
   projectCode: string | null;
   reviewedBy: string | null;
   reviewedAt: string | null;
+  /** Alert rules this matched when it arrived. Empty when it matched none. */
+  flags: string[];
   foundAt: string;
   sourceName: string;
   sourceKind: string;
+}
+
+/** What makes a mention worth interrupting someone for. */
+export interface AlertRule {
+  id: string;
+  name: string;
+  /** Terms, one per line or comma separated. */
+  terms: string;
+  active: boolean;
+}
+
+export type AlertChannelKind = 'teams' | 'slack' | 'webhook';
+
+/**
+ * Where an alert is delivered.
+ *
+ * The URL never reaches the browser: it is a credential, and anyone holding it can
+ * post into that channel. Only the host comes back, which is enough to tell two
+ * channels apart.
+ */
+export interface AlertChannel {
+  id: string;
+  name: string;
+  kind: AlertChannelKind;
+  urlMasked: string;
+  active: boolean;
+  lastStatus: string | null;
+  lastError: string | null;
+  lastSentAt: string | null;
+}
+
+export interface AlertConfig {
+  rules: AlertRule[];
+  channels: AlertChannel[];
+  /** False when the deployment has no public URL set, so alerts carry no link. */
+  appUrlConfigured: boolean;
 }
 
 /** What the last ingestion did, so an empty queue can be told from a broken fetch. */

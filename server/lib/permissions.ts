@@ -39,6 +39,9 @@ const ANY: Role[] = ['exec', 'manager', 'field', 'relations'];
  */
 export const READ_PERMISSIONS: Record<string, Role[]> = {
   '/api/users': ['exec'],
+  // Alert configuration lists the delivery channels. Their URLs are masked before they
+  // leave the server, but which channels exist is still administrative.
+  '/api/alerts': ['exec'],
 };
 
 export const WRITE_PERMISSIONS: Record<string, Role[]> = {
@@ -97,6 +100,16 @@ export const WRITE_PERMISSIONS: Record<string, Role[]> = {
   '/api/mentions/sources': ['exec'],
   '/api/mentions/sources/active': ['exec'],
   '/api/mentions/sources/delete': ['exec'],
+
+  // Alerting. A rule decides when people are interrupted and a channel URL decides
+  // where Seplat's coverage is posted, so both sit with the Executive alongside the
+  // source list rather than with the reviewers.
+  '/api/alerts/rules': ['exec'],
+  '/api/alerts/rules/active': ['exec'],
+  '/api/alerts/rules/delete': ['exec'],
+  '/api/alerts/channels': ['exec'],
+  '/api/alerts/channels/delete': ['exec'],
+  '/api/alerts/channels/test': ['exec'],
 };
 
 export interface AccessDenial {
