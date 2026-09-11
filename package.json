@@ -13,7 +13,8 @@
     "start:api": "tsx server/main.ts",
     "create:user": "tsx prisma/createUser.ts",
     "report": "node docs/status-report/build.cjs",
-    "check:routes": "node scripts/check-route-parity.mjs",
+    "check:routes": "node scripts/check-api-surface.mjs",
+    "smoke:api": "tsx scripts/smoke-catchall.ts",
     "test:parsers": "tsx server/lib/media/parse.test.ts"
   },
   "dependencies": {

@@ -4,7 +4,7 @@ The managed deployment model. For the self-hosted model see `SELF-HOSTING.md`; f
 the two mean for data ownership, see §2.1 and §10 of `TECHNICAL-SPECIFICATION.md`
 before starting — the difference is not technical.
 
-Version 1.0 · 9 September 2026
+Version 1.1 · 11 September 2026
 
 ---
 
@@ -12,6 +12,13 @@ Version 1.0 · 9 September 2026
 
 1. A **Vercel** account, owned by Seplat rather than by Teasoo. Whoever owns it can
    read every environment variable, including the session signing key.
+
+   It must be a **Pro** team, not Hobby. This is not a capacity judgement — Vercel's
+   fair-use terms restrict Hobby to non-commercial personal projects, and define
+   commercial use to include any deployment someone was paid to build. A consultancy
+   deliverable for Seplat is squarely inside that definition on both counts. Pro is
+   about $20 per seat per month. Hobby will also hold the deployment to one cron run
+   per day; see §4.
 2. A **PostgreSQL** database. Vercel does not provide one. Supabase is the
    recommendation: it is standard PostgreSQL, so the schema and migrations apply
    unchanged, and unlike the alternatives it can also be self-hosted later — which is
@@ -62,15 +69,38 @@ Preview, if you use preview deployments).
 
 ## 3. Deploy
 
-Import the repository. `vercel.json` already carries the build configuration:
+Import the repository. Leave **Root Directory** at the repository root — if you point
+it at `frontend/`, Vercel stops reading `vercel.json` and never builds `api/`, so you
+get the interface with no API behind it, which is the silent-demo-data failure in §5.
+
+`vercel.json` carries the build configuration:
 
 ```
-npx prisma migrate deploy && cd frontend && npm install && npm run build
+npx prisma generate && cd frontend && npm install && npm run build
 ```
 
-Migrations run as part of the build, so a schema change ships with the code that needs
-it. A failing migration fails the build — deliberately, since the alternative is a
-deployment whose code and database disagree.
+`prisma generate` is repeated here even though `postinstall` already runs it, because
+Vercel caches `node_modules` between builds and a cached install skips `postinstall` —
+leaving a Prisma client generated against the previous schema.
+
+### Apply migrations
+
+Migrations are **not** run by the build, and are applied deliberately, from a machine
+with the direct connection string:
+
+```bash
+DIRECT_URL="<direct connection>" DATABASE_URL="<direct connection>" npx prisma migrate deploy
+```
+
+They used to run in the build command. That was wrong in two ways. Every preview
+deployment migrated the production database, so an experimental branch could alter the
+live schema without anyone deciding it should. And it coupled deployment to database
+reachability: a transient connection failure — or simply a missing `DIRECT_URL` — failed
+the whole build with a Prisma schema-validation error that says nothing about the
+deployment being otherwise sound.
+
+Order matters when a release includes a schema change: apply the migration, then deploy.
+Run `npm run check:routes` before deploying, which is the guard described in §6.
 
 ### Create the first account
 
@@ -91,14 +121,20 @@ are in the repository and therefore public.
 
 ## 4. Scheduled media collection
 
-`vercel.json` registers a cron job that collects mentions twice daily:
+`vercel.json` registers a cron job that collects mentions once a day:
 
 ```json
-{ "path": "/api/cron/collect-mentions", "schedule": "0 6,18 * * *" }
+{ "path": "/api/cron/collect-mentions", "schedule": "0 6 * * *" }
 ```
 
-Runs overlap on purpose — de-duplication makes an overlap free, whereas a gap between
-windows loses coverage silently.
+Once a day is the Hobby ceiling, and Vercel enforces it at deploy time: a more frequent
+expression is rejected with *"Hobby accounts are limited to daily cron jobs"* and the
+deployment fails. The schedule shipped is therefore the one that deploys on either plan.
+
+On Pro, change it to `0 6,18 * * *` for twice-daily collection. Runs overlap on purpose
+— de-duplication makes an overlap free, whereas a gap between windows loses coverage
+silently. Vercel may fire the job anywhere inside the scheduled hour, which this job
+does not care about.
 
 **Set `CRON_SECRET` or this does nothing.** Vercel sends it as an `Authorization:
 Bearer` header; the endpoint refuses every request when the variable is unset. That is
@@ -140,11 +176,30 @@ Then confirm, in order:
 
 ---
 
-## 6. Costs
+## 6. How the API is deployed, and the one thing not to change
+
+Vercel turns **every file under `api/` into its own function**. There is exactly one:
+`api/[...path].ts`, a catch-all that hands the request to the same Express app used when
+self-hosting.
+
+Do not add a file per route. It looks tidy and it breaks two things at once. Vercel's
+Hobby plan refuses a deployment carrying more than twelve functions and this project has
+41 routes, so the deployment simply fails. Worse, on a plan where it succeeds, a route
+that exists in `server/app.ts` but has no file under `api/` does not 404 — the
+single-page application answers it with HTML, the interface reads HTML as "no API here",
+and the whole thing falls back to bundled sample data while looking like it works. One
+adapter cannot disagree with itself.
+
+`npm run check:routes` enforces this and is worth running before a deploy. To exercise
+the catch-all against a real database, `npm run smoke:api`.
+
+---
+
+## 7. Costs
 
 | Item | Cost |
 |---|---|
-| Vercel | Free tier is adequate for this usage; a Pro seat is roughly $20/month if their policy requires it for commercial use. |
+| Vercel | Pro, about $20 per seat per month. Hobby is free but its terms exclude commercial use, and it caps collection at one run per day. |
 | Database | Supabase and Neon both have free tiers that fit this dataset. Paid tiers start around $25/month. |
 | Media monitoring, press and web | None. The sources are public. |
 | AI commentary | Usage-based and small. Optional. |
@@ -153,7 +208,7 @@ Third-party costs are recharged at cost and are not part of the platform fee.
 
 ---
 
-## 7. Moving to Seplat infrastructure later
+## 8. Moving to Seplat infrastructure later
 
 Not a rewrite, and worth knowing before committing to managed hosting:
 
@@ -163,6 +218,5 @@ Not a rewrite, and worth knowing before committing to managed hosting:
 4. Replace the Vercel cron entry with a system cron job against the same path and
    bearer token.
 
-No application code changes. The Express adapter that makes this possible is exercised
-in development every day, which is what stops it rotting into a path that only works in
-theory.
+No application code changes — and no second code path to go stale, because the Vercel
+function is the Express app. What runs managed is what runs self-hosted.

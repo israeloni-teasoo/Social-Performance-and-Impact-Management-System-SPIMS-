@@ -35,10 +35,17 @@ because it changes what can and cannot be undertaken about the data.**
 | Data | PostgreSQL 16 | All persistent state |
 
 The API is written as framework-agnostic handlers (`server/handlers/*`) returning
-`{status, body}`. Two thin adapters call them: an Express server for self-hosted
-deployment, and serverless function wrappers for a cloud demo. **This is deliberate** —
-the business logic has no dependency on either hosting model, so the self-hosted
-deployment is not a second-class port.
+`{status, body}`, called by one thin Express adapter. Managed hosting mounts that same
+adapter as a single catch-all function rather than reimplementing it. **This is
+deliberate** — the business logic has no dependency on either hosting model, and
+neither deployment is a second-class port of the other.
+
+An earlier design gave the managed model its own wrapper per route. That was abandoned
+for two reasons. It exceeded the host's per-deployment function limit, so the
+deployment was refused outright. And a route present in one adapter but not the other
+failed silently rather than loudly: the unmatched path returned the single-page
+application's HTML, which the interface reads as "no API present", falling back to
+bundled sample data while appearing to work.
 
 The frontend and API are served from one origin. Sessions use an `HttpOnly`,
 `SameSite=Lax` cookie; a split origin would require `SameSite=None` plus CORS, which is
@@ -51,7 +58,7 @@ matters more than any technical detail: **who holds the data.**
 
 | | Self-hosted | Managed (Vercel) |
 |---|---|---|
-| Application | Docker Compose on Seplat infrastructure | Vercel serverless functions |
+| Application | Docker Compose on Seplat infrastructure | The same Express application, as one Vercel function |
 | Database | PostgreSQL inside the Seplat estate | A managed provider (Supabase or Neon) |
 | Interface | nginx container | Vercel's static edge |
 | Scheduled collection | System cron | Vercel Cron |
@@ -70,9 +77,9 @@ the consequence plainly rather than leaving the earlier self-hosting language st
 
 The two models are not a one-way door. The database is standard PostgreSQL and the
 application is standard Node; moving from managed hosting to Seplat infrastructure is a
-database dump, a restore and a redeploy, with no code change. That reversibility was
-the reason for keeping the Express adapter working alongside the serverless one, and it
-is why it must not be allowed to rot.
+database dump, a restore and a redeploy, with no code change. That reversibility is
+cheap precisely because there is no separate managed-hosting code path to maintain or
+to rot: the function the managed model runs *is* the self-hosted application.
 
 What does **not** change between the models: authentication, the role permission table,
 the absence of any telemetry, and the fact that the only outbound calls are the two in
@@ -158,10 +165,11 @@ allowlist; the API never reflects arbitrary origins.
 
 ## 6. Authorisation
 
-Enforcement happens in a single shared gate (`server/lib/guard.ts`) applied by both
-adapters, against one permission table (`server/lib/permissions.ts`). One
-implementation means the self-hosted and serverless deployments cannot drift into
-different security postures.
+Enforcement happens in a single shared gate (`server/lib/guard.ts`), against one
+permission table (`server/lib/permissions.ts`), ahead of the route table so a route
+cannot be added without being covered. One implementation, reached by one adapter,
+means the self-hosted and managed deployments cannot drift into different security
+postures.
 
 **Reads** are available to any signed-in user. SPIMS is a single-tenant internal
 system where staff are expected to see the portfolio; the meaningful restriction is on

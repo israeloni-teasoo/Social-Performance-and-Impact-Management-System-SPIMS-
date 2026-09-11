@@ -86,9 +86,9 @@ report contains no callout to exercise.
 ## Conventions
 
 - Business logic lives in `server/handlers/*` as hosting-agnostic functions returning
-  `{status, body}`. Two thin adapters call them: `server/app.ts` (Express, self-hosted)
-  and `api/*` (serverless, demo). **Never put logic in an adapter** — it would exist in
-  only one deployment.
+  `{status, body}`. One thin adapter calls them: `server/app.ts` (Express). Vercel
+  mounts that same app through the single catch-all `api/[...path].ts`. **Never put
+  logic in the adapter.**
 - Authorisation is one shared decision in `server/lib/guard.ts` against the table in
   `server/lib/permissions.ts`. Adding a route means adding its permission rule; writes
   with no rule are refused by default.
@@ -107,17 +107,30 @@ database, insert a row that exists nowhere in the seed and confirm it appears.
 
 Before pushing: `npx tsc --noEmit -p tsconfig.json`, `cd frontend && npx tsc -b`,
 `npx oxlint src`, `npm run build`, and exercise both demo and live modes. Also
-`npm run check:routes` (both adapters expose the same routes) and `npm run test:parsers`
-(the media source parsers).
+`npm run check:routes` (the API is still one catch-all function) and `npm run test:parsers`
+(the media source parsers). `npm run smoke:api` drives the catch-all against a real
+database when the deployment shape itself is in question.
 
 ## Deployment
 
-Two models, both live: self-hosted (Docker, Express) and managed (Vercel, serverless
-functions). They run identical handlers. Things that bite on the serverless side:
+Two models, both live: self-hosted (Docker, Express) and managed (Vercel). Both run the
+same Express app. Things that bite on the serverless side:
 
-- **Every Express route needs a matching file under `api/`**, or it answers with the
-  single-page application's HTML on Vercel and the frontend silently falls back to seed
-  data. Diff the two route sets after adding a route.
+- **`api/` must hold exactly one file, the catch-all `api/[...path].ts`.** Vercel makes
+  a function per file, and 41 of them exceeds the Hobby ceiling of twelve, so the
+  deployment fails outright. A per-route file also shadows the catch-all for its path,
+  and a route missing from `api/` answers with the single-page application's HTML —
+  which the frontend reads as "no API" and silently falls back to seed data. Adding
+  routes is free; adding files under `api/` is not.
+- **The catch-all works because Vercel skips its request helpers for Express.** The
+  launcher injects a lazy `req.body` only when the default export has no `.listen`
+  method, so an Express app receives an untouched stream for `express.json()`. Exporting
+  a bare `(req, res)` function instead would reintroduce that race.
+- **Migrations do not run in the build.** Build-time `prisma migrate deploy` let every
+  preview deployment migrate production, and failed the build outright when `DIRECT_URL`
+  was unset. Apply them deliberately, before deploying.
+- **Cron frequency is plan-bound.** Hobby rejects anything more often than daily at
+  deploy time. `vercel.json` ships the daily schedule so it deploys on either plan.
 - **`server/lib/db.ts` caches the Prisma client on `globalThis` unconditionally.** The
   usual dev-only guard leaks a connection pool per invocation on serverless. Do not
   "tidy" it back.
