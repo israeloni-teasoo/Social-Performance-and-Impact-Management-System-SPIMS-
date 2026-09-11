@@ -1,7 +1,10 @@
 import { prisma } from '../lib/db';
+import { appUrl, orgName } from '../lib/appIdentity';
+import { deliverAll, flagMentions } from '../lib/media/alerts';
 import { fetchAll } from '../lib/media/fetch';
 import { normaliseUrl } from '../lib/media/parse';
 import { isSourceKind } from '../lib/media/types';
+import type { DeliveryOutcome, FlaggableMention } from '../lib/media/alerts';
 import type { HandlerResult } from '../lib/types';
 import type { User } from '@prisma/client';
 
@@ -40,6 +43,7 @@ function serialise(mention: {
   projectCode: string | null;
   reviewedBy: string | null;
   reviewedAt: Date | null;
+  flags: string | null;
   createdAt: Date;
   source?: { name: string; kind: string } | null;
 }) {
@@ -57,6 +61,9 @@ function serialise(mention: {
     projectCode: mention.projectCode,
     reviewedBy: mention.reviewedBy,
     reviewedAt: mention.reviewedAt ? mention.reviewedAt.toISOString() : null,
+    // The rules this matched when it arrived, so the queue shows why it was urgent
+    // rather than only the alert knowing.
+    flags: mention.flags ? mention.flags.split(',').map((f) => f.trim()).filter(Boolean) : [],
     foundAt: mention.createdAt.toISOString(),
     sourceName: mention.source?.name ?? '',
     sourceKind: mention.source?.kind ?? '',
@@ -242,6 +249,7 @@ export async function runMentionIngestionHandler(): Promise<HandlerResult> {
   let added = 0;
   let duplicates = 0;
   const seenThisRun = new Set<string>();
+  const created: FlaggableMention[] = [];
 
   for (const outcome of outcomes) {
     if (!outcome.ok) continue;
@@ -255,7 +263,7 @@ export async function runMentionIngestionHandler(): Promise<HandlerResult> {
       seenThisRun.add(url);
 
       try {
-        await prisma.mention.create({
+        const record = await prisma.mention.create({
           data: {
             sourceId: outcome.sourceId,
             url,
@@ -266,6 +274,16 @@ export async function runMentionIngestionHandler(): Promise<HandlerResult> {
             country: item.country.slice(0, 60),
             publishedAt: item.publishedAt,
           },
+        });
+        // Only what this run actually stored is a candidate for an alert. A duplicate
+        // is a story somebody has already been told about.
+        created.push({
+          id: record.id,
+          title: record.title,
+          snippet: record.snippet,
+          publisher: record.publisher,
+          url: record.url,
+          publishedAt: record.publishedAt,
         });
         added += 1;
       } catch {
@@ -286,6 +304,8 @@ export async function runMentionIngestionHandler(): Promise<HandlerResult> {
     ...(o.error ? { error: o.error } : {}),
   }));
 
+  const alerts = await notifyFlagged(created);
+
   const run = await prisma.mentionRun.create({
     data: { status, detail, found, added, duplicates },
   });
@@ -301,7 +321,90 @@ export async function runMentionIngestionHandler(): Promise<HandlerResult> {
       added,
       duplicates,
       detail,
+      alerts,
       coverageNote: COVERAGE_NOTE,
     },
   };
+}
+
+export interface AlertSummary {
+  /** How many of this run's new mentions matched a rule. */
+  flagged: number;
+  /** How many channels the alert reached. */
+  delivered: number;
+  /** Channels that refused it, with the reason. */
+  failed: { channel: string; error: string }[];
+}
+
+/**
+ * Flags this run's new mentions and tells people about the ones that matter.
+ *
+ * Wrapped so that nothing here can fail a collection run. An alert that could not be
+ * sent is a problem; a collection that threw away everything it fetched because a
+ * webhook was down would be a much larger one, and the queue is what the system is
+ * actually for.
+ */
+async function notifyFlagged(created: FlaggableMention[]): Promise<AlertSummary> {
+  const empty: AlertSummary = { flagged: 0, delivered: 0, failed: [] };
+  if (created.length === 0) return empty;
+
+  try {
+    const rules = await prisma.alertRule.findMany({ where: { active: true } });
+    if (rules.length === 0) return empty;
+
+    const flagged = flagMentions(created, rules);
+    if (flagged.length === 0) return empty;
+
+    // Recorded whether or not anything can be delivered, so the queue shows what was
+    // urgent even on an installation with no channel configured.
+    await Promise.all(
+      flagged.map((m) => prisma.mention.update({ where: { id: m.id }, data: { flags: m.rules.join(', ') } })),
+    );
+
+    const ids = flagged.map((m) => m.id);
+    const channels = await prisma.alertChannel.findMany({ where: { active: true } });
+
+    if (channels.length === 0) {
+      // Nothing to deliver to. Marked notified anyway: adding a channel next month
+      // should not fire a month of alerts about stories that are by then old news.
+      await prisma.mention.updateMany({ where: { id: { in: ids } }, data: { notifiedAt: new Date() } });
+      return { flagged: flagged.length, delivered: 0, failed: [] };
+    }
+
+    const outcomes = await deliverAll(
+      channels.map((c) => ({ id: c.id, name: c.name, kind: c.kind, url: c.url })),
+      flagged,
+      await orgName(),
+      appUrl(),
+    );
+
+    // At-most-once: marked on the attempt, not on a confirmed delivery. See the note
+    // at the top of lib/media/alerts.ts for why a retry is the worse failure.
+    await prisma.mention.updateMany({ where: { id: { in: ids } }, data: { notifiedAt: new Date() } });
+    await Promise.all(outcomes.map(recordDelivery));
+
+    return {
+      flagged: flagged.length,
+      delivered: outcomes.filter((o) => o.ok).length,
+      failed: outcomes.filter((o) => !o.ok).map((o) => ({ channel: o.channelName, error: o.error ?? 'Unknown error' })),
+    };
+  } catch {
+    return empty;
+  }
+}
+
+/** Writes one delivery outcome onto its channel, so a broken webhook is visible. */
+async function recordDelivery(outcome: DeliveryOutcome): Promise<void> {
+  await prisma.alertChannel
+    .update({
+      where: { id: outcome.channelId },
+      data: {
+        lastStatus: outcome.ok ? 'ok' : 'failed',
+        lastError: outcome.ok ? null : outcome.error ?? 'Unknown error',
+        lastSentAt: new Date(),
+      },
+    })
+    .catch(() => {
+      // The channel was deleted mid-run. Not worth failing anything over.
+    });
 }

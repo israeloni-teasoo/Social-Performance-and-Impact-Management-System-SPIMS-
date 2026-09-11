@@ -37,3 +37,17 @@ export const SOURCE_KINDS: SourceKind[] = ['gdelt', 'rss', 'googleAlerts'];
 export function isSourceKind(value: unknown): value is SourceKind {
   return typeof value === 'string' && (SOURCE_KINDS as string[]).includes(value);
 }
+
+/**
+ * Where an alert can be delivered.
+ *
+ * `webhook` is the escape hatch: it posts a documented JSON shape, so an internal
+ * endpoint can receive alerts without SPIMS needing to know anything about it.
+ */
+export type AlertChannelKind = 'teams' | 'slack' | 'webhook';
+
+export const ALERT_CHANNEL_KINDS: AlertChannelKind[] = ['teams', 'slack', 'webhook'];
+
+export function isAlertChannelKind(value: unknown): value is AlertChannelKind {
+  return typeof value === 'string' && (ALERT_CHANNEL_KINDS as string[]).includes(value);
+}

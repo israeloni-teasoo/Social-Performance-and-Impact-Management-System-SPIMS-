@@ -86,9 +86,9 @@ report contains no callout to exercise.
 ## Conventions
 
 - Business logic lives in `server/handlers/*` as hosting-agnostic functions returning
-  `{status, body}`. Two thin adapters call them: `server/app.ts` (Express, self-hosted)
-  and `api/*` (serverless, demo). **Never put logic in an adapter** — it would exist in
-  only one deployment.
+  `{status, body}`. One thin adapter calls them: `server/app.ts` (Express). Vercel
+  mounts that same app through the single catch-all `api/[...path].ts`. **Never put
+  logic in the adapter.**
 - Authorisation is one shared decision in `server/lib/guard.ts` against the table in
   `server/lib/permissions.ts`. Adding a route means adding its permission rule; writes
   with no rule are refused by default.
@@ -107,17 +107,42 @@ database, insert a row that exists nowhere in the seed and confirm it appears.
 
 Before pushing: `npx tsc --noEmit -p tsconfig.json`, `cd frontend && npx tsc -b`,
 `npx oxlint src`, `npm run build`, and exercise both demo and live modes. Also
-`npm run check:routes` (both adapters expose the same routes) and `npm run test:parsers`
-(the media source parsers).
+`npm run check:routes` (the API is still one catch-all function) and `npm run test:parsers`
+(the media source parsers and the alert matcher). `npm run smoke:api` drives the
+catch-all against a real database when the deployment shape itself is in question, and
+`npm run smoke:alerts` drives collection through to alert delivery against a local feed
+and a local webhook — the only way to exercise that path without real outbound access,
+which a development sandbox does not have.
 
 ## Deployment
 
-Two models, both live: self-hosted (Docker, Express) and managed (Vercel, serverless
-functions). They run identical handlers. Things that bite on the serverless side:
+Two models, both live: self-hosted (Docker, Express) and managed (Vercel). Both run the
+same Express app. Things that bite on the serverless side:
 
-- **Every Express route needs a matching file under `api/`**, or it answers with the
-  single-page application's HTML on Vercel and the frontend silently falls back to seed
-  data. Diff the two route sets after adding a route.
+- **`api/` must hold exactly one file, `api/index.ts`,** with routing done by the
+  `/api/(.*)` rewrite in `vercel.json`. Vercel makes a function per file, and 48 of them
+  exceeds the Hobby ceiling of twelve. A route missing from `api/` answers with the
+  single-page application's HTML, which the frontend reads as "no API" and silently falls
+  back to seed data. Adding routes is free; adding files under `api/` is not.
+- **A bracketed filename is not a catch-all.** `api/[...path].ts` was tried and shipped
+  broken: Vercel compiles any `[segment]` under `api/` to `([^/]+)`, one path segment
+  only, so `/api/health` worked and `/api/auth/me` returned an HTML 404 and put the whole
+  interface into demo mode. `[...]` is a Next.js convention. Routing belongs in
+  `vercel.json`, and the rewrite passes the original path as `__path` for `api/index.ts`
+  to restore.
+- **Run `npm run check:vercel` before deploying.** It runs `vercel build` locally (no
+  account needed) and replays the real generated route table against every Express route.
+  Nothing else in the toolchain can see a routing mistake, because locally Express does
+  the routing and Express is never the problem.
+- **The catch-all works because Vercel skips its request helpers for Express.** The
+  launcher injects a lazy `req.body` only when the default export has no `.listen`
+  method, so an Express app receives an untouched stream for `express.json()`. Exporting
+  a bare `(req, res)` function instead would reintroduce that race.
+- **Migrations do not run in the build.** Build-time `prisma migrate deploy` let every
+  preview deployment migrate production, and failed the build outright when `DIRECT_URL`
+  was unset. Apply them deliberately, before deploying.
+- **Cron frequency is plan-bound.** Hobby rejects anything more often than daily at
+  deploy time. `vercel.json` ships the daily schedule so it deploys on either plan.
 - **`server/lib/db.ts` caches the Prisma client on `globalThis` unconditionally.** The
   usual dev-only guard leaks a connection pool per invocation on serverless. Do not
   "tidy" it back.
@@ -128,6 +153,12 @@ functions). They run identical handlers. Things that bite on the serverless side
   failure the run log exists to prevent.
 - `SELF_AUTHENTICATED_ROUTES` in `permissions.ts` is the one place default-deny is set
   aside. Anything listed there must authenticate its own caller and fail closed.
+- **Routes are registered through the local `get`/`post` wrappers in `app.ts`, never
+  `app.get`/`app.post` directly.** Express 4 lets a rejected promise from an async
+  handler go unhandled, which terminates the process — on serverless that is a crashed
+  invocation answering with the host's HTML error page, i.e. demo mode again. The
+  wrappers route the rejection to the error handler at the foot of the file, which
+  always replies JSON and keeps the detail in the log.
 
 ## Media monitoring
 
@@ -136,16 +167,28 @@ platforms need a paid provider and are not built.
 
 - **Fetching is server-side, always.** It is the only reason no user's browser contacts
   an outside host. Never move it into the frontend.
-- **Nothing about Seplat is sent** — a search term, and for feed sources not even that.
-  Keep it that way; the technical specification undertakes it in §7.3.
+- **Collection sends nothing about Seplat** — a search term, and for feed sources not
+  even that. Keep it that way; the specification undertakes it in §7.3. **Alerting is
+  the exception and is scoped deliberately**: it sends the org name, the article's
+  headline, outlet and public URL, and the rule names it matched. Never widen that to
+  carry programme data, figures or user identity — §7.4 undertakes it, and the payload
+  builders in `lib/media/alerts.ts` are the only place it is constructed.
 - **Sources are opt-in.** With none active, nothing is contacted at all.
 - A mention is evidence someone published something. It is **never** a reported figure
   and must not be mixed into the analytics layer.
 - The coverage limitation travels with the data (`COVERAGE_NOTE`, duplicated server and
   client), not only in documentation.
 - Parsers live in `server/lib/media/parse.ts` and are tested against fixtures:
-  `npx tsx server/lib/media/parse.test.ts`. The fixtures were written from documented
-  formats, not captured live, so treat the first real run as the real test.
+  `npm run test:parsers`. The fixtures were written from documented formats, not
+  captured live, so treat the first real run as the real test.
+- **A webhook URL is a credential.** It never reaches the browser — `maskUrl` returns
+  the host only — and configuration refuses plain http.
+- **Alerts are at-most-once**, marked on the attempt rather than on confirmed delivery.
+  Do not "fix" this into a retry: it would double-post alerts that did arrive, and a
+  webhook broken for a week would dump a week of backlog when repaired. Failures are
+  recorded on the channel and shown on screen instead.
+- The queue polls every 45s while it is open and visible, pausing on a hidden tab. That
+  interval is a cost decision as much as a freshness one on a per-invocation platform.
 
 ## Never commit
 

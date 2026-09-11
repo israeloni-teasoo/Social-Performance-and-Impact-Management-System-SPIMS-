@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react';
-import { CATEGORY_LABELS, SOURCE_KIND_LABELS } from '../mentionsCopy';
+import { CATEGORY_LABELS, CHANNEL_KIND_HINTS, CHANNEL_KIND_LABELS, SOURCE_KIND_LABELS } from '../mentionsCopy';
 import { card, h1, pill, primaryBtn, subtitle } from '../ui';
+import { useAlertsStore } from '../useAlertsStore';
 import { useMentionsStore } from '../useMentionsStore';
-import type { MentionCategory, MentionSourceKind, MentionStatus, Project, Role } from '../types';
+import type { AlertChannelKind, MentionCategory, MentionSourceKind, MentionStatus, Project, Role } from '../types';
 import type { ToastTone } from '../useToastQueue';
 
 /**
@@ -26,6 +27,23 @@ function when(iso: string | null): string {
   return new Date(iso).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
+/**
+ * How long ago, in words.
+ *
+ * The queue refreshes itself, so the useful question on screen is no longer "what does
+ * this say" but "how current is it". A clock time would make the reader do that
+ * subtraction themselves.
+ */
+function ago(at: Date | null): string {
+  if (!at) return '';
+  const seconds = Math.max(0, Math.round((Date.now() - at.getTime()) / 1000));
+  if (seconds < 75) return 'just now';
+  const minutes = Math.round(seconds / 60);
+  if (minutes < 60) return `${minutes} min ago`;
+  const hours = Math.round(minutes / 60);
+  return hours === 1 ? 'an hour ago' : `${hours} hours ago`;
+}
+
 export function MediaMentions({
   projects,
   role,
@@ -38,9 +56,12 @@ export function MediaMentions({
   const store = useMentionsStore(pushToast);
   const [tab, setTab] = useState<MentionStatus>('pending');
   const [showSources, setShowSources] = useState(false);
+  const [showAlerts, setShowAlerts] = useState(false);
 
   const canReview = role === 'exec' || role === 'relations';
   const canManageSources = role === 'exec';
+
+  const newIds = useMemo(() => new Set(store.newIds), [store.newIds]);
 
   const shown = useMemo(
     () => store.feed.mentions.filter((m) => m.status === tab),
@@ -91,6 +112,14 @@ export function MediaMentions({
         <div style={{ marginLeft: 'auto', display: 'flex', gap: 10, flexWrap: 'wrap' }}>
           {canManageSources && (
             <button
+              onClick={() => setShowAlerts((v) => !v)}
+              style={{ fontFamily: 'inherit', fontSize: 13, fontWeight: 600, padding: '9px 16px', borderRadius: 9, background: '#fff', border: '1px solid var(--line)', color: 'var(--navy)', cursor: 'pointer' }}
+            >
+              {showAlerts ? 'Hide alerts' : 'Alerts'}
+            </button>
+          )}
+          {canManageSources && (
+            <button
               onClick={() => setShowSources((v) => !v)}
               style={{ fontFamily: 'inherit', fontSize: 13, fontWeight: 600, padding: '9px 16px', borderRadius: 9, background: '#fff', border: '1px solid var(--line)', color: 'var(--navy)', cursor: 'pointer' }}
             >
@@ -105,10 +134,42 @@ export function MediaMentions({
         </div>
       </div>
 
+      {/*
+        The queue refreshes itself while it is open, so an arrival during a meeting is
+        on screen by the end of it. Without this marker a new item would simply appear
+        in a list somebody had already read past, which is how a flagged story gets
+        missed.
+      */}
+      {store.newIds.length > 0 && (
+        <div
+          style={{
+            ...card,
+            marginBottom: 12,
+            padding: '10px 14px',
+            borderLeft: '3px solid #006B42',
+            display: 'flex',
+            gap: 12,
+            alignItems: 'center',
+            flexWrap: 'wrap',
+          }}
+        >
+          <span style={{ fontSize: 13, fontWeight: 700, color: '#006B42' }}>
+            {store.newIds.length} new since you opened this
+          </span>
+          <button
+            onClick={store.markSeen}
+            style={{ fontFamily: 'inherit', fontSize: 12, fontWeight: 600, padding: '5px 12px', borderRadius: 8, background: '#fff', border: '1px solid var(--line)', color: 'var(--navy)', cursor: 'pointer' }}
+          >
+            Clear
+          </button>
+        </div>
+      )}
+
       {lastRun && (
         <div style={{ fontSize: 12.5, color: 'var(--muted)', marginBottom: 16 }}>
           Last checked {when(lastRun.startedAt)} — {lastRun.found} found, {lastRun.added} new, {lastRun.duplicates} already
           seen.
+          {store.live && store.checkedAt && <span> This screen updated {ago(store.checkedAt)}.</span>}
           {failedSources.length > 0 && (
             <span style={{ color: '#B7400E', fontWeight: 600 }}>
               {' '}
@@ -118,6 +179,7 @@ export function MediaMentions({
         </div>
       )}
 
+      {showAlerts && canManageSources && <AlertPanel pushToast={pushToast} />}
       {showSources && canManageSources && <SourcePanel store={store} />}
 
       {shown.length === 0 ? (
@@ -135,6 +197,7 @@ export function MediaMentions({
             mention={m}
             projects={projects}
             canReview={canReview}
+            isNew={newIds.has(m.id)}
             onReview={(status, category, projectCode) => void store.review(m.id, status, category, projectCode)}
           />
         ))
@@ -147,19 +210,37 @@ function MentionCard({
   mention,
   projects,
   canReview,
+  isNew,
   onReview,
 }: {
   mention: ReturnType<typeof useMentionsStore>['feed']['mentions'][number];
   projects: Project[];
   canReview: boolean;
+  isNew: boolean;
   onReview: (status: MentionStatus, category: MentionCategory | null, projectCode: string | null) => void;
 }) {
   const [category, setCategory] = useState<MentionCategory>((mention.category as MentionCategory) ?? 'socialInvestment');
   const [projectCode, setProjectCode] = useState(mention.projectCode ?? '');
 
+  const flagged = mention.flags.length > 0;
+
   return (
-    <div style={{ ...card, marginBottom: 12 }}>
+    <div
+      style={{
+        ...card,
+        marginBottom: 12,
+        // A flagged item is marked in the queue as well as in the alert, so someone who
+        // never saw the alert still sees why it mattered.
+        ...(flagged ? { borderLeft: '3px solid #EA5B1A' } : {}),
+      }}
+    >
       <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', marginBottom: 6 }}>
+        {isNew && <span style={{ ...pill, background: '#006B42', color: '#fff' }}>New</span>}
+        {mention.flags.map((flag) => (
+          <span key={flag} style={{ ...pill, background: '#FBE4D7', color: '#B7400E' }}>
+            {flag}
+          </span>
+        ))}
         <span style={{ ...pill, background: '#E0F0D5', color: '#006B42' }}>{mention.publisher}</span>
         <span style={{ fontSize: 12, color: 'var(--muted)' }}>{when(mention.publishedAt)}</span>
         <span style={{ fontSize: 12, color: 'var(--muted)' }}>
@@ -319,3 +400,192 @@ function SourcePanel({ store }: { store: ReturnType<typeof useMentionsStore> }) 
     </div>
   );
 }
+
+/**
+ * What is worth interrupting someone for, and where that interruption goes.
+ *
+ * Executive only, like the source list, and for a related reason: a rule decides when
+ * people are pulled out of what they are doing, and a channel URL decides where
+ * Seplat's coverage is posted.
+ *
+ * The panel is deliberately blunt about the two ways this feature fails quietly — a
+ * webhook that has stopped accepting messages, and a rule so broad that everything
+ * matches it and people stop reading the alerts.
+ */
+function AlertPanel({ pushToast }: { pushToast: (message: string, tone?: ToastTone) => void }) {
+  const alerts = useAlertsStore(pushToast);
+  const [ruleName, setRuleName] = useState('');
+  const [ruleTerms, setRuleTerms] = useState('');
+  const [channelName, setChannelName] = useState('');
+  const [channelKind, setChannelKind] = useState<AlertChannelKind>('teams');
+  const [channelUrl, setChannelUrl] = useState('');
+
+  if (!alerts.live) {
+    return (
+      <div style={{ ...card, marginBottom: 18 }}>
+        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--navy)', marginBottom: 4 }}>Alerts</div>
+        <div style={{ fontSize: 12.5, color: 'var(--muted)', lineHeight: 1.5 }}>
+          Alerts are sent by the server when it collects, so there is nothing to configure in this demo build. Connect
+          the API to set up a watchlist.
+        </div>
+      </div>
+    );
+  }
+
+  const submitRule = () => {
+    if (!ruleName.trim() || !ruleTerms.trim()) return;
+    void alerts.addRule(ruleName.trim(), ruleTerms.trim());
+    setRuleName('');
+    setRuleTerms('');
+  };
+
+  const submitChannel = () => {
+    if (!channelName.trim() || !channelUrl.trim()) return;
+    void alerts.addChannel(channelName.trim(), channelKind, channelUrl.trim());
+    setChannelName('');
+    setChannelUrl('');
+  };
+
+  return (
+    <div style={{ ...card, marginBottom: 18 }}>
+      <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--navy)', marginBottom: 4 }}>Alerts</div>
+      <div style={{ fontSize: 12.5, color: 'var(--muted)', marginBottom: 16, lineHeight: 1.5 }}>
+        A mention that matches a rule is posted to every channel below, once, when it is collected. Everything else
+        still arrives in the queue — rules decide what is urgent, not what is collected. Keep them narrow: a rule that
+        matches most coverage teaches people to ignore the alerts.
+      </div>
+
+      {/* ---- Rules ---- */}
+      <div style={{ fontSize: 12.5, fontWeight: 700, color: '#006B42', marginBottom: 6 }}>Watch for</div>
+      {alerts.config.rules.length === 0 && (
+        <div style={{ fontSize: 12.5, color: 'var(--muted)', paddingBottom: 8 }}>
+          No rules yet, so nothing is alerted on.
+        </div>
+      )}
+      {alerts.config.rules.map((rule) => (
+        <div key={rule.id} style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', padding: '8px 0', borderTop: '1px solid var(--line)' }}>
+          <span style={{ ...pill, background: rule.active ? '#FBE4D7' : '#eee', color: rule.active ? '#B7400E' : 'var(--muted)' }}>
+            {rule.name}
+          </span>
+          <span style={{ fontSize: 11.5, color: 'var(--muted)', flex: 1, wordBreak: 'break-word' }}>
+            {rule.terms.split(/[\n,]/).map((t) => t.trim()).filter(Boolean).join(' · ')}
+          </span>
+          <button
+            onClick={() => void alerts.setRuleActive(rule.id, !rule.active)}
+            style={smallBtn}
+          >
+            {rule.active ? 'Pause' : 'Resume'}
+          </button>
+          <button onClick={() => void alerts.removeRule(rule.id)} style={{ ...smallBtn, color: '#B7400E' }}>
+            Remove
+          </button>
+        </div>
+      ))}
+
+      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--line)' }}>
+        <input value={ruleName} onChange={(e) => setRuleName(e.target.value)} placeholder="Rule name, e.g. Community unrest" style={inputStyle} />
+        <input
+          value={ruleTerms}
+          onChange={(e) => setRuleTerms(e.target.value)}
+          placeholder="Terms, comma separated"
+          style={{ ...inputStyle, minWidth: 260 }}
+        />
+        <button onClick={submitRule} style={{ ...primaryBtn, padding: '8px 16px', fontSize: 12.5 }}>
+          Add rule
+        </button>
+      </div>
+      <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 8, lineHeight: 1.5 }}>
+        Matching ignores case and picks up endings, so <strong>spill</strong> also matches spills and spillage. It will
+        not match inside another word, so it will not fire on “boiling”.
+      </div>
+
+      {/* ---- Channels ---- */}
+      <div style={{ fontSize: 12.5, fontWeight: 700, color: '#006B42', marginTop: 22, marginBottom: 6 }}>Send to</div>
+      {alerts.config.rules.length > 0 && alerts.config.channels.length === 0 && (
+        <div style={{ fontSize: 12.5, color: '#B7400E', fontWeight: 600, paddingBottom: 8 }}>
+          Rules are set but there is nowhere to send an alert. Matches will be marked in the queue and nobody will be
+          told.
+        </div>
+      )}
+      {alerts.config.channels.map((channel) => (
+        <div key={channel.id} style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', padding: '8px 0', borderTop: '1px solid var(--line)' }}>
+          <span style={{ ...pill, background: '#E0F0D5', color: '#006B42' }}>
+            {CHANNEL_KIND_LABELS[channel.kind] ?? channel.kind}
+          </span>
+          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--navy)' }}>{channel.name}</span>
+          <span style={{ fontSize: 11.5, color: 'var(--muted)' }}>{channel.urlMasked}</span>
+
+          {/* A webhook that has quietly stopped working is the main way this feature
+              fails, so its last outcome is on the screen rather than in a log. */}
+          {channel.lastStatus === 'failed' ? (
+            <span style={{ fontSize: 11.5, color: '#B7400E', fontWeight: 600, flex: 1 }}>
+              Last attempt failed — {channel.lastError ?? 'no reason given'}
+            </span>
+          ) : (
+            <span style={{ fontSize: 11.5, color: 'var(--muted)', flex: 1 }}>
+              {channel.lastSentAt ? `Last delivered ${when(channel.lastSentAt)}` : 'Not used yet'}
+            </span>
+          )}
+
+          <button
+            onClick={() => void alerts.testChannel(channel.id)}
+            disabled={alerts.testing === channel.id}
+            style={{ ...smallBtn, opacity: alerts.testing === channel.id ? 0.6 : 1 }}
+          >
+            {alerts.testing === channel.id ? 'Sending…' : 'Send a test'}
+          </button>
+          <button onClick={() => void alerts.removeChannel(channel.id)} style={{ ...smallBtn, color: '#B7400E' }}>
+            Remove
+          </button>
+        </div>
+      ))}
+
+      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--line)' }}>
+        <input value={channelName} onChange={(e) => setChannelName(e.target.value)} placeholder="Channel name" style={inputStyle} />
+        <select
+          value={channelKind}
+          onChange={(e) => setChannelKind(e.target.value as AlertChannelKind)}
+          style={selectStyle}
+          aria-label="Channel type"
+        >
+          {Object.entries(CHANNEL_KIND_LABELS).map(([value, label]) => (
+            <option key={value} value={value}>
+              {label}
+            </option>
+          ))}
+        </select>
+        <input
+          value={channelUrl}
+          onChange={(e) => setChannelUrl(e.target.value)}
+          placeholder="Webhook URL (https)"
+          style={{ ...inputStyle, minWidth: 260 }}
+        />
+        <button onClick={submitChannel} style={{ ...primaryBtn, padding: '8px 16px', fontSize: 12.5 }}>
+          Add channel
+        </button>
+      </div>
+      <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 8, lineHeight: 1.5 }}>
+        {CHANNEL_KIND_HINTS[channelKind]} The URL is a credential — anyone holding it can post into that channel — so it
+        is stored on the server and never shown again here.
+        {!alerts.config.appUrlConfigured && (
+          <>
+            {' '}
+            Alerts will carry no link back to SPIMS until <strong>PUBLIC_APP_URL</strong> is set on the server.
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+const smallBtn: React.CSSProperties = {
+  fontFamily: 'inherit',
+  fontSize: 12,
+  fontWeight: 600,
+  padding: '6px 12px',
+  borderRadius: 8,
+  background: '#fff',
+  border: '1px solid var(--line)',
+  color: 'var(--navy)',
+  cursor: 'pointer',
+};
