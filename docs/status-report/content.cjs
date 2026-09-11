@@ -18,7 +18,7 @@ module.exports = {
     author: 'Teasoo Consulting',
     version: '1.7',
     date: '11 September 2026',
-    commit: '9ce26d7',
+    commit: 'b6ca64a',
   },
 
   sections: [
@@ -73,7 +73,7 @@ module.exports = {
           rows: [
             ['Access and identity', 'Sign-in screen with four role-based accounts, replacing the earlier role-switcher. Passwords hashed with bcrypt. Sessions carried in a signed, HttpOnly cookie.'],
             ['Database', 'PostgreSQL with 17 tables covering programmes, impact chains, communities, stakeholders, tasks, approvals, targets, spend, reports and uploads. Schema changes are versioned migrations, applied automatically before the application starts.'],
-            ['Application interface', '32 API endpoints, all authenticated. Written as hosting-agnostic handlers so the same logic runs self-hosted or serverless without a second implementation.'],
+            ['Application interface', '41 API endpoints, all authenticated. Written as hosting-agnostic handlers called by a single adapter, so managed hosting runs the same application as a Seplat-hosted install rather than a second implementation of it.'],
             ['Reach and impact', 'Reach recorded separately from impact for every programme, with the interaction channels, the conversion between them, and a written explanation of what separates the two for that specific programme.'],
             ['Programme custom fields', 'Recurring stakeholder questions answered on the programme’s own page, each with a source and a last-updated stamp, and carried into that programme’s export.'],
             ['Reporting', 'Report structure mirrors Seplat’s published 2025 Social Performance Report, and now its visual language too — the typeface, colours, chapter tabs and the way figures are set were taken from that document. Exports carry the compiled content, the selected programmes and the financial year, in PDF, PowerPoint, Excel and Word.'],
