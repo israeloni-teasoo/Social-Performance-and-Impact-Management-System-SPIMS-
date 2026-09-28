@@ -160,6 +160,25 @@ same Express app. Things that bite on the serverless side:
   wrappers route the rejection to the error handler at the foot of the file, which
   always replies JSON and keeps the detail in the log.
 
+## Upload templates
+
+`frontend/src/data/uploadTemplates.ts` is the single definition: each column's heading,
+what to put in it, and an example, together. The explanation is written into the
+downloaded file as `#` lines, which the parser strips before reading the header.
+
+- **No acronyms or sector shorthand in a heading.** `pwd` read as "password", `lga` and
+  `ngo` were abbreviations, `endline` was monitoring-and-evaluation jargon. Output,
+  outcome and impact are asked as questions instead — what was delivered, what changed,
+  who received it.
+- **One idea, one heading, across every template.** People reached had two names and the
+  project identifier had two, with different example formats, so rows uploaded from one
+  template would not have linked to the project created by another.
+- Fixed vocabularies (activity types, pillars) live in `data/vocabulary.ts` so a template
+  can state the accepted values instead of copying them and drifting.
+- `bulkUpload.ts` reads spend columns by name. Renaming one without updating the handler
+  silently skips every row — `npm run smoke:templates` asserts they match, and also
+  round-trips each template through the real parser and enforces the wording rules.
+
 ## Media monitoring
 
 Phase one only: free press and web sources (GDELT, news RSS, Google Alerts). Social

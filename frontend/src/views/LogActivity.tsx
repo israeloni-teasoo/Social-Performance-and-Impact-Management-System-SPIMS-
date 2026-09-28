@@ -1,17 +1,8 @@
 import { useRef, useState } from 'react';
 import { Icon } from '../components/Icon';
+import { ACTIVITY_TYPES } from '../data/vocabulary';
 import { formField, h1, input, primaryBtn, subtitle } from '../ui';
 import type { ToastTone } from '../useToastQueue';
-
-const ACTIVITY_TYPES = [
-  'Training / workshop',
-  'Community meeting',
-  'Site visit',
-  'Public consultation',
-  'Awareness campaign',
-  'M&E monitoring visit',
-  'Distribution / handover',
-];
 
 export function LogActivity({ goMyTasks, pushToast }: { goMyTasks: () => void; pushToast: (message: string, tone?: ToastTone) => void }) {
   const [activityType, setActivityType] = useState('Training / workshop');

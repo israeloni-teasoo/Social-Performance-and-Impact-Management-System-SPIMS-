@@ -1,10 +1,10 @@
+import { PILLARS } from '../data/vocabulary';
 import { ReachVsImpactTip } from '../components/ReachPanel';
 import { analysePortfolio, formatCount } from '../analytics/metrics';
 import { useMemo, useState } from 'react';
 import { h1, input, PILLAR_COLORS, STATUS_COLORS, subtitle } from '../ui';
 import type { Community, Project, ProjectImpact } from '../types';
 
-const PILLARS = ['Education', 'Health', 'Infrastructure', 'Economic Emp.'];
 const STATUSES: Project['status'][] = ['On track', 'At risk', 'Delayed'];
 
 function parseBudgetMillions(budget: string): number {

@@ -1,0 +1,77 @@
+# Applies the database schema to the live database, from the browser.
+#
+# Migrations are deliberately not part of the Vercel build: a build-time migration lets
+# every preview deployment alter the production schema, and couples deploying to the
+# database being reachable. But taking them out of the build left them needing a terminal,
+# which is a poor answer for the person who actually administers this system.
+#
+# So they run here instead. Actions tab -> Apply database migrations -> Run workflow.
+# The connection string lives in GitHub's encrypted secrets, not on a laptop and not in
+# this repository.
+#
+# It only ever runs when somebody presses the button. A migration that fires by itself on
+# every push is how people lose data they meant to keep.
+name: Apply database migrations
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "apply" to confirm you want to change the live database schema'
+        required: true
+        default: ''
+
+concurrency:
+  # Two migrations running at once against one database is not a race worth having.
+  group: migrations
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check the confirmation
+        if: inputs.confirm != 'apply'
+        run: |
+          echo "::error::Type 'apply' in the confirmation box to run this. Nothing was changed."
+          exit 1
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Check the secret is set
+        env:
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
+        run: |
+          if [ -z "$DIRECT_URL" ]; then
+            echo "::error::The DIRECT_URL secret is not set. Add it under Settings -> Secrets and variables -> Actions."
+            exit 1
+          fi
+
+      - name: Show what would be applied
+        env:
+          # Both point at the direct connection. Migrations alter the schema, which cannot
+          # be done through a transaction pooler, so the pooled URL is wrong here even
+          # though it is the right one for the running application.
+          DATABASE_URL: ${{ secrets.DIRECT_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
+        run: npx prisma migrate status || true
+
+      - name: Apply migrations
+        env:
+          DATABASE_URL: ${{ secrets.DIRECT_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
+        run: npx prisma migrate deploy
+
+      - name: Confirm the schema is in step
+        env:
+          DATABASE_URL: ${{ secrets.DIRECT_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
+        run: npx prisma migrate status

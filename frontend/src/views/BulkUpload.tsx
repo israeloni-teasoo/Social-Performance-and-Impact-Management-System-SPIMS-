@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { api } from '../api';
 import { isApiAvailable } from '../apiMode';
 import { InfoTip } from '../components/Tooltip';
-import { BULK_UPLOAD_DATA_TYPES, UPLOAD_TEMPLATES } from '../data/uploadTemplates';
+import { BULK_UPLOAD_DATA_TYPES, TEMPLATE_COMMENT, UPLOAD_TEMPLATES, columnsOf, exampleOf, guidanceRows } from '../data/uploadTemplates';
 import { buildCsvFromRows, downloadBlob } from '../reportExport';
 import { formField, h1, input, label, primaryBtn, secondaryBtn, sectionCardTitle, subtitle } from '../ui';
 import type { BulkUploadDataType, UploadTemplate } from '../data/uploadTemplates';
@@ -18,16 +18,28 @@ interface UploadRecord {
   status: string;
 }
 
+/**
+ * The template file: headings, one filled-in example, then what each column wants.
+ *
+ * The explanations go into the file rather than only onto this screen because the person
+ * filling it in is usually not the person who downloaded it, and by then this screen is
+ * not in front of them. The upload ignores the lines, so they can be left in place.
+ */
 function downloadTemplate(t: UploadTemplate) {
-  const csv = buildCsvFromRows([t.columns, t.example]);
+  const csv = buildCsvFromRows([columnsOf(t), exampleOf(t), ...guidanceRows(t)]);
   downloadBlob(new Blob([csv], { type: 'text/csv' }), t.filename);
 }
 
 /** Demo mode: validate the header against the template in the browser, since
  *  there is no server to parse rows into records. Mirrors the server's check. */
 function validateLocally(csvText: string, dataType: BulkUploadDataType) {
-  const lines = csvText.split(/\r?\n/).filter((l) => l.trim() !== '');
-  const expected = UPLOAD_TEMPLATES[dataType].columns;
+  // Mirrors the server, including skipping the template's own "#" instruction lines —
+  // otherwise demo mode would reject a file the real upload accepts.
+  const lines = csvText
+    .split(/\r?\n/)
+    .filter((l) => l.trim() !== '')
+    .filter((l) => !l.trim().replace(/^"/, '').startsWith(TEMPLATE_COMMENT));
+  const expected = columnsOf(UPLOAD_TEMPLATES[dataType]);
   const header = (lines[0] ?? '').split(',').map((c) => c.trim().replace(/^"|"$/g, ''));
   const ok = header.length === expected.length && expected.every((c, i) => c.toLowerCase() === header[i]?.toLowerCase());
   if (!ok) {
@@ -153,8 +165,26 @@ export function BulkUpload({ projects, pushToast }: { projects: Project[]; pushT
               >
                 <div style={{ flex: 1, minWidth: 260 }}>
                   <div style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--navy)', marginBottom: 4 }}>{t}</div>
-                  <div style={{ fontSize: 11.5, color: 'var(--muted)', fontFamily: 'monospace', marginBottom: 4, wordBreak: 'break-word' }}>{tpl.columns.join(', ')}</div>
-                  <div style={{ fontSize: 12, color: 'var(--muted)' }}>{tpl.note}</div>
+                  <div style={{ fontSize: 11.5, color: 'var(--muted)', fontFamily: 'monospace', marginBottom: 6, wordBreak: 'break-word' }}>
+                    {columnsOf(tpl).join(', ')}
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 6 }}>{tpl.note}</div>
+
+                  {/* The same wording that goes into the file, for anyone deciding here
+                      whether a column means what they think it means. */}
+                  <details>
+                    <summary style={{ fontSize: 12, color: '#006B42', fontWeight: 600, cursor: 'pointer' }}>
+                      What each column means
+                    </summary>
+                    <dl style={{ margin: '8px 0 0', fontSize: 12, lineHeight: 1.5 }}>
+                      {tpl.fields.map((f) => (
+                        <div key={f.name} style={{ marginBottom: 6 }}>
+                          <dt style={{ fontFamily: 'monospace', fontSize: 11.5, color: 'var(--navy)', fontWeight: 700 }}>{f.name}</dt>
+                          <dd style={{ margin: '1px 0 0', color: 'var(--muted)' }}>{f.meaning}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  </details>
                 </div>
                 <button onClick={() => downloadTemplate(tpl)} style={{ ...secondaryBtn, flexShrink: 0 }}>
                   Download →

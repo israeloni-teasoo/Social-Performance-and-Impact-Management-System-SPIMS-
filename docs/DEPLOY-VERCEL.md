@@ -87,8 +87,22 @@ leaving a Prisma client generated against the previous schema.
 
 ### Apply migrations
 
-Migrations are **not** run by the build, and are applied deliberately, from a machine
-with the direct connection string:
+Migrations are **not** run by the build. They are applied deliberately, and the easiest
+way needs no terminal and no local setup:
+
+1. In GitHub: **Settings → Secrets and variables → Actions → New repository secret**.
+   Name it `DIRECT_URL` and paste the **direct** connection string (port `5432`) from §1.
+2. Go to the **Actions** tab → **Apply database migrations** → **Run workflow**.
+3. Type `apply` in the confirmation box and run it.
+
+It prints which migrations are outstanding, applies them, and prints the schema state
+afterwards. It only runs when somebody presses the button — a migration that fires on
+every push is how people lose data they meant to keep.
+
+Rerun it after any release that adds tables or columns. It is safe to run when there is
+nothing to apply.
+
+The equivalent from a terminal, if you have one set up:
 
 ```bash
 DIRECT_URL="<direct connection>" DATABASE_URL="<direct connection>" npx prisma migrate deploy
@@ -100,6 +114,10 @@ live schema without anyone deciding it should. And it coupled deployment to data
 reachability: a transient connection failure — or simply a missing `DIRECT_URL` — failed
 the whole build with a Prisma schema-validation error that says nothing about the
 deployment being otherwise sound.
+
+**Both URLs point at the direct connection for this step.** Migrations alter the schema,
+which cannot be done through a transaction pooler, so the pooled URL is wrong here even
+though it is the correct one for the running application.
 
 Order matters when a release includes a schema change: apply the migration, then deploy.
 Run `npm run check:routes` before deploying, which is the guard described in §6.

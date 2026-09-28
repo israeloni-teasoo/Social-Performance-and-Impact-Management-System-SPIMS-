@@ -1,8 +1,8 @@
+import { PILLARS } from '../data/vocabulary';
 import { useState } from 'react';
 import { h1, PILLAR_COLORS, pill, STATUS_COLORS, tableHeaderRow, tableRow } from '../ui';
 import type { Project } from '../types';
 
-const PILLARS = ['Education', 'Health', 'Infrastructure', 'Economic Emp.'];
 
 export function ProjectPortfolio({ projects, onOpen }: { projects: Project[]; onOpen: (id: string) => void }) {
   const [pillarFilter, setPillarFilter] = useState<string | null>(null);
