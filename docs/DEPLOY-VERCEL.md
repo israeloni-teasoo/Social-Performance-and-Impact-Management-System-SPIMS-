@@ -34,17 +34,30 @@ Version 1.1 · 11 September 2026
 Create the database and take **two** connection strings from it. This is the step that
 is easy to get wrong and expensive to diagnose.
 
-| Variable | Which string | Why |
-|---|---|---|
-| `DATABASE_URL` | The **pooled** connection — Supabase port `6543`, or a Neon `-pooler` host — with `?pgbouncer=true&connection_limit=1` appended | Serverless functions come and go constantly. Without a pooler, each one opens its own connections and the database runs out of them under quite ordinary load. The failure looks like an outage, not like a configuration mistake. |
-| `DIRECT_URL` | The **direct** connection, port `5432` | Migrations alter the schema, which cannot be done through a transaction pooler. Prisma uses this for migrations only. |
+In Supabase: the **Connect** button in the top bar → **ORMs** tab → **Prisma**. That
+panel gives both strings already formatted. Supabase offers three, and which two you pick
+matters:
 
-Example:
+| Variable | Which of Supabase's three | Why |
+|---|---|---|
+| `DATABASE_URL` | **Transaction pooler**, port `6543`, with `?pgbouncer=true&connection_limit=1` appended | Serverless functions come and go constantly. Without a pooler each one opens its own connections and the database runs out under quite ordinary load — a failure that looks like an outage rather than a configuration mistake. |
+| `DIRECT_URL` | **Session pooler**, port `5432` | Migrations alter the schema, which a *transaction* pooler cannot do — it does not support the prepared statements Prisma Migrate uses. Session mode holds a real session, so it can. |
+
+Example (note both are `pooler.supabase.com`; only the port differs):
 
 ```
 DATABASE_URL="postgresql://postgres.abc:PASSWORD@aws-0-eu-west-1.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1"
 DIRECT_URL="postgresql://postgres.abc:PASSWORD@aws-0-eu-west-1.pooler.supabase.com:5432/postgres"
 ```
+
+**Do not use the option Supabase labels "Direct connection"** (`db.<project>.supabase.co`)
+even though its port is also `5432` and the name sounds like what `DIRECT_URL` wants. On
+the free and Pro plans that host answers over IPv6 only unless you buy the IPv4 add-on,
+and GitHub Actions is IPv4-only — so the migration job in §3 would fail to resolve it.
+The session pooler is IPv4 on every plan and does the same job here.
+
+Both strings carry your database password. Treat them as credentials: they belong in
+Vercel's environment variables and GitHub's encrypted secrets, nowhere else.
 
 ---
 
@@ -91,7 +104,8 @@ Migrations are **not** run by the build. They are applied deliberately, and the 
 way needs no terminal and no local setup:
 
 1. In GitHub: **Settings → Secrets and variables → Actions → New repository secret**.
-   Name it `DIRECT_URL` and paste the **direct** connection string (port `5432`) from §1.
+   Name it `DIRECT_URL` and paste the **session pooler** string (port `5432`) from §1 —
+   the same value you gave Vercel for `DIRECT_URL`.
 2. Go to the **Actions** tab → **Apply database migrations** → **Run workflow**.
 3. Type `apply` in the confirmation box and run it.
 
@@ -115,9 +129,9 @@ reachability: a transient connection failure — or simply a missing `DIRECT_URL
 the whole build with a Prisma schema-validation error that says nothing about the
 deployment being otherwise sound.
 
-**Both URLs point at the direct connection for this step.** Migrations alter the schema,
-which cannot be done through a transaction pooler, so the pooled URL is wrong here even
-though it is the correct one for the running application.
+**Both URLs point at the session pooler for this step.** Migrations cannot run through a
+transaction pooler, so the port-`6543` URL is wrong here even though it is the correct one
+for the running application.
 
 Order matters when a release includes a schema change: apply the migration, then deploy.
 Run `npm run check:routes` before deploying, which is the guard described in §6.

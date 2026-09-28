@@ -66,17 +66,23 @@ The target setup is **Vercel** (hosts the frontend build and the `api/` function
 
 **Supabase is the recommended database.** It is plain Postgres, so the schema and migrations apply unchanged, and unlike Neon it can also be self-hosted via Docker — which matters because Seplat's stated model is to host on their own infrastructure. Two Supabase-specific details:
 
-- `DATABASE_URL` must point at the **connection pooler** (port 6543, with `?pgbouncer=true`), since serverless functions open many short-lived connections.
-- `DIRECT_URL` must point at the **direct connection** (port 5432); Prisma needs it for `migrate deploy`, which cannot run through the pooler.
+Supabase offers three connection strings (**Connect** → **ORMs** → **Prisma** gives you the two you need, already formatted):
+
+- `DATABASE_URL` — the **transaction pooler** (port 6543, with `?pgbouncer=true&connection_limit=1`), since serverless functions open many short-lived connections.
+- `DIRECT_URL` — the **session pooler** (port 5432 on the same `pooler.supabase.com` host). Prisma needs it for `migrate deploy`, which cannot run through a transaction pooler.
+- Not the option labelled **"Direct connection"** (`db.<project>.supabase.co:5432`), despite the name matching the variable: it answers over IPv6 only without the paid IPv4 add-on, so GitHub Actions and most CI cannot reach it.
 
 1. **Database**: create a project at [supabase.com](https://supabase.com) (or [neon.tech](https://neon.tech)), copy its connection string(s).
 2. **Vercel**: import this repo as a new Vercel project and leave **Root Directory** at the repo root — pointing it at `frontend/` makes Vercel ignore `vercel.json` and skip `api/` entirely, giving you an interface with no API behind it. `vercel.json` handles the rest: `frontend/dist` for the build output, and the single catch-all in `api/` for the whole API. Note that Vercel's Hobby tier excludes commercial use and caps cron at one run per day, so a client deployment wants Pro.
 3. **Environment variables** (Vercel project → Settings → Environment Variables):
-   - `DATABASE_URL` — the Neon connection string from step 1.
+   - `DATABASE_URL` — the transaction-pooler string from step 1.
+   - `DIRECT_URL` — the session-pooler string from step 1. Required: without it Prisma refuses to load the schema at all.
    - `JWT_SECRET` — a random 64-char hex string (`node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`).
    - `ANTHROPIC_API_KEY` — from [console.anthropic.com](https://console.anthropic.com) → API Keys (a developer/billing account, separate from a claude.ai login — add a payment method under Billing first). Omit this and the app still works; the Claude preview button just returns a clear "not configured" message instead of crashing.
-4. **Apply migrations, then deploy.** Run `DATABASE_URL="<direct-url>" DIRECT_URL="<direct-url>" npx prisma migrate deploy` from your machine. The build deliberately does not do this: it would let every preview deployment migrate production, and a missing `DIRECT_URL` would fail the build rather than the migration.
-5. **Seed the production database once**, from your machine, pointed at the Neon connection string: `DATABASE_URL="<neon-url>" npm run prisma:seed`.
+4. **Apply migrations, then deploy.** Easiest route needs no terminal: add the session-pooler string as a GitHub secret named `DIRECT_URL`, then **Actions** → *Apply database migrations* → **Run workflow**. From a terminal instead: `DATABASE_URL="<session-pooler-url>" DIRECT_URL="<session-pooler-url>" npx prisma migrate deploy`. The build deliberately does not do this: it would let every preview deployment migrate production, and a missing `DIRECT_URL` would fail the build rather than the migration.
+5. **Create the first account**: `DATABASE_URL="<session-pooler-url>" npm run create:user`. Make it an `exec`; that role can create everyone else from Settings → User accounts.
+
+   **Do not run `prisma:seed` against a production database.** It loads the demo dataset, and the demo account passwords are in this repository and therefore public. Seeding is for development and for demonstrations only.
 
 ## What's implemented
 
