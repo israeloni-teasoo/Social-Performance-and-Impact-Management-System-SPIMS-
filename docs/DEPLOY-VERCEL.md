@@ -50,6 +50,16 @@ DATABASE_URL="postgresql://postgres.abc:PASSWORD@aws-0-eu-west-1.pooler.supabase
 DIRECT_URL="postgresql://postgres.abc:PASSWORD@aws-0-eu-west-1.pooler.supabase.com:5432/postgres"
 ```
 
+**The username carries your project reference.** On the shared pooler it is
+`postgres.<project-ref>`, not plain `postgres` — the pooler works out which project you
+mean from it. A string with a bare `postgres` username fails with
+`P1000: Authentication failed ... credentials for "postgres" are not valid`, which reads
+as a wrong password and is not one. This is what happens if you edit a direct-connection
+string to point at the pooler instead of copying the pooler string.
+
+**Percent-encode special characters in the password.** An `@` in the password splits the
+URL in the wrong place; write it as `%40`. Same for `:` `/` `?` `#` `&`.
+
 **Do not use the option Supabase labels "Direct connection"** (`db.<project>.supabase.co`)
 even though its port is also `5432` and the name sounds like what `DIRECT_URL` wants. On
 the free and Pro plans that host answers over IPv6 only unless you buy the IPv4 add-on,
@@ -109,9 +119,20 @@ way needs no terminal and no local setup:
 2. Go to the **Actions** tab → **Apply database migrations** → **Run workflow**.
 3. Type `apply` in the confirmation box and run it.
 
-It prints which migrations are outstanding, applies them, and prints the schema state
-afterwards. It only runs when somebody presses the button — a migration that fires on
-every push is how people lose data they meant to keep.
+It checks the connection string first and says which part is wrong if it is — a bad
+username, a placeholder password, an unencoded character, the wrong pooler port — rather
+than passing the problem to Prisma, whose message for all of these is an authentication
+failure. It prints the host, port and username; never the password. Then it prints which
+migrations are outstanding, applies them, and prints the schema state afterwards.
+
+It only runs when somebody presses the button — a migration that fires on every push is
+how people lose data they meant to keep.
+
+To check a string without running anything, including the `DATABASE_URL` you gave Vercel:
+
+```bash
+DATABASE_URL="<the string>" node scripts/check-db-url.mjs DATABASE_URL runtime
+```
 
 Rerun it after any release that adds tables or columns. It is safe to run when there is
 nothing to apply.

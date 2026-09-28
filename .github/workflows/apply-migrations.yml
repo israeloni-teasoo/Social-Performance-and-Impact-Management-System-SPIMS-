@@ -43,10 +43,9 @@ jobs:
           node-version: 22
           cache: npm
 
-      - name: Install
-        run: npm ci
-
-      - name: Check the secret is set
+      # Before the install, because it needs nothing but Node and a bad secret should
+      # fail in seconds rather than after a dependency install.
+      - name: Check the connection string
         env:
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
         run: |
@@ -54,6 +53,14 @@ jobs:
             echo "::error::The DIRECT_URL secret is not set. Add it under Settings -> Secrets and variables -> Actions."
             exit 1
           fi
+          # Prisma's own failure for a malformed pooler string is "P1000: Authentication
+          # failed ... credentials for postgres are not valid", which reads as a wrong
+          # password and is usually a wrong username. This says which part is wrong.
+          # It prints the host, port and user, never the password.
+          node scripts/check-db-url.mjs DIRECT_URL migrate
+
+      - name: Install
+        run: npm ci
 
       - name: Show what would be applied
         env:
