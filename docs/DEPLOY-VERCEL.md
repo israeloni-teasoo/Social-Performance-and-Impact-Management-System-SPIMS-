@@ -159,15 +159,28 @@ Run `npm run check:routes` before deploying, which is the guard described in §6
 
 ### Create the first account
 
-There is no self-registration, so the first account is created from a machine with the
-database credentials to hand:
+There is no self-registration — an internal system anyone who finds the URL can enrol
+themselves in is not one to put real programme data in — so the first account is made out
+of band. From the browser:
+
+1. Add a second GitHub secret, `FIRST_ADMIN_PASSWORD`, at least 12 characters.
+2. **Actions → Create a sign-in account → Run workflow.** Give your email, your name, and
+   the role `exec`.
+3. Sign in to the live deployment, change the password under **Settings → User accounts**,
+   then **delete the `FIRST_ADMIN_PASSWORD` secret**.
+
+The password is a secret rather than a workflow input on purpose: inputs are recorded in
+the run and readable by anyone with access to the repository, while secrets are masked in
+the log.
+
+You only need this once. An `exec` can create everyone else from **Settings → User
+accounts**, which is the normal route.
+
+From a terminal instead:
 
 ```bash
-DATABASE_URL="<direct connection>" npm run create:user
+DATABASE_URL="<session pooler>" npm run create:user -- --email you@seplat.com --name "Your Name" --role exec
 ```
-
-It prompts for name, email, role and password. Make it an `exec`; that role can then
-create everyone else from **Settings → User accounts**.
 
 **Do not seed the demo dataset into a production database.** The demo account passwords
 are in the repository and therefore public.

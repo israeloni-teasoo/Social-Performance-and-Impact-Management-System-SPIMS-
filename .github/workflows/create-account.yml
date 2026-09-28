@@ -1,0 +1,96 @@
+# Creates a sign-in account on the live database, from the browser.
+#
+# There is no self-registration — an internal system that lets anyone who finds the URL
+# create themselves an account is not one you put real programme data in — so the first
+# account has to be made out of band. This is that, without needing a terminal.
+#
+# Actions tab -> Create a sign-in account -> Run workflow.
+#
+# The password is NOT a workflow input. Inputs are recorded in the run and visible to
+# anyone who can read the repository; secrets are masked in logs. So it comes from the
+# FIRST_ADMIN_PASSWORD secret, which you should delete once you have signed in and
+# changed it under Settings -> User accounts.
+name: Create a sign-in account
+
+on:
+  workflow_dispatch:
+    inputs:
+      email:
+        description: 'Email address to sign in with'
+        required: true
+      name:
+        description: 'Full name, as it should appear in the interface'
+        required: true
+      role:
+        description: 'Role'
+        required: true
+        default: exec
+        type: choice
+        options:
+          - exec
+          - manager
+          - field
+          - relations
+
+concurrency:
+  group: account-creation
+  cancel-in-progress: false
+
+jobs:
+  create:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Check the connection string and the password secret
+        env:
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
+          FIRST_ADMIN_PASSWORD: ${{ secrets.FIRST_ADMIN_PASSWORD }}
+        run: |
+          if [ -z "$DIRECT_URL" ]; then
+            echo "::error::The DIRECT_URL secret is not set. Add it under Settings -> Secrets and variables -> Actions."
+            exit 1
+          fi
+          if [ -z "$FIRST_ADMIN_PASSWORD" ]; then
+            echo "::error::The FIRST_ADMIN_PASSWORD secret is not set. Add it, run this, then delete it again."
+            exit 1
+          fi
+          # The script enforces this too, but failing here costs three seconds instead of
+          # an install, and says so before anything touches the database.
+          if [ "${#FIRST_ADMIN_PASSWORD}" -lt 12 ]; then
+            echo "::error::FIRST_ADMIN_PASSWORD must be at least 12 characters."
+            exit 1
+          fi
+          node scripts/check-db-url.mjs DIRECT_URL migrate
+
+      - name: Install
+        run: npm ci
+
+      - name: Create the account
+        env:
+          # A single insert, so the session pooler is fine for both.
+          DATABASE_URL: ${{ secrets.DIRECT_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
+          # Read by prisma/createUser.ts. Never passed as an argument, so it stays out of
+          # the process list as well as out of the log.
+          SPIMS_NEW_USER_PASSWORD: ${{ secrets.FIRST_ADMIN_PASSWORD }}
+          # Through the environment rather than interpolated into the command. A value
+          # substituted directly into `run:` is pasted in as shell source before the shell
+          # sees it, so a name containing a quote or a backtick would execute.
+          NEW_EMAIL: ${{ inputs.email }}
+          NEW_NAME: ${{ inputs.name }}
+          NEW_ROLE: ${{ inputs.role }}
+        run: npm run create:user -- --email "$NEW_EMAIL" --name "$NEW_NAME" --role "$NEW_ROLE"
+
+      - name: What to do next
+        run: |
+          echo "Account created. Now:"
+          echo "  1. Sign in to the live deployment with that email and the password you set."
+          echo "  2. Change the password under Settings -> User accounts."
+          echo "  3. Delete the FIRST_ADMIN_PASSWORD secret — it has done its job."
+          echo "  4. Create everyone else from Settings -> User accounts. This workflow is only needed once."
