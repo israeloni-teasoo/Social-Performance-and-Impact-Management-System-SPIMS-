@@ -4,7 +4,16 @@ An implementation of the SPIMS platform designed for Teasoo Consulting / Seplat 
 
 SPIMS moves social-investment reporting from a spend register to an output → outcome → impact chain, with one dataset that produces both a Nigerian local-compliance report (NCDMB/PIA/NUPRC) and a global ESG report (GRI/IFRS/SDG). It has four personas — **Executive**, **Project Manager**, **Field Officer**, and **Community Relations** — each with their own workspace. The sign-in screen lists a demo account for each persona.
 
-**Live demo**: `https://<owner>.github.io/<repo>/` via GitHub Pages. Pages is a static host with no API, so the app detects that and runs in **demo mode** — it signs in against the bundled demo accounts, reads the sample dataset, and saves changes to the viewer's browser only. A "Demo mode" pill in the topbar makes this unambiguous during a client demo. Claude report generation is the one feature that genuinely needs a server and says so.
+**There are two deployments of this interface and they look identical. Check which one you are on before entering anything.**
+
+| | URL | What it is |
+|---|---|---|
+| **Live** | your Vercel deployment | Real database. Data is saved. Media collection works. |
+| **Demo** | `https://<owner>.github.io/<repo>/` | Static host, no server. Sample data, nothing saved. |
+
+GitHub Pages is a static host with no API, so the app detects that and runs in **demo mode** — it signs in against the bundled demo accounts, reads the sample dataset, and saves changes to the viewer's browser only. A dark red band across the top says so on every screen, including the sign-in page, because the two are otherwise indistinguishable by eye and the failure is silent: the demo build accepts your work and discards it.
+
+Anything that genuinely needs a server — collecting media mentions, Claude report generation — says so rather than pretending.
 
 ## Stack
 

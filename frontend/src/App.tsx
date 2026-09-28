@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { CSSProperties } from 'react';
+import { DemoBanner } from './components/DemoBanner';
 import { Sidebar } from './components/Sidebar';
 import { ToastStack } from './components/ToastStack';
 import { Topbar } from './components/Topbar';
@@ -54,7 +55,15 @@ export default function App() {
   const { user, loading, demoMode, login, logout } = useAuth();
 
   if (loading) return <div style={splash('var(--muted)')}>Loading SPIMS…</div>;
-  if (!user) return <Login onLogin={login} />;
+  // Also before sign-in: someone opening the wrong deployment should find out before
+  // they spend an afternoon entering data into it, not after.
+  if (!user)
+    return (
+      <>
+        {demoMode && <DemoBanner />}
+        <Login onLogin={login} />
+      </>
+    );
 
   // Keyed on the user so signing in as someone else remounts with their own data and
   // landing view, rather than carrying the previous session's state across.
@@ -130,6 +139,9 @@ function SignedInApp({ user, demoMode, onLogout }: { user: AuthUser; demoMode: b
       />
 
       <div className="spims-main-col">
+        {/* Above the top bar, not inside it: the point is that it cannot be mistaken for
+            one more chip among the status chips. */}
+        {demoMode && <DemoBanner />}
         <Topbar
           orgName={settings.orgName}
           crumb={CRUMBS[view]}
