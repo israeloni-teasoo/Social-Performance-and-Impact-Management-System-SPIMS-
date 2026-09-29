@@ -1,4 +1,4 @@
-import { prisma } from './db';
+import { prisma } from './db.js';
 import type { User } from '@prisma/client';
 
 /** Loads the authenticated user for handlers that need to attribute a mutation

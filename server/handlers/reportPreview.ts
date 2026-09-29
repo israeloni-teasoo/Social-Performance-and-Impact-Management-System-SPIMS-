@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
-import type { HandlerResult } from '../lib/types';
+import type { HandlerResult } from '../lib/types.js';
 import type { User } from '@prisma/client';
 
 interface ReportSectionInput {

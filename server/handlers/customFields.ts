@@ -1,5 +1,5 @@
-import { prisma } from '../lib/db';
-import type { HandlerResult } from '../lib/types';
+import { prisma } from '../lib/db.js';
+import type { HandlerResult } from '../lib/types.js';
 import type { User } from '@prisma/client';
 
 const FORMATS = ['text', 'number', 'percent', 'naira', 'date'];

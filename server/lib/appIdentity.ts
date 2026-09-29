@@ -1,4 +1,4 @@
-import { prisma } from './db';
+import { prisma } from './db.js';
 
 /**
  * Who this installation is, and where it can be reached.

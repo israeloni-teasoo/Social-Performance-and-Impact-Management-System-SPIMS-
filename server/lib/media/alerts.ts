@@ -20,7 +20,7 @@
  * A failed delivery is recorded against the channel and shown on the screen instead.
  */
 
-import type { AlertChannelKind } from './types';
+import type { AlertChannelKind } from './types.js';
 
 const TIMEOUT_MS = Number(process.env.ALERT_WEBHOOK_TIMEOUT_MS) || 10_000;
 

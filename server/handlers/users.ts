@@ -1,6 +1,6 @@
-import { comparePassword, hashPassword } from '../lib/auth';
-import { prisma } from '../lib/db';
-import type { HandlerResult } from '../lib/types';
+import { comparePassword, hashPassword } from '../lib/auth.js';
+import { prisma } from '../lib/db.js';
+import type { HandlerResult } from '../lib/types.js';
 import type { Role, User } from '@prisma/client';
 
 const ROLE_LABELS: Record<Role, string> = {

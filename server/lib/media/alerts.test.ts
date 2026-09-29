@@ -11,8 +11,8 @@
  */
 
 import assert from 'node:assert/strict';
-import { buildPayload, flagMentions, matchTerms, parseTerms, testMention } from './alerts';
-import type { FlaggableMention } from './alerts';
+import { buildPayload, flagMentions, matchTerms, parseTerms, testMention } from './alerts.js';
+import type { FlaggableMention } from './alerts.js';
 
 let failures = 0;
 function test(name: string, fn: () => void) {

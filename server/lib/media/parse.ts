@@ -1,4 +1,4 @@
-import type { RawMention } from './types';
+import type { RawMention } from './types.js';
 
 /**
  * Parsers for the free sources.

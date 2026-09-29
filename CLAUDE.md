@@ -130,10 +130,18 @@ same Express app. Things that bite on the serverless side:
   interface into demo mode. `[...]` is a Next.js convention. Routing belongs in
   `vercel.json`, and the rewrite passes the original path as `__path` for `api/index.ts`
   to restore.
+- **Relative imports in `server/`, `api/`, `prisma/` must carry the `.js` extension**,
+  naming the emitted file (`./thing.js` for `thing.ts`). The server is ESM, and ESM
+  requires it. `tsc` does not complain — `moduleResolution: "Bundler"` permits
+  extensionless — and `tsx` resolves them, so this ran locally for months while every
+  Vercel invocation died with `ERR_MODULE_NOT_FOUND`, which the platform reports as
+  `FUNCTION_INVOCATION_FAILED` and the frontend reads as "no API". `npm run check:esm`
+  enforces it; running the codemod without `--check` fixes it.
 - **Run `npm run check:vercel` before deploying.** It runs `vercel build` locally (no
-  account needed) and replays the real generated route table against every Express route.
-  Nothing else in the toolchain can see a routing mistake, because locally Express does
-  the routing and Express is never the problem.
+  account needed), replays the real generated route table against every Express route,
+  **and imports the built function**. Routing correctly to a function that cannot start
+  is no better than not routing at all. Nothing else in the toolchain sees either fault,
+  because locally Express does the routing and `tsx` does the resolving.
 - **The catch-all works because Vercel skips its request helpers for Express.** The
   launcher injects a lazy `req.body` only when the default export has no `.listen`
   method, so an Express app receives an untouched stream for `express.json()`. Exporting

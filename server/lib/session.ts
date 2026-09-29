@@ -1,5 +1,5 @@
 import * as cookie from 'cookie';
-import { SESSION_COOKIE, SESSION_MAX_AGE_SECONDS, verifySession } from './auth';
+import { SESSION_COOKIE, SESSION_MAX_AGE_SECONDS, verifySession } from './auth.js';
 
 interface CookieCarrier {
   headers: { cookie?: string | string[] };

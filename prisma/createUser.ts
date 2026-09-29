@@ -3,7 +3,7 @@ import { createInterface } from 'node:readline/promises';
 import { stdin, stdout } from 'node:process';
 import { PrismaClient } from '@prisma/client';
 import type { Role } from '@prisma/client';
-import { hashPassword } from '../server/lib/auth';
+import { hashPassword } from '../server/lib/auth.js';
 
 /**
  * Creates a real user account.

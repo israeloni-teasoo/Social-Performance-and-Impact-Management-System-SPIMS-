@@ -1,4 +1,4 @@
-import { ACTIVITY_TYPES, PILLARS, listForTemplate } from './vocabulary';
+import { ACTIVITY_TYPES, PILLARS, listForTemplate } from './vocabulary.js';
 
 /**
  * The bulk upload templates.

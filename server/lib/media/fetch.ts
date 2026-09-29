@@ -1,5 +1,5 @@
-import { dedupe, parseFeed, parseGdelt } from './parse';
-import type { FetchOutcome, RawMention, SourceKind } from './types';
+import { dedupe, parseFeed, parseGdelt } from './parse.js';
+import type { FetchOutcome, RawMention, SourceKind } from './types.js';
 
 /**
  * Fetching from the free sources.

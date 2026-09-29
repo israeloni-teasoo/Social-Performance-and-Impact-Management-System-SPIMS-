@@ -9,8 +9,8 @@
  */
 
 import assert from 'node:assert/strict';
-import { GDELT_SAMPLE, GOOGLE_ALERTS_SAMPLE, RSS_SAMPLE } from './fixtures';
-import { dedupe, normaliseUrl, parseFeed, parseGdelt, parseGdeltDate, unwrapRedirect } from './parse';
+import { GDELT_SAMPLE, GOOGLE_ALERTS_SAMPLE, RSS_SAMPLE } from './fixtures.js';
+import { dedupe, normaliseUrl, parseFeed, parseGdelt, parseGdeltDate, unwrapRedirect } from './parse.js';
 
 let failures = 0;
 function test(name: string, fn: () => void) {

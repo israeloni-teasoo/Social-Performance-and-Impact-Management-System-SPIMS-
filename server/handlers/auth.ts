@@ -1,6 +1,6 @@
-import { comparePassword, signSession } from '../lib/auth';
-import { prisma } from '../lib/db';
-import type { HandlerResult, PublicUser } from '../lib/types';
+import { comparePassword, signSession } from '../lib/auth.js';
+import { prisma } from '../lib/db.js';
+import type { HandlerResult, PublicUser } from '../lib/types.js';
 import type { User } from '@prisma/client';
 
 function toPublicUser(user: User): PublicUser {

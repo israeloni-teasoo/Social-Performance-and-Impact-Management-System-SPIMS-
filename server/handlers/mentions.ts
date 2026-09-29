@@ -1,11 +1,11 @@
-import { prisma } from '../lib/db';
-import { appUrl, orgName } from '../lib/appIdentity';
-import { deliverAll, flagMentions } from '../lib/media/alerts';
-import { fetchAll } from '../lib/media/fetch';
-import { normaliseUrl } from '../lib/media/parse';
-import { isSourceKind } from '../lib/media/types';
-import type { DeliveryOutcome, FlaggableMention } from '../lib/media/alerts';
-import type { HandlerResult } from '../lib/types';
+import { prisma } from '../lib/db.js';
+import { appUrl, orgName } from '../lib/appIdentity.js';
+import { deliverAll, flagMentions } from '../lib/media/alerts.js';
+import { fetchAll } from '../lib/media/fetch.js';
+import { normaliseUrl } from '../lib/media/parse.js';
+import { isSourceKind } from '../lib/media/types.js';
+import type { DeliveryOutcome, FlaggableMention } from '../lib/media/alerts.js';
+import type { HandlerResult } from '../lib/types.js';
 import type { User } from '@prisma/client';
 
 /**

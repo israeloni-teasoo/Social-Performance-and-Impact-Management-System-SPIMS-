@@ -15,6 +15,7 @@
     "report": "node docs/status-report/build.cjs",
     "check:routes": "node scripts/check-api-surface.mjs",
     "check:vercel": "node scripts/check-vercel-routes.mjs",
+    "check:esm": "node scripts/add-esm-extensions.mjs --check",
     "smoke:api": "tsx scripts/smoke-catchall.ts",
     "smoke:alerts": "tsx scripts/smoke-alerts.ts",
     "smoke:templates": "tsx scripts/smoke-templates.ts",

@@ -80,7 +80,8 @@ if (files.length > HOBBY_FUNCTION_LIMIT) {
 
 if (files.includes(CATCH_ALL)) {
   const source = await readFile(path.join(ROOT, 'api', CATCH_ALL), 'utf8');
-  if (!/from '\.\.\/server\/app'/.test(source)) {
+  // The .js is the emitted file, not the source file — see scripts/add-esm-extensions.mjs.
+  if (!/from '\.\.\/server\/app(\.js)?'/.test(source)) {
     problems.push(`api/${CATCH_ALL} no longer delegates to server/app.ts, so the two adapters can diverge again.`);
   }
   if (!/__path/.test(source)) {

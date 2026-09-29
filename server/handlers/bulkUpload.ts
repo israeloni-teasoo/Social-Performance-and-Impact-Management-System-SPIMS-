@@ -1,7 +1,7 @@
-import { TEMPLATE_COMMENT, UPLOAD_TEMPLATES, columnsOf } from '../../frontend/src/data/uploadTemplates';
-import { parseCsv } from '../lib/csv';
-import { prisma } from '../lib/db';
-import type { HandlerResult } from '../lib/types';
+import { TEMPLATE_COMMENT, UPLOAD_TEMPLATES, columnsOf } from '../../frontend/src/data/uploadTemplates.js';
+import { parseCsv } from '../lib/csv.js';
+import { prisma } from '../lib/db.js';
+import type { HandlerResult } from '../lib/types.js';
 import type { User } from '@prisma/client';
 
 export async function bulkUploadHandler(

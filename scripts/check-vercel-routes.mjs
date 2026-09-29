@@ -29,8 +29,8 @@
 
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUTPUT = path.join(ROOT, '.vercel/output/config.json');
@@ -91,6 +91,33 @@ if (!existsSync(OUTPUT)) {
   process.exit(1);
 }
 
+/**
+ * Imports the function exactly as the platform will.
+ *
+ * Routing correctly to a function that cannot start is no better than not routing at
+ * all: the platform answers with its own HTML error page, and the frontend reads that as
+ * "no API here" and drops into demo data. That is what happened — the emitted code kept
+ * TypeScript's extensionless relative imports, which ESM does not allow, so every
+ * invocation died with ERR_MODULE_NOT_FOUND and the deployment looked like a demo.
+ *
+ * Nothing else in the toolchain can see it. `tsc` is satisfied because `moduleResolution:
+ * "Bundler"` permits extensionless specifiers, and `tsx` resolves them at runtime. Only
+ * the built output run as ESM tells the truth.
+ */
+async function importsCleanly() {
+  const entry = path.join(ROOT, '.vercel/output/functions/api/index.func/api/index.js');
+  if (!existsSync(entry)) return { ok: false, error: 'the function was not built at api/index.func' };
+  try {
+    const mod = await import(pathToFileURL(entry).href);
+    if (typeof mod.default !== 'function') {
+      return { ok: false, error: `the default export is ${typeof mod.default}, not a request handler` };
+    }
+    return { ok: true };
+  } catch (error) {
+    return { ok: false, error: String(error).split('\n')[0] };
+  }
+}
+
 const { routes } = JSON.parse(readFileSync(OUTPUT, 'utf8'));
 const paths = expressRoutes();
 
@@ -104,6 +131,15 @@ for (const p of paths) {
 }
 
 console.log(`\n${paths.length} Express route(s) checked against the built routing table.`);
+
+const startup = await importsCleanly();
+if (startup.ok) {
+  console.log('The built function imports and exports a request handler.');
+} else {
+  failures += 1;
+  console.log(`\nThe built function does not start: ${startup.error}`);
+  console.log('Every route would answer with the platform\'s HTML error page, which the frontend reads as "no API".');
+}
 
 if (failures > 0) {
   console.log(

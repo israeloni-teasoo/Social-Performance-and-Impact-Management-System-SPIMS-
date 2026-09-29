@@ -1,8 +1,8 @@
-import { prisma } from '../lib/db';
-import { buildPayload, deliver, testMention } from '../lib/media/alerts';
-import { isAlertChannelKind } from '../lib/media/types';
-import { appUrl, orgName } from '../lib/appIdentity';
-import type { HandlerResult } from '../lib/types';
+import { prisma } from '../lib/db.js';
+import { buildPayload, deliver, testMention } from '../lib/media/alerts.js';
+import { isAlertChannelKind } from '../lib/media/types.js';
+import { appUrl, orgName } from '../lib/appIdentity.js';
+import type { HandlerResult } from '../lib/types.js';
 
 /**
  * Alert rules and delivery channels.

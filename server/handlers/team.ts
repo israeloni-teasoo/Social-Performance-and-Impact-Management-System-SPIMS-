@@ -1,5 +1,5 @@
-import { prisma } from '../lib/db';
-import type { HandlerResult } from '../lib/types';
+import { prisma } from '../lib/db.js';
+import type { HandlerResult } from '../lib/types.js';
 
 export async function listTeamHandler(): Promise<HandlerResult> {
   const members = await prisma.teamMember.findMany({ orderBy: { name: 'asc' } });

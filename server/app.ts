@@ -2,11 +2,11 @@ import 'dotenv/config';
 import cors from 'cors';
 import express from 'express';
 import type { NextFunction, Request, Response } from 'express';
-import { addApprovalCommentHandler, approveHandler, listApprovalsHandler, returnApprovalHandler } from './handlers/approvals';
-import { loginHandler, meHandler } from './handlers/auth';
-import { bulkUploadHandler } from './handlers/bulkUpload';
-import { listCommunitiesHandler, listEvidenceHandler, listIndicatorsHandler, listProjectImpactsHandler, listProjectsHandler, listReportsHandler } from './handlers/content';
-import { createCustomFieldHandler, deleteCustomFieldHandler, listCustomFieldsHandler, updateCustomFieldHandler } from './handlers/customFields';
+import { addApprovalCommentHandler, approveHandler, listApprovalsHandler, returnApprovalHandler } from './handlers/approvals.js';
+import { loginHandler, meHandler } from './handlers/auth.js';
+import { bulkUploadHandler } from './handlers/bulkUpload.js';
+import { listCommunitiesHandler, listEvidenceHandler, listIndicatorsHandler, listProjectImpactsHandler, listProjectsHandler, listReportsHandler } from './handlers/content.js';
+import { createCustomFieldHandler, deleteCustomFieldHandler, listCustomFieldsHandler, updateCustomFieldHandler } from './handlers/customFields.js';
 import {
   createMentionSourceHandler,
   deleteMentionSourceHandler,
@@ -15,7 +15,7 @@ import {
   reviewMentionHandler,
   runMentionIngestionHandler,
   setMentionSourceActiveHandler,
-} from './handlers/mentions';
+} from './handlers/mentions.js';
 import {
   createAlertChannelHandler,
   createAlertRuleHandler,
@@ -24,21 +24,21 @@ import {
   listAlertConfigHandler,
   setAlertRuleActiveHandler,
   testAlertChannelHandler,
-} from './handlers/alerts';
-import { checkCronAuth } from './lib/cronAuth';
-import { addReportCommentHandler, listReportCommentsHandler } from './handlers/reportComments';
-import { generateReportPreviewHandler } from './handlers/reportPreview';
-import { createProjectHandler, updateProjectHandler } from './handlers/projects';
-import { getIntegrationStatusHandler, getSettingsHandler, updateSettingsHandler } from './handlers/settings';
-import { createStakeholderHandler, listStakeholdersHandler } from './handlers/stakeholders';
-import { closeTargetHandler, createTargetHandler, listTargetsHandler } from './handlers/targets';
-import { assignTaskHandler, listTasksHandler, setTaskStatusHandler } from './handlers/tasks';
-import { inviteTeamMemberHandler, listTeamHandler } from './handlers/team';
-import { changeOwnPasswordHandler, createUserHandler, listUsersHandler, resetUserPasswordHandler, setUserActiveHandler, setUserRoleHandler } from './handlers/users';
-import { prisma } from './lib/db';
-import { guard } from './lib/guard';
-import { requireUser } from './lib/requireAuth';
-import { clearSessionCookie, getSessionUserId, setSessionCookie } from './lib/session';
+} from './handlers/alerts.js';
+import { checkCronAuth } from './lib/cronAuth.js';
+import { addReportCommentHandler, listReportCommentsHandler } from './handlers/reportComments.js';
+import { generateReportPreviewHandler } from './handlers/reportPreview.js';
+import { createProjectHandler, updateProjectHandler } from './handlers/projects.js';
+import { getIntegrationStatusHandler, getSettingsHandler, updateSettingsHandler } from './handlers/settings.js';
+import { createStakeholderHandler, listStakeholdersHandler } from './handlers/stakeholders.js';
+import { closeTargetHandler, createTargetHandler, listTargetsHandler } from './handlers/targets.js';
+import { assignTaskHandler, listTasksHandler, setTaskStatusHandler } from './handlers/tasks.js';
+import { inviteTeamMemberHandler, listTeamHandler } from './handlers/team.js';
+import { changeOwnPasswordHandler, createUserHandler, listUsersHandler, resetUserPasswordHandler, setUserActiveHandler, setUserRoleHandler } from './handlers/users.js';
+import { prisma } from './lib/db.js';
+import { guard } from './lib/guard.js';
+import { requireUser } from './lib/requireAuth.js';
+import { clearSessionCookie, getSessionUserId, setSessionCookie } from './lib/session.js';
 
 export const app = express();
 app.use(express.json({ limit: '5mb' })); // CSV text rides along in the JSON body for bulk uploads

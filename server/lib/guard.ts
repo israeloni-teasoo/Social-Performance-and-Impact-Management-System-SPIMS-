@@ -1,7 +1,7 @@
-import { checkAccess } from './permissions';
-import { requireUser } from './requireAuth';
-import { getSessionUserId } from './session';
-import type { AccessDenial } from './permissions';
+import { checkAccess } from './permissions.js';
+import { requireUser } from './requireAuth.js';
+import { getSessionUserId } from './session.js';
+import type { AccessDenial } from './permissions.js';
 import type { User } from '@prisma/client';
 
 interface GuardableRequest {

@@ -1,8 +1,8 @@
 import 'dotenv/config';
 import bcrypt from 'bcryptjs';
 import { PrismaClient, Prisma } from '@prisma/client';
-import { PROJECTS, PROJECT_IMPACTS, COMMUNITIES, INDICATORS, REPORTS, STAKEHOLDERS, TEAM_MEMBERS, TASKS, APPROVALS, EVIDENCE_ITEMS, TARGETS, CUSTOM_FIELDS } from '../frontend/src/data/seed';
-import { DEMO_ACCOUNTS } from '../frontend/src/data/accounts';
+import { PROJECTS, PROJECT_IMPACTS, COMMUNITIES, INDICATORS, REPORTS, STAKEHOLDERS, TEAM_MEMBERS, TASKS, APPROVALS, EVIDENCE_ITEMS, TARGETS, CUSTOM_FIELDS } from '../frontend/src/data/seed.js';
+import { DEMO_ACCOUNTS } from '../frontend/src/data/accounts.js';
 
 const prisma = new PrismaClient();
 

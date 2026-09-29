@@ -1,5 +1,5 @@
-import { prisma } from '../lib/db';
-import type { HandlerResult } from '../lib/types';
+import { prisma } from '../lib/db.js';
+import type { HandlerResult } from '../lib/types.js';
 
 const ID = 'org';
 
