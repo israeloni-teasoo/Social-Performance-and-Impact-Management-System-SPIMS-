@@ -97,6 +97,9 @@ export const WRITE_PERMISSIONS: Record<string, Role[]> = {
   // administrative and sits with the Executive alone.
   '/api/mentions/review': ['exec', 'relations'],
   '/api/mentions/run': ['exec', 'relations'],
+  // Deletes waiting items that do not mention the organisation. Same people who review
+  // the queue, since it is queue housekeeping rather than configuration.
+  '/api/mentions/prune': ['exec', 'relations'],
   '/api/mentions/sources': ['exec'],
   '/api/mentions/sources/active': ['exec'],
   '/api/mentions/sources/delete': ['exec'],

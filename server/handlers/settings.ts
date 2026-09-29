@@ -24,6 +24,7 @@ export async function getSettingsHandler(): Promise<HandlerResult> {
       currencyLabel: s.currencyLabel,
       targetYear: s.targetYear,
       dataStatusNote: s.dataStatusNote,
+      mentionTerms: s.mentionTerms,
     },
   };
 }
@@ -35,6 +36,7 @@ export async function updateSettingsHandler(input: Record<string, unknown>): Pro
   const financialYear = str(input.financialYear);
   const currencyLabel = str(input.currencyLabel);
   const dataStatusNote = str(input.dataStatusNote);
+  const mentionTerms = str(input.mentionTerms);
   const targetYear = Number(input.targetYear);
 
   if (!orgName) return { status: 400, body: { error: 'An organisation name is required.' } };
@@ -47,7 +49,7 @@ export async function updateSettingsHandler(input: Record<string, unknown>): Pro
   await load();
   const updated = await prisma.orgSettings.update({
     where: { id: ID },
-    data: { orgName, financialYear, currencyLabel, targetYear, dataStatusNote },
+    data: { orgName, financialYear, currencyLabel, targetYear, dataStatusNote, mentionTerms },
   });
   return {
     status: 200,
@@ -57,6 +59,7 @@ export async function updateSettingsHandler(input: Record<string, unknown>): Pro
       currencyLabel: updated.currencyLabel,
       targetYear: updated.targetYear,
       dataStatusNote: updated.dataStatusNote,
+      mentionTerms: updated.mentionTerms,
     },
   };
 }

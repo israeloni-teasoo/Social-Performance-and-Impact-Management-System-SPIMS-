@@ -277,6 +277,15 @@ review because they are the whole basis on which it is acceptable:
 Requests carry a `User-Agent` identifying SPIMS, time out after 20 seconds, and a
 failing source is reported to the operator rather than silently swallowed.
 
+**Whole-publication feeds are filtered before anything is stored.** A newspaper's RSS
+feed carries everything that paper publishes, not everything it publishes about Seplat,
+so feed results are matched against the names configured under Settings → Organisation
+and the rest are discarded at ingestion. Sources that already carry a query of their own
+— a GDELT search, a Google Alerts feed — are not filtered again, because applying a
+second filter would silently drop results whose phrasing differs from what is configured
+here. With no names configured nothing is filtered, on the grounds that discarding an
+outlet's entire feed on a blank setting would be worse than passing it to a person.
+
 If this must be blocked entirely, deactivating every source stops it, and blocking the
 hosts above at the firewall stops it independently of the application.
 

@@ -271,6 +271,13 @@ model OrgSettings {
   /// Shown on the sign-in screen and in exports, so a deployment can state whether it
   /// holds live data or sample data.
   dataStatusNote String   @default("Illustrative data \u2014 replace with verified Seplat figures before external reporting.")
+  /// Who this installation is watching for, comma or newline separated.
+  ///
+  /// A newspaper's RSS feed carries everything that paper publishes, not everything it
+  /// publishes about you. Without this the review queue fills with national news and the
+  /// coverage worth reading is buried in it. Sources that already carry a query of their
+  /// own — GDELT, Google Alerts — are not filtered again.
+  mentionTerms   String   @default("Seplat, Seplat Energy")
   updatedAt      DateTime @updatedAt
 }
 

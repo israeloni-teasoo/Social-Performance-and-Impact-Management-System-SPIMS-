@@ -84,6 +84,21 @@ function OrganisationSection({
         </span>
       </div>
 
+      <div style={{ ...formField, marginBottom: 16 }}>
+        <label style={labelStyle}>Names to watch for in the press</label>
+        <input
+          value={draft.mentionTerms}
+          onChange={(e) => set('mentionTerms', e.target.value)}
+          style={input}
+          disabled={!canEdit}
+        />
+        <span style={{ fontSize: 11.5, color: 'var(--muted)' }}>
+          Comma separated. A newspaper's feed carries everything that paper publishes, so it is filtered against these
+          before anything reaches the review queue. Add subsidiaries or former names if coverage uses them. Case does
+          not matter, and endings are matched — Seplat also finds Seplat's.
+        </span>
+      </div>
+
       {canEdit ? (
         <button onClick={save} disabled={busy} style={{ ...primaryBtn, opacity: busy ? 0.6 : 1 }}>
           {busy ? 'Saving…' : 'Save organisation settings'}

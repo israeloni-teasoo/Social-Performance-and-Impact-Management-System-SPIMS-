@@ -85,7 +85,9 @@ export function MediaMentions({
         <div style={{ fontSize: 12.5, fontWeight: 700, color: '#006B42', marginBottom: 4 }}>What this covers</div>
         <div style={{ fontSize: 13, color: 'var(--ink)', lineHeight: 1.5 }}>
           {store.feed.coverageNote || 'Press and web sources only.'} Social platforms release mention data only through
-          licensed partners, so that part needs a paid subscription and is not built.
+          licensed partners, so that part needs a paid subscription and is not built. A newspaper feed carries
+          everything that paper publishes, so it is filtered against the names set under{' '}
+          <strong>Settings → Organisation</strong> before anything reaches this queue.
         </div>
       </div>
 
@@ -125,6 +127,17 @@ export function MediaMentions({
               style={{ fontFamily: 'inherit', fontSize: 13, fontWeight: 600, padding: '9px 16px', borderRadius: 9, background: '#fff', border: '1px solid var(--line)', color: 'var(--navy)', cursor: 'pointer' }}
             >
               {showSources ? 'Hide sources' : `Sources (${store.sources.filter((s) => s.active).length} active)`}
+            </button>
+          )}
+          {/* Filtering was added after collection, so an existing queue can still hold an
+              outlet's whole front page. Clearing that by hand is not reasonable. */}
+          {canReview && tab === 'pending' && shown.length > 0 && (
+            <button
+              onClick={() => void store.pruneIrrelevant()}
+              style={{ fontFamily: 'inherit', fontSize: 13, fontWeight: 600, padding: '9px 16px', borderRadius: 9, background: '#fff', border: '1px solid var(--line)', color: '#B7400E', cursor: 'pointer' }}
+              title="Deletes waiting items whose headline and summary do not mention the names set under Settings. Accepted and rejected items are untouched."
+            >
+              Remove items not about us
             </button>
           )}
           {canReview && (

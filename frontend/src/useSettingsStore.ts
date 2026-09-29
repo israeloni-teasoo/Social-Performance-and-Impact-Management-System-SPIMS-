@@ -11,6 +11,7 @@ export const DEFAULT_SETTINGS: OrgSettings = {
   currencyLabel: '₦ Naira',
   targetYear: 2030,
   dataStatusNote: 'Illustrative data — replace with verified Seplat figures before external reporting.',
+  mentionTerms: 'Seplat, Seplat Energy',
 };
 
 /**

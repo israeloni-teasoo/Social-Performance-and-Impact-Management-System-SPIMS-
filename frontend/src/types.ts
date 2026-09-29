@@ -296,6 +296,8 @@ export interface OrgSettings {
   currencyLabel: string;
   targetYear: number;
   dataStatusNote: string;
+  /** Who this installation watches for. Whole-publication feeds are filtered against it. */
+  mentionTerms: string;
 }
 
 /** What this deployment has connected. Never carries any key or secret. */

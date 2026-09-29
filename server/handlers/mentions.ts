@@ -1,6 +1,6 @@
 import { prisma } from '../lib/db.js';
 import { appUrl, orgName } from '../lib/appIdentity.js';
-import { deliverAll, flagMentions } from '../lib/media/alerts.js';
+import { deliverAll, flagMentions, matchTerms, parseTerms } from '../lib/media/alerts.js';
 import { fetchAll } from '../lib/media/fetch.js';
 import { normaliseUrl } from '../lib/media/parse.js';
 import { isSourceKind } from '../lib/media/types.js';
@@ -252,16 +252,30 @@ export async function runMentionIngestionHandler(): Promise<HandlerResult> {
 
   const outcomes = await fetchAll(sources.map((s) => ({ id: s.id, name: s.name, kind: s.kind, target: s.target })));
 
+  const terms = await watchTerms();
+  const kindOf = new Map(sources.map((s) => [s.id, s.kind]));
+
   let found = 0;
   let added = 0;
   let duplicates = 0;
+  let irrelevant = 0;
   const seenThisRun = new Set<string>();
   const created: FlaggableMention[] = [];
 
   for (const outcome of outcomes) {
     if (!outcome.ok) continue;
+    const filtered = needsFiltering(kindOf.get(outcome.sourceId));
+
     for (const item of outcome.items) {
       found += 1;
+
+      // A newspaper's feed carries everything that paper publishes. Without this the
+      // queue fills with national news and the coverage worth reading is buried in it.
+      if (filtered && !isAbout(item, terms)) {
+        irrelevant += 1;
+        continue;
+      }
+
       const url = normaliseUrl(item.url);
       if (seenThisRun.has(url)) {
         duplicates += 1;
@@ -327,11 +341,79 @@ export async function runMentionIngestionHandler(): Promise<HandlerResult> {
       found,
       added,
       duplicates,
+      irrelevant,
       detail,
       alerts,
       coverageNote: COVERAGE_NOTE,
     },
   };
+}
+
+/**
+ * Removes waiting items that are not about the organisation.
+ *
+ * Needed because filtering was added after collection: a queue that filled with an
+ * outlet's whole front page cannot reasonably be cleared by rejecting several hundred
+ * items one at a time. Only `pending` items are touched — anything a person has already
+ * accepted or rejected is their decision and is left alone.
+ *
+ * It deletes rather than rejects. These were never mentions; recording a human rejection
+ * for each would put a decision in the audit trail that nobody made.
+ */
+export async function pruneIrrelevantMentionsHandler(): Promise<HandlerResult> {
+  const terms = await watchTerms();
+  if (terms.length === 0) {
+    return { status: 400, body: { error: 'No watch terms are configured, so there is nothing to measure relevance against.' } };
+  }
+
+  const pending = await prisma.mention.findMany({
+    where: { status: 'pending' },
+    select: { id: true, title: true, snippet: true },
+  });
+
+  const doomed = pending.filter((m) => !isAbout(m, terms)).map((m) => m.id);
+  if (doomed.length === 0) {
+    return { status: 200, body: { removed: 0, kept: pending.length, terms } };
+  }
+
+  await prisma.mention.deleteMany({ where: { id: { in: doomed } } });
+  return { status: 200, body: { removed: doomed.length, kept: pending.length - doomed.length, terms } };
+}
+
+/* ----------------------------------------------------------------- filtering */
+
+/**
+ * Which sources need filtering against the watch terms.
+ *
+ * A source that already carries a query — a GDELT search, a Google Alerts feed you
+ * created with your own terms — has done the filtering at the far end, and applying ours
+ * on top would silently drop results whose phrasing differs from what is configured here.
+ * A whole-publication RSS feed has done none, and must be filtered or the queue is just
+ * that outlet's front page.
+ */
+function needsFiltering(kind: string | undefined): boolean {
+  return kind === 'rss';
+}
+
+/** The organisation's watch terms, falling back to its name when none are configured. */
+async function watchTerms(): Promise<string[]> {
+  try {
+    const settings = await prisma.orgSettings.findUnique({ where: { id: 'org' } });
+    const configured = parseTerms(settings?.mentionTerms ?? '');
+    if (configured.length > 0) return configured;
+    // Better than filtering on nothing, which would let everything through again.
+    return parseTerms(settings?.orgName ?? '');
+  } catch {
+    return [];
+  }
+}
+
+/** Whether an article is about the organisation, by its headline and summary. */
+function isAbout(item: { title: string; snippet: string }, terms: string[]): boolean {
+  // No terms at all means we cannot tell, and silently discarding an outlet's whole feed
+  // would be worse than passing it through for a person to look at.
+  if (terms.length === 0) return true;
+  return matchTerms(`${item.title}\n${item.snippet}`, terms).length > 0;
 }
 
 export interface AlertSummary {

@@ -154,6 +154,7 @@ export function useMentionsStore(onNotify: (message: string, tone?: ToastTone) =
         added: number;
         duplicates: number;
         found: number;
+        irrelevant?: number;
         detail: { source: string; ok: boolean; error?: string }[];
         alerts?: { flagged: number; delivered: number; failed: { channel: string; error: string }[] };
       }>('/api/mentions/run', {});
@@ -161,6 +162,9 @@ export function useMentionsStore(onNotify: (message: string, tone?: ToastTone) =
       const failed = result.detail.filter((d) => !d.ok);
       const alerts = result.alerts;
       const flaggedNote = alerts && alerts.flagged > 0 ? ` ${alerts.flagged} flagged.` : '';
+      // Said plainly, because "found 40, added 2" otherwise looks like most of the run
+      // was lost rather than correctly ignored.
+      const filteredNote = result.irrelevant ? ` ${result.irrelevant} not about you.` : '';
 
       if (failed.length > 0) {
         // Naming the source that failed is the difference between a fixable problem
@@ -175,7 +179,7 @@ export function useMentionsStore(onNotify: (message: string, tone?: ToastTone) =
         );
       } else {
         onNotify(
-          `${result.added} new mention${result.added === 1 ? '' : 's'}, ${result.duplicates} already seen.${flaggedNote}`,
+          `${result.added} new mention${result.added === 1 ? '' : 's'}, ${result.duplicates} already seen.${filteredNote}${flaggedNote}`,
           'success',
         );
       }
@@ -254,6 +258,26 @@ export function useMentionsStore(onNotify: (message: string, tone?: ToastTone) =
     );
   };
 
+  /** Removes waiting items that are not about the organisation. */
+  const pruneIrrelevant = async () => {
+    if (!live) {
+      onNotify('This runs on the server, and this demo build has none.', 'warning');
+      return;
+    }
+    try {
+      const r = await api.post<{ removed: number; kept: number; terms: string[] }>('/api/mentions/prune', {});
+      await load();
+      onNotify(
+        r.removed === 0
+          ? `Nothing to remove — all ${r.kept} waiting item(s) mention ${r.terms.join(' or ')}.`
+          : `Removed ${r.removed} item(s) that did not mention ${r.terms.join(' or ')}. ${r.kept} left to review.`,
+        'success',
+      );
+    } catch (error) {
+      onNotify(error instanceof Error ? error.message : 'Could not tidy the queue.', 'warning');
+    }
+  };
+
   const addSource = async (name: string, kind: MentionSourceKind, target: string) => {
     try {
       const created = live
@@ -309,6 +333,7 @@ export function useMentionsStore(onNotify: (message: string, tone?: ToastTone) =
     review,
     addSource,
     addRecommendedSources,
+    pruneIrrelevant,
     setSourceActive,
     removeSource,
     reload: load,

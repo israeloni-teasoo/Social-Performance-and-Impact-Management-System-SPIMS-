@@ -203,6 +203,12 @@ platforms need a paid provider and are not built.
 - **Sources are opt-in.** With none active, nothing is contacted at all.
 - A mention is evidence someone published something. It is **never** a reported figure
   and must not be mixed into the analytics layer.
+- **RSS sources are filtered against `OrgSettings.mentionTerms`; GDELT and Google Alerts
+  are not.** A paper's feed is its whole front page, and without the filter the review
+  queue fills with national news. The other two carry a query already, and filtering them
+  twice would drop results whose phrasing differs from the configured terms. Matching
+  reuses `matchTerms` from the alerting module so there is one set of matching semantics,
+  not two.
 - The coverage limitation travels with the data (`COVERAGE_NOTE`, duplicated server and
   client), not only in documentation.
 - Parsers live in `server/lib/media/parse.ts` and are tested against fixtures:

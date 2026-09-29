@@ -35,21 +35,33 @@ if (!/localhost|127\.0\.0\.1/.test(url)) {
   process.exit(1);
 }
 
-/** Two stories, one of which should trip the watchlist and one of which should not. */
+/**
+ * A newspaper feed, which is what these sources really are: mostly stories about other
+ * things, with the occasional one about us.
+ *
+ * Two mention the organisation — one trips the watchlist, one does not — and one is
+ * ordinary national news, which must never reach the queue at all.
+ */
 const FEED = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0"><channel>
   <title>Smoke Test Wire</title>
   <item>
-    <title>Oil spill reported near a delivery site</title>
+    <title>Oil spill reported near a Seplat delivery site</title>
     <link>https://smoke.example/spill-reported</link>
     <description>Residents said spills were visible on Tuesday morning.</description>
     <pubDate>Tue, 08 Sep 2026 09:15:00 +0100</pubDate>
   </item>
   <item>
-    <title>Scholarship programme certifies 40 teachers</title>
+    <title>Seplat scholarship programme certifies 40 teachers</title>
     <link>https://smoke.example/teachers-certified</link>
     <description>Teachers completed literacy training this year.</description>
     <pubDate>Mon, 07 Sep 2026 14:40:00 +0100</pubDate>
+  </item>
+  <item>
+    <title>Lagos traffic reforms begin on Monday</title>
+    <link>https://smoke.example/traffic-reforms</link>
+    <description>New bus lanes open across the mainland.</description>
+    <pubDate>Mon, 07 Sep 2026 08:00:00 +0100</pubDate>
   </item>
 </channel></rss>`;
 
@@ -108,6 +120,12 @@ async function main() {
   const base = `http://127.0.0.1:${port}`;
 
   await cleanup();
+  // Pinned, so this does not depend on whatever the settings row happens to hold.
+  await prisma.orgSettings.upsert({
+    where: { id: 'org' },
+    create: { id: 'org', mentionTerms: 'Seplat' },
+    update: { mentionTerms: 'Seplat' },
+  });
 
   console.log('\nSetup');
 
@@ -151,11 +169,20 @@ async function main() {
 
   let firstRun: Record<string, unknown> = {};
 
-  await check('collects both stories from the feed', async () => {
+  await check('collects the two stories that mention us', async () => {
     const r = await runMentionIngestionHandler();
     firstRun = r.body as Record<string, unknown>;
     assert.equal(r.status, 200);
-    assert.ok((firstRun.added as number) >= 2, `added ${firstRun.added}`);
+    assert.equal(firstRun.added, 2, `added ${firstRun.added}`);
+  });
+
+  await check('leaves the unrelated national story out of the queue', async () => {
+    // The whole point: a paper's feed is its front page, and only the part of it about
+    // this organisation belongs in a queue labelled "mentions".
+    assert.equal(firstRun.found, 3, 'all three were fetched');
+    assert.equal(firstRun.irrelevant, 1, 'one was filtered');
+    const stored = await prisma.mention.findMany({ where: { url: { contains: 'smoke.example' } } });
+    assert.ok(!stored.some((m) => m.url.includes('traffic-reforms')), 'the traffic story must not be stored');
   });
 
   await check('flags only the story that matched the watchlist', () => {

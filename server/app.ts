@@ -13,6 +13,7 @@ import {
   listMentionSourcesHandler,
   listMentionsHandler,
   reviewMentionHandler,
+  pruneIrrelevantMentionsHandler,
   runMentionIngestionHandler,
   setMentionSourceActiveHandler,
 } from './handlers/mentions.js';
@@ -281,6 +282,10 @@ post('/api/mentions/sources', async (req, res) => {
 });
 post('/api/mentions/sources/active', async (req, res) => {
   const r = await setMentionSourceActiveHandler(req.body ?? {});
+  res.status(r.status).json(r.body);
+});
+post('/api/mentions/prune', async (_req, res) => {
+  const r = await pruneIrrelevantMentionsHandler();
   res.status(r.status).json(r.body);
 });
 post('/api/mentions/sources/delete', async (req, res) => {
