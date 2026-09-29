@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { api } from './api';
+import { ApiError, api } from './api';
 import { isApiAvailable, loadLocal, saveLocal } from './apiMode';
 import { MENTION_FEED, MENTION_SOURCES } from './data/mentionsSeed';
+import { RECOMMENDED_SOURCES } from './data/recommendedSources';
 import type { Mention, MentionCategory, MentionFeed, MentionSource, MentionSourceKind, MentionStatus } from './types';
 import type { ToastTone } from './useToastQueue';
 
@@ -178,10 +179,16 @@ export function useMentionsStore(onNotify: (message: string, tone?: ToastTone) =
           'success',
         );
       }
-    } catch {
-      // A run in which every source failed answers 502, which lands here.
+    } catch (error) {
       await load().catch(() => {});
-      onNotify('Every source failed. Check the source list and this server’s outbound access.', 'warning');
+      // 400 means there was nothing to fetch from, which is a different problem from
+      // fetching and failing — and telling someone with no sources that their outbound
+      // access is broken sends them hunting for a fault that is not there.
+      if (error instanceof ApiError && error.status === 400) {
+        onNotify(`${error.message} Add one under Sources.`, 'warning');
+      } else {
+        onNotify('Every source failed. Check the source list and this server’s outbound access.', 'warning');
+      }
     } finally {
       setRunning(false);
     }
@@ -207,6 +214,44 @@ export function useMentionsStore(onNotify: (message: string, tone?: ToastTone) =
     } finally {
       reviewing.current = false;
     }
+  };
+
+  /**
+   * Adds the starting set, paused.
+   *
+   * Paused because configuring a source and switching it on are two decisions: a source
+   * decides what leaves the network. Sources that already exist are skipped rather than
+   * reported as failures — pressing this twice should be harmless.
+   */
+  const addRecommendedSources = async () => {
+    if (!live) {
+      onNotify('Sources are stored on the server, and this demo build has none.', 'warning');
+      return;
+    }
+    let added = 0;
+    for (const source of RECOMMENDED_SOURCES) {
+      try {
+        const created = await api.post<MentionSource>('/api/mentions/sources', {
+          name: source.name,
+          kind: source.kind,
+          target: source.target,
+          active: false,
+        });
+        setSources((list) => [...list, created]);
+        added += 1;
+      } catch (error) {
+        // 409 is "already configured", which is not a problem worth reporting.
+        if (!(error instanceof ApiError && error.status === 409)) {
+          onNotify(`Could not add ${source.name}.`, 'warning');
+        }
+      }
+    }
+    onNotify(
+      added === 0
+        ? 'Those sources are already configured.'
+        : `Added ${added} source${added === 1 ? '' : 's'}, all paused. Switch on the ones you want, then check for mentions.`,
+      'success',
+    );
   };
 
   const addSource = async (name: string, kind: MentionSourceKind, target: string) => {
@@ -263,6 +308,7 @@ export function useMentionsStore(onNotify: (message: string, tone?: ToastTone) =
     runIngestion,
     review,
     addSource,
+    addRecommendedSources,
     setSourceActive,
     removeSource,
     reload: load,

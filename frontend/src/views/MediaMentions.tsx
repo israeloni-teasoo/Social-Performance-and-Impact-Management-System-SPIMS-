@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { RECOMMENDED_SOURCES } from '../data/recommendedSources';
 import { CATEGORY_LABELS, CHANNEL_KIND_HINTS, CHANNEL_KIND_LABELS, SOURCE_KIND_LABELS } from '../mentionsCopy';
 import { card, h1, pill, primaryBtn, subtitle } from '../ui';
 import { useAlertsStore } from '../useAlertsStore';
@@ -186,7 +187,9 @@ export function MediaMentions({
         <div style={{ ...card, textAlign: 'center', padding: '40px 20px', color: 'var(--muted)' }}>
           {tab === 'pending'
             ? store.feed.activeSources === 0
-              ? 'No sources are configured yet, so nothing has been collected.'
+              ? canManageSources
+                ? 'No source is switched on, so nothing has been collected and nothing has been contacted. Open Sources to add one.'
+                : 'No source is switched on yet, so nothing has been collected. An Executive configures these.'
               : 'Nothing waiting to be reviewed.'
             : `No ${tab} mentions.`}
         </div>
@@ -357,6 +360,25 @@ function SourcePanel({ store }: { store: ReturnType<typeof useMentionsStore> }) 
         Every check is made by this server, never by anyone’s browser, and sends only a search term — no Seplat data
         leaves with it. With no active source, nothing is contacted at all.
       </div>
+
+      {store.sources.length === 0 && (
+        <div style={{ paddingTop: 10, borderTop: '1px solid var(--line)' }}>
+          <div style={{ fontSize: 12.5, color: 'var(--muted)', lineHeight: 1.5, marginBottom: 10 }}>
+            Nothing is configured, so nothing is collected and nothing is contacted. Add the free sources we would
+            start with — they arrive paused, so you decide which to switch on.
+          </div>
+          <div style={{ marginBottom: 10 }}>
+            {RECOMMENDED_SOURCES.map((s) => (
+              <div key={s.name} style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 3 }}>
+                <strong style={{ color: 'var(--navy)' }}>{s.name}</strong> — {s.note}
+              </div>
+            ))}
+          </div>
+          <button onClick={() => void store.addRecommendedSources()} style={{ ...primaryBtn, padding: '8px 16px', fontSize: 12.5 }}>
+            Add these, paused
+          </button>
+        </div>
+      )}
 
       {store.sources.map((s) => (
         <div key={s.id} style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', padding: '8px 0', borderTop: '1px solid var(--line)' }}>

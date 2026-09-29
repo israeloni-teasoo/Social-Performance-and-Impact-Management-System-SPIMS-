@@ -126,6 +126,7 @@ export async function createMentionSourceHandler(input: {
   name?: unknown;
   kind?: unknown;
   target?: unknown;
+  active?: unknown;
 }): Promise<HandlerResult> {
   const name = typeof input.name === 'string' ? input.name.trim() : '';
   const target = typeof input.target === 'string' ? input.target.trim() : '';
@@ -149,7 +150,13 @@ export async function createMentionSourceHandler(input: {
   const existing = await prisma.mentionSource.findFirst({ where: { kind, target } });
   if (existing) return { status: 409, body: { error: 'That source is already configured.' } };
 
-  const source = await prisma.mentionSource.create({ data: { name, kind, target } });
+  // Defaults to on, which is right for a source somebody has just typed in and wants to
+  // use. A caller adding several at once passes false, so that switching each on stays a
+  // separate, deliberate act — that decision is what the outbound undertaking in §7.3
+  // rests on.
+  const active = input.active === undefined ? true : Boolean(input.active);
+
+  const source = await prisma.mentionSource.create({ data: { name, kind, target, active } });
   return { status: 201, body: { id: source.id, name: source.name, kind: source.kind, target: source.target, active: source.active } };
 }
 
