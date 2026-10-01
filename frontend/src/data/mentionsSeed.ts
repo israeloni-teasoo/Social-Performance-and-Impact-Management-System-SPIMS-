@@ -27,6 +27,7 @@ export const MENTION_FEED: MentionFeed = {
     found: 21,
     added: 7,
     duplicates: 14,
+    irrelevant: 0,
     detail: [
       { source: 'GDELT — Seplat coverage', ok: true, items: 12 },
       { source: 'Punch Newspapers', ok: true, items: 4 },

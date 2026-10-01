@@ -43,20 +43,74 @@ export interface SourceRecord {
   target: string;
 }
 
-async function get(url: string, accept: string): Promise<string> {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
-  try {
-    const response = await fetch(url, {
-      signal: controller.signal,
-      headers: { accept, 'user-agent': USER_AGENT },
-      redirect: 'follow',
-    });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    return await response.text();
-  } finally {
-    clearTimeout(timer);
+/**
+ * How long to wait before the one retry after a rate-limit response.
+ *
+ * Capped, and only once. A function that keeps retrying is both impolite to a free
+ * service and liable to be killed by the platform's time limit mid-run, which writes no
+ * record at all — the failure this module is otherwise built to avoid.
+ */
+const RETRY_CAP_MS = 6_000;
+
+function retryAfterMs(response: Response): number {
+  const header = response.headers.get('retry-after');
+  const seconds = Number(header);
+  if (Number.isFinite(seconds) && seconds > 0) return Math.min(seconds * 1000, RETRY_CAP_MS);
+  return 2_000;
+}
+
+/**
+ * Turns an HTTP status into something worth reading on the screen.
+ *
+ * "HTTP 429" is accurate and useless: it sends an operator looking at their own
+ * configuration for a problem that is the far end asking them to slow down, and that will
+ * very likely have cleared by the next scheduled run.
+ */
+function describe(status: number, host: string): string {
+  if (status === 429) {
+    return `${host} is rate-limiting requests (HTTP 429). Nothing is wrong with the configuration — wait a few minutes, or leave it to the scheduled run.`;
   }
+  if (status === 403) return `${host} refused the request (HTTP 403). It may be blocking automated readers.`;
+  if (status === 404) return `${host} has no feed at that address (HTTP 404). Check the source's address.`;
+  if (status >= 500) return `${host} is having trouble of its own (HTTP ${status}). Usually worth retrying later.`;
+  return `HTTP ${status}`;
+}
+
+async function get(url: string, accept: string): Promise<string> {
+  const host = (() => {
+    try {
+      return new URL(url).hostname;
+    } catch {
+      return 'The source';
+    }
+  })();
+
+  const attempt = async (): Promise<Response> => {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+    try {
+      return await fetch(url, {
+        signal: controller.signal,
+        headers: { accept, 'user-agent': USER_AGENT },
+        redirect: 'follow',
+      });
+    } finally {
+      clearTimeout(timer);
+    }
+  };
+
+  let response = await attempt();
+
+  // One polite retry, honouring Retry-After when the service sends one. GDELT is free
+  // and shared — on a serverless host the outbound address is shared with other tenants
+  // too — so being asked to wait is ordinary rather than exceptional.
+  if (response.status === 429) {
+    await new Promise((resolve) => setTimeout(resolve, retryAfterMs(response)));
+    response = await attempt();
+  }
+
+  if (!response.ok) throw new Error(describe(response.status, host));
+  return await response.text();
 }
 
 /**

@@ -404,4 +404,10 @@ model MentionRun {
   found      Int      @default(0)
   added      Int      @default(0)
   duplicates Int      @default(0)
+  /// Fetched but not about this organisation, so never stored.
+  ///
+  /// Recorded because without it a working run reads as a broken one: a newspaper feed
+  /// that yielded 55 articles and no coverage of us shows as "55 found, 0 new" and looks
+  /// like everything was lost on the way in.
+  irrelevant Int      @default(0)
 }

@@ -182,7 +182,10 @@ export function MediaMentions({
       {lastRun && (
         <div style={{ fontSize: 12.5, color: 'var(--muted)', marginBottom: 16 }}>
           Last checked {when(lastRun.startedAt)} — {lastRun.found} found, {lastRun.added} new, {lastRun.duplicates} already
-          seen.
+          seen
+          {/* Without this, a feed that carried 55 articles and no coverage of us reads as
+              "55 found, 0 new" and looks like the run threw everything away. */}
+          {lastRun.irrelevant > 0 && `, ${lastRun.irrelevant} not about you`}.
           {store.live && store.checkedAt && <span> This screen updated {ago(store.checkedAt)}.</span>}
           {failedSources.length > 0 && (
             <span style={{ color: '#B7400E', fontWeight: 600 }}>

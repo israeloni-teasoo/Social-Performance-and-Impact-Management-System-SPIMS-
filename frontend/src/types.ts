@@ -416,6 +416,8 @@ export interface MentionRun {
   found: number;
   added: number;
   duplicates: number;
+  /** Fetched but not about this organisation, so never stored. */
+  irrelevant: number;
   detail: { source: string; ok: boolean; items: number; error?: string }[];
 }
 

@@ -104,6 +104,7 @@ export async function listMentionsHandler(query: { status?: unknown }): Promise<
             found: lastRun.found,
             added: lastRun.added,
             duplicates: lastRun.duplicates,
+            irrelevant: lastRun.irrelevant,
             detail: lastRun.detail,
           }
         : null,
@@ -328,7 +329,7 @@ export async function runMentionIngestionHandler(): Promise<HandlerResult> {
   const alerts = await notifyFlagged(created);
 
   const run = await prisma.mentionRun.create({
-    data: { status, detail, found, added, duplicates },
+    data: { status, detail, found, added, duplicates, irrelevant },
   });
 
   return {
