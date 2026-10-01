@@ -120,6 +120,36 @@ async function get(url: string, accept: string): Promise<string> {
  * since the last one, and the de-duplication downstream makes an overlap harmless
  * while a gap would silently lose coverage.
  */
+/**
+ * Checks a GDELT query for the one mistake its API punishes silently.
+ *
+ * GDELT requires OR'd terms to sit inside parentheses. A bare `A OR B` is not an error
+ * it reports as one: it answers 200 with an HTML notice, so the failure arrives as
+ * "non-JSON response" and reads like rate limiting. Our own recommended query had this
+ * bug, which is how it was found.
+ *
+ * Returns the problem in words, or null when the query is usable.
+ */
+export function gdeltQueryProblem(query: string): string | null {
+  let depth = 0;
+  let inQuotes = false;
+
+  for (let i = 0; i < query.length; i++) {
+    const c = query[i];
+    if (c === '"') inQuotes = !inQuotes;
+    if (inQuotes) continue;
+    if (c === '(') depth += 1;
+    else if (c === ')') depth -= 1;
+    else if (depth === 0 && query.startsWith('OR', i) && /\s/.test(query[i - 1] ?? '') && /\s/.test(query[i + 2] ?? '')) {
+      return `GDELT needs OR'd terms inside brackets. Write ( ${query.trim()} ) — or just search one word, since a search for Seplat already finds "Seplat Energy".`;
+    }
+  }
+
+  if (depth !== 0) return 'The brackets in this query are not balanced.';
+  if (inQuotes) return 'There is an unclosed quotation mark in this query.';
+  return null;
+}
+
 export function gdeltUrl(query: string, timespan = '7d', maxRecords = 75): string {
   const params = new URLSearchParams({
     query,
@@ -138,10 +168,17 @@ async function fetchGdelt(target: string): Promise<RawMention[]> {
   try {
     payload = JSON.parse(body);
   } catch {
-    // GDELT answers with an HTML notice when a query is malformed or it is
+    // GDELT answers 200 with an HTML notice when a query is malformed or it is
     // rate-limiting. Reported as a source error rather than as an empty result, so an
-    // empty queue is never mistaken for "no coverage this week".
-    throw new Error('GDELT returned a non-JSON response (usually a malformed query or rate limiting)');
+    // empty queue is never mistaken for "no coverage this week" — and the query is
+    // checked here, because "non-JSON response" otherwise reads as rate limiting when it
+    // is a query that will never work however long you wait.
+    const problem = gdeltQueryProblem(target);
+    throw new Error(
+      problem
+        ? `GDELT rejected this query. ${problem}`
+        : 'GDELT returned a non-JSON response. Usually rate limiting — it typically clears within a few minutes.',
+    );
   }
   return parseGdelt(payload);
 }

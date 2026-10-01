@@ -377,14 +377,18 @@ function SourcePanel({ store }: { store: ReturnType<typeof useMentionsStore> }) 
         leaves with it. With no active source, nothing is contacted at all.
       </div>
 
-      {store.sources.length === 0 && (
+      {/* Shown whenever one of them is missing, not only on an empty list — otherwise a
+          corrected recommendation can never reach an installation that already has the
+          others. */}
+      {RECOMMENDED_SOURCES.some((r) => !store.sources.some((s) => s.kind === r.kind && s.target === r.target)) && (
         <div style={{ paddingTop: 10, borderTop: '1px solid var(--line)' }}>
           <div style={{ fontSize: 12.5, color: 'var(--muted)', lineHeight: 1.5, marginBottom: 10 }}>
-            Nothing is configured, so nothing is collected and nothing is contacted. Add the free sources we would
-            start with — they arrive paused, so you decide which to switch on.
+            {store.sources.length === 0
+              ? 'Nothing is configured, so nothing is collected and nothing is contacted. Add the free sources we would start with — they arrive paused, so you decide which to switch on.'
+              : 'Some of the sources we would recommend are not configured here. Adding them again is harmless — anything already present is skipped, and new ones arrive paused.'}
           </div>
           <div style={{ marginBottom: 10 }}>
-            {RECOMMENDED_SOURCES.map((s) => (
+            {RECOMMENDED_SOURCES.filter((r) => !store.sources.some((s) => s.kind === r.kind && s.target === r.target)).map((s) => (
               <div key={s.name} style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 3 }}>
                 <strong style={{ color: 'var(--navy)' }}>{s.name}</strong> — {s.note}
               </div>

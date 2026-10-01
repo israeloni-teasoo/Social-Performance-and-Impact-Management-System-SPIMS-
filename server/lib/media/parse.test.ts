@@ -11,6 +11,7 @@
 import assert from 'node:assert/strict';
 import { GDELT_SAMPLE, GOOGLE_ALERTS_SAMPLE, RSS_SAMPLE } from './fixtures.js';
 import { dedupe, normaliseUrl, parseFeed, parseGdelt, parseGdeltDate, unwrapRedirect } from './parse.js';
+import { gdeltQueryProblem } from './fetch.js';
 
 let failures = 0;
 function test(name: string, fn: () => void) {
@@ -134,6 +135,35 @@ test('keeps genuinely different stories', () => {
 
 test('leaves an unparseable URL as itself rather than throwing', () => {
   assert.equal(normaliseUrl('not a url'), 'not a url');
+});
+
+console.log('\nGDELT query syntax');
+
+test('refuses a bare OR, which GDELT answers with an HTML notice rather than an error', () => {
+  // The recommended query shipped with exactly this fault, so every run reported a
+  // "non-JSON response" that read like rate limiting and would never have cleared.
+  assert.ok(gdeltQueryProblem('"Seplat" OR "Seplat Energy"'));
+  assert.ok(gdeltQueryProblem('Seplat OR SEPLAT'));
+});
+
+test('accepts the bracketed form GDELT actually wants', () => {
+  assert.equal(gdeltQueryProblem('("Seplat" OR "Seplat Energy")'), null);
+  assert.equal(gdeltQueryProblem('(Seplat OR SEPLAT) (Nigeria OR Delta)'), null);
+});
+
+test('accepts a plain search, which needs no brackets at all', () => {
+  assert.equal(gdeltQueryProblem('Seplat'), null);
+  assert.equal(gdeltQueryProblem('"Seplat Energy"'), null);
+});
+
+test('does not mistake OR inside a word or inside quotes for the operator', () => {
+  assert.equal(gdeltQueryProblem('Seplat ORCHARD'), null);
+  assert.equal(gdeltQueryProblem('"A OR B"'), null);
+});
+
+test('catches an unbalanced bracket or an unclosed quote', () => {
+  assert.ok(gdeltQueryProblem('(Seplat'));
+  assert.ok(gdeltQueryProblem('"Seplat'));
 });
 
 console.log(failures === 0 ? '\nAll parser checks passed.\n' : `\n${failures} check(s) failed.\n`);

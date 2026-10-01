@@ -1,7 +1,7 @@
 import { prisma } from '../lib/db.js';
 import { appUrl, orgName } from '../lib/appIdentity.js';
 import { deliverAll, flagMentions, matchTerms, parseTerms } from '../lib/media/alerts.js';
-import { fetchAll } from '../lib/media/fetch.js';
+import { fetchAll, gdeltQueryProblem } from '../lib/media/fetch.js';
 import { normaliseUrl } from '../lib/media/parse.js';
 import { isSourceKind } from '../lib/media/types.js';
 import type { DeliveryOutcome, FlaggableMention } from '../lib/media/alerts.js';
@@ -136,6 +136,15 @@ export async function createMentionSourceHandler(input: {
   if (!name) return { status: 400, body: { error: 'A name is required.' } };
   if (!isSourceKind(kind)) return { status: 400, body: { error: 'kind must be gdelt, rss or googleAlerts.' } };
   if (!target) return { status: 400, body: { error: 'A query or feed URL is required.' } };
+
+  // GDELT's query language is the one place a source can be configured, accepted, and
+  // then fail for ever: a malformed query comes back as an HTML notice rather than an
+  // error status, so it looks like rate limiting on every run. Caught at the point
+  // somebody can still fix it.
+  if (kind === 'gdelt') {
+    const problem = gdeltQueryProblem(target);
+    if (problem) return { status: 400, body: { error: problem } };
+  }
 
   // A feed source must be a URL we can actually fetch. Rejected here rather than
   // discovered as a failed source on the first run.

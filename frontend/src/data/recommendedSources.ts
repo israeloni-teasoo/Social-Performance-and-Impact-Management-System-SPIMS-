@@ -26,7 +26,11 @@ export const RECOMMENDED_SOURCES: RecommendedSource[] = [
   {
     name: 'GDELT — Seplat coverage',
     kind: 'gdelt',
-    target: '"Seplat" OR "Seplat Energy"',
+    // One word, deliberately. It was `"Seplat" OR "Seplat Energy"`, which GDELT rejects:
+    // its query language requires OR'd terms inside parentheses, and a malformed query
+    // comes back as an HTML notice rather than an error status. The OR was redundant
+    // anyway — every article containing "Seplat Energy" contains "Seplat".
+    target: 'Seplat',
     note: 'A worldwide news index. Widest reach of the four, and the only one that finds outlets you have not listed.',
   },
   {
