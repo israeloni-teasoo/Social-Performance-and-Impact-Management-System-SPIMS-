@@ -404,5 +404,38 @@ post('/api/report-comments', async (req, res) => {
 app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
   console.error('Unhandled error in an API route:', error);
   if (res.headersSent) return;
+
+  const drift = schemaDrift(error);
+  if (drift) {
+    // Named rather than swallowed. A deployment whose code is ahead of its database
+    // fails on whichever screen touches the new column first, and the generic message
+    // sent somebody looking at the browser for a problem that is in the database. This
+    // reveals nothing sensitive: the schema is in the repository.
+    return res.status(503).json({ error: drift });
+  }
+
   res.status(500).json({ error: 'Something went wrong on the server.' });
 });
+
+/**
+ * Recognises a database that is behind the code it is serving.
+ *
+ * P2022 is a column the application expects and the database does not have; P2021 is a
+ * missing table. Both mean the same thing in practice — migrations have not been applied
+ * since the last deploy — and both are worth saying out loud, because the symptom
+ * otherwise is an unrelated screen quietly going read-only.
+ */
+function schemaDrift(error: unknown): string | null {
+  if (typeof error !== 'object' || error === null) return null;
+  const { code, meta } = error as { code?: string; meta?: { column?: string; table?: string } };
+
+  if (code === 'P2022') {
+    const column = meta?.column ? ` (${meta.column})` : '';
+    return `The database is missing a column this version expects${column}. Apply the pending migrations, then reload.`;
+  }
+  if (code === 'P2021') {
+    const table = meta?.table ? ` (${meta.table})` : '';
+    return `The database is missing a table this version expects${table}. Apply the pending migrations, then reload.`;
+  }
+  return null;
+}

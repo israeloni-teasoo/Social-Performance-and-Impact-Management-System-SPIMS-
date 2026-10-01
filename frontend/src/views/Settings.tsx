@@ -173,6 +173,7 @@ export function Settings({
   settings,
   status,
   live,
+  loadError,
   onSave,
   pushToast,
 }: {
@@ -181,6 +182,8 @@ export function Settings({
   settings: OrgSettings;
   status: IntegrationStatus | null;
   live: boolean;
+  /** Why the settings could not be read, when a server answered but the read failed. */
+  loadError: string | null;
   onSave: (next: OrgSettings) => Promise<boolean>;
   pushToast: (message: string, tone?: ToastTone) => void;
 }) {
@@ -225,7 +228,23 @@ export function Settings({
         ))}
       </div>
 
-      {tab === 'organisation' && <OrganisationSection settings={settings} canEdit={canAdminister && live} onSave={onSave} />}
+      {tab === 'organisation' && (
+        <>
+          {/* A read-only form with no explanation is the failure this is here to end. */}
+          {canAdminister && !live && loadError && (
+            <div style={{ ...card, borderLeft: '3px solid #B7400E', marginBottom: 14 }}>
+              <div style={{ fontSize: 13.5, fontWeight: 700, color: '#B7400E', marginBottom: 4 }}>
+                These settings could not be read from the server
+              </div>
+              <div style={{ fontSize: 12.5, color: 'var(--ink)', lineHeight: 1.5 }}>
+                {loadError} The fields below show built-in defaults, are not what this installation is using, and cannot
+                be saved until the problem is fixed.
+              </div>
+            </div>
+          )}
+          <OrganisationSection settings={settings} canEdit={canAdminister && live} onSave={onSave} />
+        </>
+      )}
       {tab === 'accounts' && canAdminister && (
         <>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 15, fontWeight: 700, color: 'var(--navy)', marginBottom: 12 }}>

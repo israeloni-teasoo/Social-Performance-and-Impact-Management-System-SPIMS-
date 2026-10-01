@@ -23,6 +23,14 @@ export function useSettingsStore(onNotify?: (message: string, tone?: ToastTone) 
   const [settings, setSettings] = useState<OrgSettings>(DEFAULT_SETTINGS);
   const [status, setStatus] = useState<IntegrationStatus | null>(null);
   const [live, setLive] = useState(false);
+  /**
+   * Why the settings could not be read, when a server was there to ask.
+   *
+   * Without this the only signal was `live` staying false, which disables the whole
+   * Organisation form — so a database one migration behind presented as a form that
+   * simply would not accept typing, with nothing on screen to say why.
+   */
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -39,8 +47,11 @@ export function useSettingsStore(onNotify?: (message: string, tone?: ToastTone) 
           setLive(true);
         }
       })
-      .catch(() => {
-        // Fall back to the defaults already in state.
+      .catch((err: unknown) => {
+        // The defaults already in state stand; what was missing was the reason.
+        if (!cancelled) {
+          setLoadError(err instanceof Error && err.message ? err.message : 'The server did not return the settings.');
+        }
       });
     return () => {
       cancelled = true;
@@ -59,5 +70,5 @@ export function useSettingsStore(onNotify?: (message: string, tone?: ToastTone) 
     }
   };
 
-  return { settings, status, live, save };
+  return { settings, status, live, loadError, save };
 }

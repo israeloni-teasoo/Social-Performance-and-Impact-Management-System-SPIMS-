@@ -89,7 +89,7 @@ function SignedInApp({ user, demoMode, onLogout }: { user: AuthUser; demoMode: b
   const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(null);
 
   const { toasts, push: pushToast, dismiss: dismissToast } = useToastQueue();
-  const { settings, status: integrationStatus, live: settingsLive, save: saveSettings } = useSettingsStore(pushToast);
+  const { settings, status: integrationStatus, live: settingsLive, loadError: settingsLoadError, save: saveSettings } = useSettingsStore(pushToast);
   const { approvals, approve, returnItem, addComment: addApprovalComment } = useApprovalsStore(pushToast);
   const { stakeholders, addStakeholder } = useStakeholdersStore(pushToast);
   const { targets, addTarget, closeTarget } = useTargetsStore(pushToast);
@@ -218,6 +218,7 @@ function SignedInApp({ user, demoMode, onLogout }: { user: AuthUser; demoMode: b
               settings={settings}
               status={integrationStatus}
               live={settingsLive}
+              loadError={settingsLoadError}
               onSave={saveSettings}
               pushToast={pushToast}
             />
