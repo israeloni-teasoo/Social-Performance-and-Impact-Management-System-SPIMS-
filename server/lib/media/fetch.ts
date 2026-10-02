@@ -1,4 +1,5 @@
 import { dedupe, parseFeed, parseGdelt } from './parse.js';
+import { minimumGapMs } from './types.js';
 import type { FetchOutcome, RawMention, SourceKind } from './types.js';
 
 /**
@@ -41,6 +42,16 @@ export interface SourceRecord {
   name: string;
   kind: string;
   target: string;
+  /** When this source was last contacted, so a rate-limited one can be left alone. */
+  lastFetchedAt?: Date | null;
+}
+
+/** How long ago, in words a person reading the failure line would use. */
+function agoLabel(ms: number): string {
+  const seconds = Math.round(ms / 1000);
+  if (seconds < 60) return `${seconds} second${seconds === 1 ? '' : 's'} ago`;
+  const minutes = Math.round(seconds / 60);
+  return `${minutes} minute${minutes === 1 ? '' : 's'} ago`;
 }
 
 /**
@@ -52,11 +63,18 @@ export interface SourceRecord {
  */
 const RETRY_CAP_MS = 6_000;
 
-function retryAfterMs(response: Response): number {
-  const header = response.headers.get('retry-after');
-  const seconds = Number(header);
-  if (Number.isFinite(seconds) && seconds > 0) return Math.min(seconds * 1000, RETRY_CAP_MS);
-  return 2_000;
+/**
+ * How long to wait, or null when the service did not say.
+ *
+ * Only a stated wait is honoured. Guessing was worse than useless against GDELT, which
+ * sends no Retry-After and keeps the gate shut for roughly a minute after a breach: a
+ * two-second guess spends another request inside the block and extends it. A service
+ * that does not say how long is one to leave alone until the next run.
+ */
+function retryAfterMs(response: Response): number | null {
+  const seconds = Number(response.headers.get('retry-after'));
+  if (!Number.isFinite(seconds) || seconds <= 0) return null;
+  return seconds * 1000 <= RETRY_CAP_MS ? seconds * 1000 : null;
 }
 
 /**
@@ -101,12 +119,14 @@ async function get(url: string, accept: string): Promise<string> {
 
   let response = await attempt();
 
-  // One polite retry, honouring Retry-After when the service sends one. GDELT is free
-  // and shared — on a serverless host the outbound address is shared with other tenants
-  // too — so being asked to wait is ordinary rather than exceptional.
+  // One polite retry, and only when the service named a wait we can afford. Retrying a
+  // silent 429 spends a request inside a block we cannot see the end of.
   if (response.status === 429) {
-    await new Promise((resolve) => setTimeout(resolve, retryAfterMs(response)));
-    response = await attempt();
+    const wait = retryAfterMs(response);
+    if (wait !== null) {
+      await new Promise((resolve) => setTimeout(resolve, wait));
+      response = await attempt();
+    }
   }
 
   if (!response.ok) throw new Error(describe(response.status, host));
@@ -191,6 +211,21 @@ async function fetchFeed(target: string, country: string): Promise<RawMention[]>
 /** Fetches one source, converting a failure into a reported outcome rather than a throw. */
 export async function fetchSource(source: SourceRecord): Promise<FetchOutcome> {
   const base = { sourceId: source.id, sourceName: source.name };
+
+  // Left alone rather than asked again. Pressing the button after a rate-limited run is
+  // the natural thing to do and the one thing that keeps the block alive.
+  const gap = minimumGapMs(source.kind);
+  const since = source.lastFetchedAt ? Date.now() - new Date(source.lastFetchedAt).getTime() : Infinity;
+  if (gap > 0 && since < gap) {
+    return {
+      ...base,
+      ok: true,
+      skipped: true,
+      items: [],
+      error: `Checked ${agoLabel(since)}. Left alone so it does not start rate-limiting; the next run will pick it up.`,
+    };
+  }
+
   try {
     let items: RawMention[];
     switch (source.kind as SourceKind) {

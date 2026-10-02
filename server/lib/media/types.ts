@@ -28,6 +28,24 @@ export interface FetchOutcome {
   items: RawMention[];
   /** Present when ok is false. Shown to the operator rather than swallowed. */
   error?: string;
+  /**
+   * Set when the source was deliberately left alone because it was contacted moments
+   * ago. Distinct from a failure: nothing went wrong, and reporting it as a failed
+   * source would train people to ignore the failure line.
+   */
+  skipped?: boolean;
+}
+
+/**
+ * The shortest gap between two requests to the same source.
+ *
+ * Only GDELT needs one. It allows roughly one request every five seconds per address and
+ * answers a breach with a block of about a minute, so a person pressing the button after
+ * a failed run keeps the block alive. A newspaper serving a static feed file does not
+ * care.
+ */
+export function minimumGapMs(kind: string): number {
+  return kind === 'gdelt' ? 60_000 : 0;
 }
 
 export type SourceKind = 'gdelt' | 'rss' | 'googleAlerts';

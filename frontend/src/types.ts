@@ -418,7 +418,7 @@ export interface MentionRun {
   duplicates: number;
   /** Fetched but not about this organisation, so never stored. */
   irrelevant: number;
-  detail: { source: string; ok: boolean; items: number; error?: string }[];
+  detail: { source: string; ok: boolean; items: number; skipped?: boolean; error?: string }[];
 }
 
 export interface MentionFeed {

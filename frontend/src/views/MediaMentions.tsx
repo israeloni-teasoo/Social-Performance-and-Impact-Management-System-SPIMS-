@@ -71,6 +71,8 @@ export function MediaMentions({
 
   const lastRun = store.feed.lastRun;
   const failedSources = lastRun?.detail.filter((d) => !d.ok) ?? [];
+  // Left alone on purpose, which is not a failure and must not be coloured like one.
+  const skippedSources = lastRun?.detail.filter((d) => d.skipped) ?? [];
 
   return (
     <div>
@@ -187,6 +189,12 @@ export function MediaMentions({
               "55 found, 0 new" and looks like the run threw everything away. */}
           {lastRun.irrelevant > 0 && `, ${lastRun.irrelevant} not about you`}.
           {store.live && store.checkedAt && <span> This screen updated {ago(store.checkedAt)}.</span>}
+          {skippedSources.length > 0 && (
+            <span>
+              {' '}
+              {skippedSources.map((d) => `${d.source} — ${d.error ?? 'left alone this time'}`).join('; ')}
+            </span>
+          )}
           {failedSources.length > 0 && (
             <span style={{ color: '#B7400E', fontWeight: 600 }}>
               {' '}

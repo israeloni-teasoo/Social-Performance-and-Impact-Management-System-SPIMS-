@@ -260,7 +260,20 @@ export async function runMentionIngestionHandler(): Promise<HandlerResult> {
     };
   }
 
-  const outcomes = await fetchAll(sources.map((s) => ({ id: s.id, name: s.name, kind: s.kind, target: s.target })));
+  const outcomes = await fetchAll(
+    sources.map((s) => ({ id: s.id, name: s.name, kind: s.kind, target: s.target, lastFetchedAt: s.lastFetchedAt })),
+  );
+
+  // Stamped only for sources actually contacted, so a skip does not extend its own
+  // cooldown indefinitely.
+  const contacted = outcomes.filter((o) => !o.skipped).map((o) => o.sourceId);
+  if (contacted.length > 0) {
+    await prisma.mentionSource
+      .updateMany({ where: { id: { in: contacted } }, data: { lastFetchedAt: new Date() } })
+      .catch(() => {
+        // Worth no more than a missed cooldown.
+      });
+  }
 
   const terms = await watchTerms();
   const kindOf = new Map(sources.map((s) => [s.id, s.kind]));
@@ -326,12 +339,16 @@ export async function runMentionIngestionHandler(): Promise<HandlerResult> {
   }
 
   const failed = outcomes.filter((o) => !o.ok);
-  const status = failed.length === 0 ? 'ok' : failed.length === outcomes.length ? 'failed' : 'partial';
+  const attempted = outcomes.filter((o) => !o.skipped);
+  // A run in which every source was merely left alone is not a failed run.
+  const status =
+    failed.length === 0 ? 'ok' : attempted.length > 0 && failed.length === attempted.length ? 'failed' : 'partial';
 
   const detail = outcomes.map((o) => ({
     source: o.sourceName,
     ok: o.ok,
     items: o.items.length,
+    ...(o.skipped ? { skipped: true } : {}),
     ...(o.error ? { error: o.error } : {}),
   }));
 

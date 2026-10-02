@@ -155,11 +155,13 @@ export function useMentionsStore(onNotify: (message: string, tone?: ToastTone) =
         duplicates: number;
         found: number;
         irrelevant?: number;
-        detail: { source: string; ok: boolean; error?: string }[];
+        detail: { source: string; ok: boolean; skipped?: boolean; error?: string }[];
         alerts?: { flagged: number; delivered: number; failed: { channel: string; error: string }[] };
       }>('/api/mentions/run', {});
       await load();
       const failed = result.detail.filter((d) => !d.ok);
+      const skipped = result.detail.filter((d) => d.skipped);
+      const skippedNote = skipped.length > 0 ? ` ${skipped.map((d) => `${d.source}: ${d.error ?? 'left alone'}`).join('; ')}` : '';
       const alerts = result.alerts;
       const flaggedNote = alerts && alerts.flagged > 0 ? ` ${alerts.flagged} flagged.` : '';
       // Said plainly, because "found 40, added 2" otherwise looks like most of the run
@@ -179,7 +181,7 @@ export function useMentionsStore(onNotify: (message: string, tone?: ToastTone) =
         );
       } else {
         onNotify(
-          `${result.added} new mention${result.added === 1 ? '' : 's'}, ${result.duplicates} already seen.${filteredNote}${flaggedNote}`,
+          `${result.added} new mention${result.added === 1 ? '' : 's'}, ${result.duplicates} already seen.${filteredNote}${flaggedNote}${skippedNote}`,
           'success',
         );
       }

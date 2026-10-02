@@ -299,6 +299,14 @@ model MentionSource {
 
   mentions Mention[]
 
+  /// When this source was last actually contacted.
+  ///
+  /// Used to leave a rate-limited service alone. GDELT allows about one request every
+  /// five seconds per address and answers a breach with a block lasting roughly a
+  /// minute — so pressing "check for new mentions" after a failure re-triggers the
+  /// block, and the only escape is to stop pressing. This makes the button safe.
+  lastFetchedAt DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
