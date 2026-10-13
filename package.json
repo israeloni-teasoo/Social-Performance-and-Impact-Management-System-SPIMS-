@@ -20,6 +20,7 @@
     "smoke:alerts": "tsx scripts/smoke-alerts.ts",
     "smoke:templates": "tsx scripts/smoke-templates.ts",
     "smoke:upload": "tsx scripts/smoke-upload.ts",
+    "test:portfolio": "tsx scripts/portfolio.test.ts",
     "test:validator": "tsx scripts/validator.test.ts",
     "test:sroi": "tsx scripts/sroi.test.ts",
     "test:parsers": "tsx server/lib/media/parse.test.ts && tsx server/lib/media/alerts.test.ts"

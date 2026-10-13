@@ -1,68 +1,112 @@
 import { ReachVsImpactTip } from '../components/ReachPanel';
 import { InfoTip } from '../components/Tooltip';
-import { analysePortfolio, formatCompact, formatCount } from '../analytics/metrics';
-import { card } from '../ui';
-import type { Project, ProjectImpact } from '../types';
+import { analysePortfolio, formatCompact, formatCount, formatMillions } from '../analytics/metrics';
+import { communitiesFor, deliveryFor, demographicsFor, moneyFor, outcomesFor, sroiFor } from '../analytics/portfolio';
+import { card, PILLAR_COLORS } from '../ui';
+import type { MoneySlice } from '../analytics/portfolio';
+import type { Project, ProjectImpact, Target } from '../types';
 
-const COMPLIANCE_ITEMS = [
-  {
-    icon: '✓',
-    iconColor: '#1F8A5B',
-    text: 'PIA HCDT — 3% OpEx funded',
-    detail: 'FY26 Host Community Development Trust allocation is fully funded and reconciled quarterly against actual OpEx. No open gap.',
-  },
-  {
-    icon: '87%',
-    iconColor: '#2B4C9B',
-    text: 'NCDMB local content',
-    detail: 'Target: 90% Nigerian personnel, goods and services. Current: 87%. Gap: local-hire share on 2 infrastructure contracts is below threshold — Procurement is tracking corrective hiring targets with those contractors this quarter.',
-  },
-  {
-    icon: '!',
-    iconColor: '#C0491E',
-    text: '4 IFRS S1 gaps open',
-    detail: 'Open items: climate-related risk disclosure, governance oversight statement, scenario analysis, and value-chain emissions estimate. Owner: Sustainability team, targeted for close-out before the FY26 annual report.',
-  },
-  {
-    icon: '96%',
-    iconColor: '#1F8A5B',
-    text: 'GRI 403 disclosure complete',
-    detail: 'Target: 100% of active sites with occupational-health disclosure. Current: 96%. Gap: 1 site is awaiting its Q3 safety audit before its disclosure can be finalised.',
-  },
-  {
-    icon: '✓',
-    iconColor: '#1F8A5B',
-    text: 'SDG mapping current',
-    detail: 'Every active project is tagged to at least one SDG target. No open gap.',
-  },
+/**
+ * The executive dashboard.
+ *
+ * Every figure on this screen is computed from the programmes in the portfolio. That
+ * sounds unremarkable and was not true: the social investment total, the host-community
+ * count, the SROI ratio, community satisfaction, the share of the social aspiration
+ * achieved, the spend split by pillar and by state, the four "who benefited"
+ * percentages, the compliance tally and the high-risk count were all written into this
+ * file. None of them moved when a project was added, which makes the first screen an
+ * executive opens the worst place in the product for a number nobody can trace.
+ *
+ * Two of them had no source at all — community satisfaction is measured by nothing in
+ * this system, and compliance is checked against nothing. Those are now absent, with the
+ * screen saying what would have to be connected, rather than estimated into place.
+ */
+
+/** What SPIMS would check compliance against, once something is connected to check. */
+const COMPLIANCE_COMMITMENTS = [
+  { text: 'PIA host-community trust allocation', needs: 'the trust’s funding position, from finance' },
+  { text: 'NCDMB local-content thresholds', needs: 'contractor local-hire data, from procurement' },
+  { text: 'IFRS S1 disclosures', needs: 'the sustainability team’s disclosure register' },
+  { text: 'GRI 403 occupational health', needs: 'site-level safety audit status' },
+  { text: 'SDG mapping of active programmes', needs: 'each programme tagged in the indicator library' },
 ];
 
-const OUTCOME_ROWS = [
-  { delta: '+12%', desc: 'literacy in STEP-supported schools', localTag: 'NCDMB human-capital', globalTag: 'SDG 4' },
-  { delta: '−8%', desc: 'youth unemployment in YEP-covered LGAs', localTag: 'NCDMB local content', globalTag: 'SDG 8' },
-  { delta: '+22K', desc: 'people gained clean-water access', localTag: 'PIA HCDT', globalTag: 'SDG 6' },
-];
-
-const SPEND_TILE = { label: 'Social investment · FY26', value: '\u20a64.68B', sub: '90% of \u20a65.2B budget' };
-const COMMUNITIES_TILE = { label: 'Host communities', value: '42', sub: 'Edo \u00b7 Delta \u00b7 Imo' };
+function MoneyBars({ rows, title, note }: { rows: MoneySlice[]; title: string; note: string }) {
+  if (rows.length === 0) {
+    return <div style={{ fontSize: 13, color: 'var(--muted)' }}>No programme carries a budget yet.</div>;
+  }
+  return (
+    <>
+      <div style={{ fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 12 }}>{title}</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        {rows.map((row) => (
+          <div key={row.label} style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            <span style={{ width: 130, fontSize: 13.5, fontWeight: 600 }}>{row.label}</span>
+            <span style={{ flex: 1, height: 20, background: 'var(--bg)', borderRadius: 6, overflow: 'hidden' }}>
+              <span
+                style={{
+                  display: 'block',
+                  height: '100%',
+                  width: `${Math.max(row.sharePct, 0.8)}%`,
+                  background: PILLAR_COLORS[row.label]?.[1] ?? '#2B4C9B',
+                  borderRadius: 6,
+                }}
+              />
+            </span>
+            <span style={{ width: 128, fontSize: 13, fontWeight: 700, textAlign: 'right', whiteSpace: 'nowrap' }}>
+              {formatMillions(row.budgetMillions)} · {row.sharePct}%
+            </span>
+          </div>
+        ))}
+      </div>
+      <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 12 }}>{note}</div>
+    </>
+  );
+}
 
 export function ExecutiveDashboard({
   targetYear,
   projects,
   impacts,
+  targets,
 }: {
   targetYear: number;
   projects: Project[];
   impacts: Record<string, ProjectImpact>;
+  targets: Target[];
 }) {
   const totals = analysePortfolio(projects, impacts);
-  const pillars = totals.pillars;
+  const money = moneyFor(projects, impacts);
+  const people = demographicsFor(projects, impacts);
+  const sroi = sroiFor(projects, impacts);
+  const delivery = deliveryFor(projects);
+  const communities = communitiesFor(projects, impacts);
+  const outcomes = outcomesFor(projects, impacts);
+
+  // The aspiration figure comes from the targets somebody actually set, as the mean of
+  // how far each has run. Targets are measured in different units, so they are averaged
+  // as percentages rather than summed — stated below the figure, because an average of
+  // percentages is a different claim from a total.
+  const active = targets.filter((t) => t.status === 'Active' && t.totalTarget > 0);
+  const aspirationPct = active.length === 0
+    ? null
+    : Math.round(active.reduce((sum, t) => sum + Math.min(t.currentValue / t.totalTarget, 1), 0) / active.length * 100);
 
   const atAGlance = [
-    SPEND_TILE,
-    { label: 'Reach \u00b7 interactions', value: formatCompact(totals.reach), sub: `${formatCount(totals.reach)} people engaged`, tone: 'reach' as const },
-    { label: 'Impact \u00b7 people served', value: formatCompact(totals.impact), sub: `${formatCount(totals.impact)} · ${totals.conversionPct}% of interactions`, tone: 'impact' as const },
-    COMMUNITIES_TILE,
+    {
+      label: 'Social investment',
+      value: formatMillions(money.budgetMillions),
+      sub: money.programmesWithRecordedSpend > 0
+        ? `${formatMillions(money.spentMillions)} recorded spent · ${money.utilisedPct}% of those programmes’ budgets`
+        : `budgeted across ${projects.length} programme${projects.length === 1 ? '' : 's'} · none has recorded spend yet`,
+    },
+    { label: 'Reach · interactions', value: formatCompact(totals.reach), sub: `${formatCount(totals.reach)} people engaged`, tone: 'reach' as const },
+    { label: 'Impact · people served', value: formatCompact(totals.impact), sub: `${formatCount(totals.impact)} · ${totals.conversionPct}% of interactions`, tone: 'impact' as const },
+    {
+      label: 'Host communities',
+      value: String(communities.length),
+      sub: communities.length === 0 ? 'none recorded against a programme yet' : communities.slice(0, 3).join(' · ') + (communities.length > 3 ? ' …' : ''),
+    },
   ];
 
   return (
@@ -72,9 +116,12 @@ export function ExecutiveDashboard({
           Executive Dashboard
         </h1>
         <p style={{ fontSize: 14.5, color: 'var(--muted)', margin: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
-          Social investment performance, FY26 year to date.
-          <InfoTip label="About this data">
-            This build isn't connected to Seplat's real field data yet — figures shown are illustrative, pending verified data.
+          Social investment performance across {projects.length} programme{projects.length === 1 ? '' : 's'}.
+          <InfoTip label="Where these figures come from" width={340}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div>Every figure on this screen is calculated from the programmes recorded in SPIMS. Add or change one and these move.</div>
+              <div>Two things are not shown because nothing feeds them: community satisfaction, which no part of this system collects, and compliance, which has no source to check against. Both are named below rather than estimated.</div>
+            </div>
           </InfoTip>
         </p>
       </div>
@@ -82,41 +129,70 @@ export function ExecutiveDashboard({
       <div style={{ background: 'linear-gradient(160deg,#1a2a63,#111c55)', borderRadius: 18, padding: '26px 28px', marginBottom: 22 }}>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
           <div style={{ fontSize: 19, fontWeight: 800, color: '#fff' }}>What changed</div>
-          <div style={{ fontSize: 12.5, color: '#9EA1C0' }}>Outcome deltas for FY26, mapped to local and global frameworks</div>
+          <div style={{ fontSize: 12.5, color: '#9EA1C0' }}>
+            {outcomes.length > 0 ? 'Outcomes recorded against programmes, largest first' : 'Recorded outcomes appear here'}
+          </div>
         </div>
-        <div className="grid-3" style={{ gap: 16 }}>
-          {OUTCOME_ROWS.map((row) => (
-            <div key={row.desc} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 14, padding: '18px 20px' }}>
-              <div style={{ fontSize: 34, fontWeight: 800, color: '#fff', lineHeight: 1.1, marginBottom: 8 }}>{row.delta}</div>
-              <div style={{ fontSize: 13.5, color: '#E4E6F5', marginBottom: 12 }}>{row.desc}</div>
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                <span style={{ fontSize: 10.5, fontWeight: 700, padding: '3px 9px', borderRadius: 20, background: 'rgba(43,76,155,0.35)', color: '#B9CBEB' }}>{row.localTag}</span>
-                <span style={{ fontSize: 10.5, fontWeight: 700, padding: '3px 9px', borderRadius: 20, background: 'rgba(31,138,91,0.3)', color: '#9EE8C4' }}>{row.globalTag}</span>
+        {outcomes.length === 0 ? (
+          <div style={{ fontSize: 13.5, color: '#C7C9DA', lineHeight: 1.6, maxWidth: 680 }}>
+            No programme has recorded what changed as a result of its work yet. It is the{' '}
+            <span style={{ fontFamily: 'monospace', fontSize: 12.5 }}>what_changed_as_a_result</span> column of the project completion
+            upload, and until one is filled in there is nothing here to show.
+          </div>
+        ) : (
+          <div className="grid-3" style={{ gap: 16 }}>
+            {outcomes.map((row) => (
+              <div key={row.code} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 14, padding: '18px 20px' }}>
+                {row.figure && (
+                  <div style={{ fontSize: 34, fontWeight: 800, color: '#fff', lineHeight: 1.1, marginBottom: 2 }}>{row.figure}</div>
+                )}
+                {row.figureLabel && <div style={{ fontSize: 11.5, color: '#9EA1C0', marginBottom: 10 }}>{row.figureLabel}</div>}
+                <div style={{ fontSize: 13.5, color: '#E4E6F5', marginBottom: 12, lineHeight: 1.5 }}>{row.outcome}</div>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: 10.5, fontWeight: 700, padding: '3px 9px', borderRadius: 20, background: 'rgba(43,76,155,0.35)', color: '#B9CBEB' }}>{row.pillar}</span>
+                  <span style={{ fontSize: 10.5, fontWeight: 700, padding: '3px 9px', borderRadius: 20, background: 'rgba(255,255,255,0.1)', color: '#C7C9DA' }}>{row.code}</span>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-        <div style={{ display: 'flex', gap: 26, marginTop: 20, paddingTop: 18, borderTop: '1px solid rgba(255,255,255,0.12)' }}>
+            ))}
+          </div>
+        )}
+        <div style={{ display: 'flex', gap: 26, marginTop: 20, paddingTop: 18, borderTop: '1px solid rgba(255,255,255,0.12)', flexWrap: 'wrap' }}>
           <div>
             <div style={{ fontSize: 26, fontWeight: 800, color: '#fff', display: 'flex', alignItems: 'center', gap: 6 }}>
-              3.4×
-              <InfoTip label="How SROI is calculated">
+              {sroi ? `₦${sroi.ratio.toFixed(2)}` : '—'}
+              <InfoTip label="How the social return is calculated" width={360}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  <div>SROI = total social value created ÷ total invested. 3.4× means ₦3.40 of estimated social value for every ₦1 spent.</div>
-                  <div>Social value is estimated by assigning a financial proxy to each outcome — for example, the wage uplift from a job created, or the healthcare-cost value of restored sight — then adjusting for deadweight (what would have happened anyway), attribution, and drop-off over time.</div>
-                  <div style={{ color: '#8A5A0B' }}>⚠ This figure is a Phase 1 illustrative placeholder. Seplat's M&amp;E team hasn't yet validated the financial proxies each outcome needs, so this ratio isn't computed from live data.</div>
+                  <div>
+                    Social value created ÷ amount invested, by Social Value International’s method: a financial proxy for each
+                    programme’s outcome, less deadweight and attribution, decaying each year and discounted to today’s money.
+                  </div>
+                  {sroi ? (
+                    <div>
+                      Across {sroi.programmes} programme{sroi.programmes === 1 ? '' : 's'} with recorded spend and a count of people
+                      served: {formatMillions(sroi.presentValueNgn / 1_000_000)} of estimated social value against{' '}
+                      {formatMillions(sroi.investmentNgn / 1_000_000)} invested.
+                    </div>
+                  ) : (
+                    <div>No programme yet carries both recorded spend and a count of people served, so there is nothing to calculate.</div>
+                  )}
+                  <div style={{ color: '#FFD2D9' }}>
+                    ⚠ Illustrative. The financial proxies have not been validated by Seplat’s M&amp;E function — they are placeholders in
+                    one file, and the ratio changes when they are replaced.
+                  </div>
                 </div>
               </InfoTip>
             </div>
-            <div style={{ fontSize: 11.5, color: '#9EA1C0' }}>SROI ratio</div>
+            <div style={{ fontSize: 11.5, color: '#9EA1C0' }}>Social value per ₦1 · illustrative</div>
           </div>
           <div>
-            <div style={{ fontSize: 26, fontWeight: 800, color: '#fff' }}>78%</div>
-            <div style={{ fontSize: 11.5, color: '#9EA1C0' }}>Community satisfaction</div>
+            <div style={{ fontSize: 26, fontWeight: 800, color: '#fff' }}>{formatCount(totals.impact)}</div>
+            <div style={{ fontSize: 11.5, color: '#9EA1C0' }}>People served to date</div>
           </div>
           <div>
-            <div style={{ fontSize: 26, fontWeight: 800, color: '#fff' }}>52%</div>
-            <div style={{ fontSize: 11.5, color: '#9EA1C0' }}>{targetYear} social aspiration achieved</div>
+            <div style={{ fontSize: 26, fontWeight: 800, color: '#fff' }}>{aspirationPct === null ? '—' : `${aspirationPct}%`}</div>
+            <div style={{ fontSize: 11.5, color: '#9EA1C0' }}>
+              {aspirationPct === null ? `No ${targetYear} target set yet` : `Mean progress across ${active.length} target${active.length === 1 ? '' : 's'}`}
+            </div>
           </div>
         </div>
       </div>
@@ -134,19 +210,12 @@ export function ExecutiveDashboard({
         }}
       >
         {atAGlance.map((item, i) => (
-          <div
-            key={item.label}
-            style={{
-              flex: '1 1 200px',
-              padding: '14px 20px',
-              borderLeft: i === 0 ? 'none' : '1px solid var(--line)',
-            }}
-          >
+          <div key={item.label} style={{ flex: '1 1 200px', padding: '14px 20px', borderLeft: i === 0 ? 'none' : '1px solid var(--line)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10.5, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
               {item.label}
               {'tone' in item && <ReachVsImpactTip width={300} />}
             </div>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 2 }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 2, flexWrap: 'wrap' }}>
               <span
                 style={{
                   fontSize: 19,
@@ -172,7 +241,7 @@ export function ExecutiveDashboard({
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: 18 }}>
-          {pillars.map((p) => {
+          {totals.pillars.map((p) => {
             const share = totals.reach === 0 ? 0 : (p.reach / totals.reach) * 100;
             const impactShare = p.reach === 0 ? 0 : (p.impact / p.reach) * 100;
             return (
@@ -205,36 +274,22 @@ export function ExecutiveDashboard({
       <div className="grid-dash-money" style={{ marginBottom: 18 }}>
         <div style={card}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 22, flexWrap: 'wrap', gap: 8 }}>
-            <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--navy)' }}>Where the money went</div>
-            <div style={{ fontSize: 12, color: 'var(--muted)' }}>FY26 spend by pillar</div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--navy)' }}>Where the money is committed</div>
+            <div style={{ fontSize: 12, color: 'var(--muted)' }}>
+              {money.programmesWithRecordedSpend} of {projects.length} programme{projects.length === 1 ? '' : 's'} has recorded actual spend
+            </div>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-            {[
-              { name: 'Education', pct: 45, amt: '₦2.10B · 45%', color: '#2B4C9B' },
-              { name: 'Health', pct: 22, amt: '₦1.03B · 22%', color: '#1F8A5B' },
-              { name: 'Infrastructure', pct: 20, amt: '₦0.94B · 20%', color: '#0E7C86' },
-              { name: 'Economic Emp.', pct: 13, amt: '₦0.61B · 13%', color: '#C0491E' },
-            ].map((row) => (
-              <div key={row.name} style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                <span style={{ width: 130, fontSize: 13.5, fontWeight: 600 }}>{row.name}</span>
-                <span style={{ flex: 1, height: 22, background: 'var(--bg)', borderRadius: 6, overflow: 'hidden' }}>
-                  <span style={{ display: 'block', height: '100%', width: `${row.pct}%`, background: row.color, borderRadius: 6 }} />
-                </span>
-                <span style={{ width: 112, fontSize: 13.5, fontWeight: 700, textAlign: 'right' }}>{row.amt}</span>
-              </div>
-            ))}
-          </div>
-          <div style={{ display: 'flex', gap: 26, marginTop: 24, paddingTop: 18, borderTop: '1px solid var(--line)' }}>
-            {[
-              { label: 'By state · Edo', val: '58%' },
-              { label: 'Delta', val: '34%' },
-              { label: 'Imo', val: '8%' },
-            ].map((s) => (
-              <div key={s.label}>
-                <div style={{ fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{s.label}</div>
-                <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--navy)' }}>{s.val}</div>
-              </div>
-            ))}
+          <MoneyBars
+            rows={money.byPillar}
+            title="By pillar"
+            note="Budgets as recorded against each programme, not ledger entries from a finance system."
+          />
+          <div style={{ marginTop: 22, paddingTop: 18, borderTop: '1px solid var(--line)' }}>
+            <MoneyBars
+              rows={money.byState}
+              title="By state"
+              note="A programme covering more than one state is counted in each, so the shares describe where the work is rather than splitting a budget."
+            />
           </div>
         </div>
 
@@ -250,17 +305,7 @@ export function ExecutiveDashboard({
             justifyContent: 'center',
           }}
         >
-          <div
-            style={{
-              fontSize: 12,
-              fontWeight: 600,
-              letterSpacing: '0.08em',
-              textTransform: 'uppercase',
-              color: '#9EA1C0',
-              marginBottom: 16,
-              alignSelf: 'flex-start',
-            }}
-          >
+          <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#9EA1C0', marginBottom: 16, alignSelf: 'flex-start' }}>
             {targetYear} Social aspirations
           </div>
           <div
@@ -268,7 +313,7 @@ export function ExecutiveDashboard({
               width: 190,
               height: 190,
               borderRadius: '50%',
-              background: 'conic-gradient(var(--accent) 0% 52%, rgba(255,255,255,0.12) 52% 100%)',
+              background: `conic-gradient(var(--accent) 0% ${aspirationPct ?? 0}%, rgba(255,255,255,0.12) ${aspirationPct ?? 0}% 100%)`,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -286,65 +331,93 @@ export function ExecutiveDashboard({
                 justifyContent: 'center',
               }}
             >
-              <span style={{ fontSize: 50, fontWeight: 800, lineHeight: 1 }}>52%</span>
-              <span style={{ fontSize: 12, color: '#9EA1C0', marginTop: 4 }}>achieved</span>
+              <span style={{ fontSize: aspirationPct === null ? 22 : 50, fontWeight: 800, lineHeight: 1 }}>
+                {aspirationPct === null ? 'Not set' : `${aspirationPct}%`}
+              </span>
+              <span style={{ fontSize: 12, color: '#9EA1C0', marginTop: 4 }}>{aspirationPct === null ? '' : 'achieved'}</span>
             </div>
           </div>
-          <div style={{ fontSize: 13.5, color: '#C7C9DA', marginTop: 18, textAlign: 'center' }}>
-            On track across 4 pillars — Economic Empowerment flagged as the priority gap.
+          <div style={{ fontSize: 13, color: '#C7C9DA', marginTop: 18, textAlign: 'center', lineHeight: 1.55 }}>
+            {aspirationPct === null
+              ? 'No active target has been set. Targets are created under Targets, and this is the mean of how far each has run.'
+              : `Mean progress across ${active.length} active target${active.length === 1 ? '' : 's'}. Targets use different units, so they are averaged as percentages rather than added together.`}
           </div>
         </div>
       </div>
 
       <div className="grid-2" style={{ marginBottom: 18, gap: 18 }}>
         <div style={card}>
-          <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--navy)', marginBottom: 18 }}>Who benefited</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 15 }}>
-            {[
-              { label: 'Female', pct: 48, color: 'var(--accent)' },
-              { label: 'Youth (under 35)', pct: 64, color: '#2B4C9B' },
-              { label: 'Persons w/ disability', pct: 3, barPct: 12, color: '#0E7C86' },
-            ].map((row) => (
-              <div key={row.label}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 6 }}>
-                  <span style={{ fontWeight: 600 }}>{row.label}</span>
-                  <span style={{ color: 'var(--muted)' }}>{row.pct}%</span>
-                </div>
-                <span style={{ display: 'block', height: 8, background: 'var(--bg)', borderRadius: 5, overflow: 'hidden' }}>
-                  <span
-                    style={{ display: 'block', height: '100%', width: `${row.barPct ?? row.pct}%`, background: row.color }}
-                  />
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div style={card}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 700, color: 'var(--navy)', marginBottom: 16 }}>
-            Are we compliant? <span style={{ fontWeight: 500, fontSize: 12, color: 'var(--muted)' }}>· local + global view</span>
-            <InfoTip label="How compliance is assessed">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 700, color: 'var(--navy)', marginBottom: 6 }}>
+            Who benefited
+            <InfoTip label="What this counts" width={330}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <div>Each row compares one commitment — a PIA HCDT allocation, an NCDMB threshold, a disclosure standard — against the data logged for it in SPIMS. A checkmark means the target is fully met; a percentage shows partial progress; ! flags an open gap.</div>
-                <div>Tap the ⓘ on any row below to see exactly what the gap is and who owns closing it.</div>
-                <div style={{ color: '#8A5A0B' }}>⚠ In this prototype these figures are a static illustrative summary, not a live check against source data — automatic gap-detection against real compliance data is a Phase 2 backend integration.</div>
+                <div>The four breakdown columns of the project completion upload, added across the programmes that filled them in.</div>
+                <div>
+                  Shares are of the people served by those programmes only. A programme that reported no breakdown is left out rather
+                  than counted as zero, which would push every share down and read as a finding about the people rather than about the
+                  paperwork.
+                </div>
               </div>
             </InfoTip>
           </div>
-          <div style={{ fontSize: 12, fontWeight: 600, color: '#1F8A5B', marginBottom: 14 }}>22 / 24 commitments met</div>
-          <div className="grid-compliance-inner">
-            {COMPLIANCE_ITEMS.map((row) => (
-              <div
-                key={row.text}
-                style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'var(--bg)', borderRadius: 10, padding: '11px 14px' }}
-              >
-                <span style={{ fontSize: row.icon.length > 1 && row.icon !== '!' ? 12 : undefined, fontWeight: row.icon.length > 1 ? 700 : undefined, color: row.iconColor }}>
-                  {row.icon}
-                </span>
-                <span style={{ fontSize: 13, flex: 1 }}>{row.text}</span>
-                <InfoTip label={`Detail on ${row.text}`} width={300}>
-                  {row.detail}
-                </InfoTip>
+          {people.programmesReporting === 0 ? (
+            <div style={{ fontSize: 13.5, color: 'var(--muted)', lineHeight: 1.6, marginTop: 10 }}>
+              No programme has reported a breakdown of who it served. The columns are{' '}
+              <span style={{ fontFamily: 'monospace', fontSize: 12.5 }}>of_whom_female</span>,{' '}
+              <span style={{ fontFamily: 'monospace', fontSize: 12.5 }}>of_whom_male</span>,{' '}
+              <span style={{ fontFamily: 'monospace', fontSize: 12.5 }}>of_whom_aged_under_35</span> and{' '}
+              <span style={{ fontFamily: 'monospace', fontSize: 12.5 }}>of_whom_living_with_disability</span> in the project completion
+              file.
+            </div>
+          ) : (
+            <>
+              <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 16 }}>
+                Across {people.programmesReporting} of {people.programmesTotal} programmes, covering {formatCount(people.benefited)} people served
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 15 }}>
+                {[
+                  { label: 'Female', value: people.female, color: 'var(--accent)' },
+                  { label: 'Male', value: people.male, color: '#2B4C9B' },
+                  { label: 'Youth (under 35)', value: people.under35, color: '#1F8A5B' },
+                  { label: 'Living with a disability', value: people.livingWithDisability, color: '#0E7C86' },
+                ].map((row) => {
+                  const pct = people.benefited === 0 ? 0 : Math.round((row.value / people.benefited) * 100);
+                  return (
+                    <div key={row.label}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 6 }}>
+                        <span style={{ fontWeight: 600 }}>{row.label}</span>
+                        <span style={{ color: 'var(--muted)' }}>{formatCount(row.value)} · {pct}%</span>
+                      </div>
+                      <span style={{ display: 'block', height: 8, background: 'var(--bg)', borderRadius: 5, overflow: 'hidden' }}>
+                        <span style={{ display: 'block', height: '100%', width: `${pct}%`, background: row.color }} />
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          )}
+        </div>
+
+        <div style={card}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 700, color: 'var(--navy)', marginBottom: 6 }}>
+            Are we compliant?
+            <InfoTip label="Why there are no figures here" width={330}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div>
+                  SPIMS holds no compliance data. It showed a tally of commitments met, with percentages against each framework; those
+                  were written into the screen and no upload could change them.
+                </div>
+                <div>Each row below names what would have to be connected for the check to be real.</div>
+              </div>
+            </InfoTip>
+          </div>
+          <div style={{ fontSize: 12.5, color: '#8A5A0B', marginBottom: 14 }}>Not connected — no source to check against</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
+            {COMPLIANCE_COMMITMENTS.map((row) => (
+              <div key={row.text} style={{ background: 'var(--bg)', borderRadius: 10, padding: '10px 14px' }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--navy)' }}>{row.text}</div>
+                <div style={{ fontSize: 12, color: 'var(--muted)' }}>Needs {row.needs}</div>
               </div>
             ))}
           </div>
@@ -353,14 +426,14 @@ export function ExecutiveDashboard({
 
       <div style={card}>
         <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--navy)', marginBottom: 16 }}>What risks exist?</div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
           <div
             style={{
               width: 44,
               height: 44,
               borderRadius: 11,
-              background: 'rgba(227,26,56,0.1)',
-              color: 'var(--accent)',
+              background: delivery.needingAttention > 0 ? 'rgba(227,26,56,0.1)' : 'rgba(31,138,91,0.12)',
+              color: delivery.needingAttention > 0 ? 'var(--accent)' : '#1F8A5B',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -369,11 +442,16 @@ export function ExecutiveDashboard({
               flexShrink: 0,
             }}
           >
-            6
+            {delivery.needingAttention}
           </div>
           <div>
-            <div style={{ fontSize: 13.5, fontWeight: 600 }}>High-risk projects</div>
-            <div style={{ fontSize: 12, color: 'var(--muted)' }}>budget or delivery flagged</div>
+            <div style={{ fontSize: 13.5, fontWeight: 600 }}>
+              {delivery.needingAttention === 0 ? 'No programme flagged' : `Programme${delivery.needingAttention === 1 ? '' : 's'} flagged on delivery`}
+            </div>
+            <div style={{ fontSize: 12, color: 'var(--muted)' }}>
+              {delivery.atRisk} at risk · {delivery.delayed} delayed · {delivery.onTrack} on track · {delivery.completed} completed.
+              Status is set on each project, not inferred from its budget.
+            </div>
           </div>
         </div>
       </div>

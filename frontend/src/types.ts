@@ -192,6 +192,13 @@ export interface ReachProfile {
   note: string;
 }
 
+export interface BenefitedBreakdown {
+  female?: number;
+  male?: number;
+  under35?: number;
+  livingWithDisability?: number;
+}
+
 export interface ProjectImpact {
   projectCode: string;
   inputs: string;
@@ -218,6 +225,9 @@ export interface ProjectImpact {
   costPerOutcome: string;
   /** What was actually spent, as a figure in naira. The SROI estimate divides by it. */
   spentNgn?: number | null;
+  /** Who the people served were. A field is absent when nobody counted it, which the
+   *  dashboard reports as unreported rather than as zero. */
+  benefited?: BenefitedBreakdown;
   /** A confirmed ratio, once Seplat's M&E function has one. Empty while the system's own
    *  estimate — calculated in `analytics/sroi.ts` and labelled illustrative — stands in. */
   sroi: string;

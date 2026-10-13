@@ -157,7 +157,7 @@ function SignedInApp({ user, demoMode, onLogout }: { user: AuthUser; demoMode: b
         />
 
         <main className="spims-scroll" style={{ flex: 1, overflowY: 'auto', padding: '30px 34px 48px' }}>
-          {view === 'dashboard' && <ExecutiveDashboard targetYear={settings.targetYear} projects={PROJECTS} impacts={PROJECT_IMPACTS} />}
+          {view === 'dashboard' && <ExecutiveDashboard targetYear={settings.targetYear} projects={PROJECTS} impacts={PROJECT_IMPACTS} targets={targets} />}
           {view === 'portfolio' && <ProjectPortfolio projects={PROJECTS} onOpen={(id) => goProjectDetail(id, 'portfolio')} />}
           {view === 'impact' && (
             <ImpactChain

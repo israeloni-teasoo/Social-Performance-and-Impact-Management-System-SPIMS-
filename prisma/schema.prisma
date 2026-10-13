@@ -109,6 +109,14 @@ model ProjectImpact {
   /// What was actually spent, in naira. `inputs` carries only a rounded label, and the
   /// SROI estimate divides by this, so the figure has to survive as a figure.
   spentNgn            Float?
+  /// Who the people served were. The completion template has asked for these four since
+  /// it was written and the handler dropped them on the way in, so the dashboard's
+  /// "Who benefited" panel was four invented percentages. Null means not reported, which
+  /// is not the same as zero and is counted differently.
+  benefitedFemale                Int?
+  benefitedMale                  Int?
+  benefitedUnder35               Int?
+  benefitedLivingWithDisability  Int?
   sroi                String
   /// What the team would tell whoever runs this next.
   ///

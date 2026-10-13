@@ -61,6 +61,16 @@ The other two documents follow the same rule when they are affected:
   showing the estimate shows the proxy, the deductions and the caveat with it, and marks it
   ILLUSTRATIVE. A programme missing spend, beneficiaries or a proxy returns `null` with the
   reason, never a zero.
+- **No screen holds a figure of its own.** The executive dashboard did — the investment
+  total, the community count, the SROI ratio, community satisfaction, the aspiration
+  percentage, the spend split by pillar and by state, the four "who benefited" shares, the
+  compliance tally and the high-risk count were all constants in the view file, and none
+  of them moved when a project was added. They now come from `analytics/portfolio.ts`, and
+  `npm run test:portfolio` reads the view file back to assert no currency or percentage
+  literal has returned to it.
+- **A figure with no source is removed, not estimated.** Community satisfaction is
+  collected by nothing in this system and compliance is checked against nothing, so the
+  dashboard names what would have to be connected instead of showing a number.
 - **A completion file's `date_completed` is what marks a project complete** — it sets
   status to Completed and progress to 100%. Nothing else infers completion, and a blank
   date means a project still running that is recording results so far.
@@ -135,7 +145,9 @@ Before pushing: `npx tsc --noEmit -p tsconfig.json`, `cd frontend && npx tsc -b`
 `npx oxlint src`, `npm run build`, and exercise both demo and live modes. Also
 `npm run check:routes` (the API is still one catch-all function), `npm run test:parsers`
 (the media source parsers and the alert matcher), `npm run test:sroi` (the social-return
-arithmetic, against figures worked out by hand) and `npm run test:validator`. `npm run smoke:upload` needs a scratch
+arithmetic, against figures worked out by hand), `npm run test:portfolio` (every dashboard
+figure moves with the data, and the view file holds none of its own) and
+`npm run test:validator`. `npm run smoke:upload` needs a scratch
 `DATABASE_URL` and drives both project uploads, then reads the stored records back — the
 only way to tell a write from a well-worded message, which is the failure it was written
 for. `npm run smoke:api` drives the

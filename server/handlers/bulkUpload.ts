@@ -46,6 +46,14 @@ function isDate(value: string): boolean {
   return !Number.isNaN(when.getTime()) && when.toISOString().slice(0, 10) === text;
 }
 
+/** A whole number from a cell, or null when the cell is blank or not a number. */
+function count(value: string | undefined): number | null {
+  const text = String(value ?? '').trim();
+  if (text === '') return null;
+  const n = Number(text.replace(/[^\d.-]/g, ''));
+  return Number.isFinite(n) && n >= 0 ? Math.round(n) : null;
+}
+
 function digits(value: string): number {
   return Number(String(value).replace(/[^\d.-]/g, ''));
 }
@@ -279,6 +287,14 @@ export async function bulkUploadHandler(
         // as though it meant something.
         costPerOutcome: spend > 0 && benefited > 0 ? `${nairaLabel(spend / benefited)} per person` : '',
         spentNgn: spend > 0 ? spend : null,
+        // Null rather than 0 when the column is blank: "none of the people served were
+        // living with a disability" and "nobody counted" are different claims, and the
+        // dashboard reports the second as unreported rather than folding it into a
+        // percentage.
+        benefitedFemale: count(rec.of_whom_female),
+        benefitedMale: count(rec.of_whom_male),
+        benefitedUnder35: count(rec.of_whom_aged_under_35),
+        benefitedLivingWithDisability: count(rec.of_whom_living_with_disability),
         sroi: '',
         contactPerson: project.owner ?? '',
         communitiesImpacted: list(rec.communities),
