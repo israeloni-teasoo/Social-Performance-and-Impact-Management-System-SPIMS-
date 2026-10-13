@@ -97,6 +97,12 @@ model ProjectImpact {
   dualLens            Json // DualLensTag[]
   costPerOutcome      String
   sroi                String
+  /// What the team would tell whoever runs this next.
+  ///
+  /// The completion template asks for it and it is often the most useful thing a
+  /// finished project produces, so it needs somewhere to live rather than being read
+  /// once and dropped on the way in.
+  lessons             String?
   contactPerson       String
   communitiesImpacted Json // string[]
 }
