@@ -40,6 +40,8 @@ export function useAppData() {
     isApiAvailable()
       .then(async (live) => {
         if (!live) {
+          // No server at all: the bundled sample set, which the demonstration banner
+          // and the "Demo mode" chip both announce.
           if (!cancelled) setData(SEED);
           return;
         }
@@ -53,12 +55,19 @@ export function useAppData() {
         ]);
         if (!cancelled) setData({ projects, projectImpacts, communities, indicators, reports, evidence });
       })
-      .catch(() => {
-        // An API was detected but a request failed — fall back rather than showing an empty app.
-        if (!cancelled) {
-          setData(SEED);
-          setError(null);
-        }
+      .catch((err: unknown) => {
+        if (cancelled) return;
+        // Deliberately NOT a fall back to the seed. This used to substitute the bundled
+        // sample portfolio and clear the error, so a live deployment whose database was
+        // empty or briefly unreachable showed eight invented Seplat programmes as though
+        // they were real — the exact failure this system exists to prevent. An empty
+        // screen with a reason is worth more than a full one that is fiction.
+        setData(EMPTY);
+        setError(
+          err instanceof Error && err.message
+            ? `The portfolio could not be loaded from the server. ${err.message}`
+            : 'The portfolio could not be loaded from the server.',
+        );
       })
       .finally(() => {
         if (!cancelled) setLoading(false);

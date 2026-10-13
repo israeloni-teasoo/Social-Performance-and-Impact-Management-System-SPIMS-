@@ -48,7 +48,23 @@ function validateLocally(csvText: string, dataType: BulkUploadDataType) {
   return { id: `up-${Date.now()}`, rowCount: Math.max(0, lines.length - 1), status: 'Validated — demo mode' };
 }
 
-export function BulkUpload({ projects, pushToast }: { projects: Project[]; pushToast: (message: string, tone?: ToastTone) => void }) {
+export function BulkUpload({
+  projects,
+  pushToast,
+  onWrote,
+}: {
+  projects: Project[];
+  pushToast: (message: string, tone?: ToastTone) => void;
+  /**
+   * Re-reads the portfolio after an upload that changed records.
+   *
+   * Without it an upload succeeded, said so, and nothing on any other screen moved: the
+   * portfolio holds whatever it fetched when the app loaded, so the new project was in
+   * the database and invisible until someone happened to reload. A write you cannot see
+   * is indistinguishable from one that did not happen.
+   */
+  onWrote: () => void;
+}) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [dataType, setDataType] = useState<BulkUploadDataType>('Beneficiary counts');
   const [projectId, setProjectId] = useState('all');
@@ -80,6 +96,9 @@ export function BulkUpload({ projects, pushToast }: { projects: Project[]; pushT
           ...prev,
         ]);
         pushToast(`${file.name} received — ${result.rowCount} rows ${result.status.toLowerCase()}.`, 'success');
+        // Only when something was actually stored. A validated-and-logged upload changes
+        // no records, so re-reading would suggest it had.
+        if (/written to/.test(result.status)) onWrote();
         if (fileRef.current) fileRef.current.value = '';
         setFileName(null);
       } catch (err) {

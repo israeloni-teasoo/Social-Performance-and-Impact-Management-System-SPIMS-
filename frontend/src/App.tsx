@@ -210,7 +210,7 @@ function SignedInApp({ user, demoMode, onLogout }: { user: AuthUser; demoMode: b
           {view === 'stakeholders' && <StakeholderRegister stakeholders={stakeholders} onAdd={addStakeholder} />}
           {view === 'targets' && <Targets targets={targets} onAdd={addTarget} onClose={closeTarget} pushToast={pushToast} />}
           {view === 'team' && <Team members={members} tasks={tasks} projects={PROJECTS} onInvite={inviteMember} onAssignTask={assignTask} />}
-          {view === 'bulkupload' && <BulkUpload projects={PROJECTS} pushToast={pushToast} />}
+          {view === 'bulkupload' && <BulkUpload projects={PROJECTS} pushToast={pushToast} onWrote={refreshData} />}
           {view === 'settings' && (
             <Settings
               currentUserId={user.id}

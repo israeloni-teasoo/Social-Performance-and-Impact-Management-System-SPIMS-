@@ -214,6 +214,8 @@ export interface ProjectImpact {
   dualLens: DualLensTag[];
   costPerOutcome: string;
   sroi: string;
+  /** What the team would tell whoever runs this next. Optional: older records have none. */
+  lessons?: string;
   contactPerson: string;
   communitiesImpacted: string[];
 }

@@ -31,6 +31,9 @@ export async function listProjectImpactsHandler(): Promise<HandlerResult> {
       sroi: imp.sroi,
       contactPerson: imp.contactPerson,
       communitiesImpacted: imp.communitiesImpacted,
+      // Serialised explicitly, field by field, which is why a new column is invisible
+      // until it is named here. Lessons were being stored and never served.
+      lessons: imp.lessons ?? undefined,
     };
   }
   return { status: 200, body: byCode };
