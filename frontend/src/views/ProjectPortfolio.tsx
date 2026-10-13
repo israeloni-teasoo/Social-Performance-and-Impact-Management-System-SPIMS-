@@ -1,3 +1,4 @@
+import { barWidth, percentLabel } from '../analytics/metrics';
 import { PILLARS } from '../data/vocabulary';
 import { useState } from 'react';
 import { h1, PILLAR_COLORS, pill, STATUS_COLORS, tableHeaderRow, tableRow } from '../ui';
@@ -89,14 +90,14 @@ export function ProjectPortfolio({ projects, onOpen }: { projects: Project[]; on
                 <div>
                   <div style={{ fontWeight: 600 }}>{p.budget}</div>
                   <span style={{ display: 'block', height: 6, width: 110, background: 'var(--bg)', borderRadius: 4, overflow: 'hidden', marginTop: 5 }}>
-                    <span style={{ display: 'block', height: '100%', width: p.utilPct, background: '#2B4C9B' }} />
+                    <span style={{ display: 'block', height: '100%', width: barWidth(p.utilPct), background: '#2B4C9B' }} />
                   </span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span style={{ flex: 1, height: 6, background: 'var(--bg)', borderRadius: 4, overflow: 'hidden' }}>
-                    <span style={{ display: 'block', height: '100%', width: p.progPct, background: 'var(--accent)' }} />
+                    <span style={{ display: 'block', height: '100%', width: barWidth(p.progPct), background: 'var(--accent)' }} />
                   </span>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--muted)' }}>{p.progress}</span>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--muted)' }}>{percentLabel(p.progress, '—')}</span>
                 </div>
                 <div>
                   <span style={pill(statusBg, statusFg)}>{p.status}</span>

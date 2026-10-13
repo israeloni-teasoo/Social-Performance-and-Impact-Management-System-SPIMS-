@@ -48,6 +48,16 @@ model Project {
   pillar   String
   state    String
   budget   String
+  /// The budget as a figure, in naira.
+  ///
+  /// `budget` is a display string ("₦480M", "₦3.44M"), which is lossy: parsing it back
+  /// gives ₦3,440,000 for a budget of ₦3,443,000. That is fine for a chart and wrong for
+  /// a utilisation percentage, which is the figure a completion upload computes against
+  /// recorded spend. Nullable because the programmes seeded from Seplat's published
+  /// report only ever had the display string.
+  budgetNgn Float?
+  /// Utilisation and progress, as display strings. An empty string means nobody has
+  /// recorded it — which is not the same claim as "0%", and used to be stored as "0%".
   utilPct  String
   progress String
   progPct  String

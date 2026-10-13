@@ -46,6 +46,17 @@ The other two documents follow the same rule when they are affected:
   figure. A programme with no reach profile is shown as unmapped, never as zero.
 - **Illustrative figures must say so** in the interface, not only in documentation.
   SROI and the compliance percentages are currently illustrative.
+- **A figure nobody recorded is not zero.** `utilPct`, `progress` and `progPct` hold an
+  empty string when unrecorded, and `barWidth`, `percentLabel` and `utilisedCaption` in
+  `analytics/metrics.ts` are the only places that is interpreted. Never put a raw one in
+  a CSS `width`: an empty string is not a valid length, the browser drops the
+  declaration, and the bar renders full. The same applies to a blank field on a card —
+  `?? '—'` does not fire for `''`, which is how the SROI card came to render a blank space
+  under its heading.
+- **`Project.budget` is a label; `Project.budgetNgn` is the figure.** Anything written to
+  `budget` must carry an M or a B so `budgetToMillions` can read it back. Never derive a
+  percentage from the label: against "₦3.4M", a project that spent ₦3,443,000 of its
+  ₦3,443,000 budget came out at 101% utilised.
 
 ## Reporting architecture
 
@@ -108,7 +119,10 @@ database, insert a row that exists nowhere in the seed and confirm it appears.
 Before pushing: `npx tsc --noEmit -p tsconfig.json`, `cd frontend && npx tsc -b`,
 `npx oxlint src`, `npm run build`, and exercise both demo and live modes. Also
 `npm run check:routes` (the API is still one catch-all function) and `npm run test:parsers`
-(the media source parsers and the alert matcher). `npm run smoke:api` drives the
+(the media source parsers and the alert matcher). `npm run smoke:upload` needs a scratch
+`DATABASE_URL` and drives both project uploads, then reads the stored records back — the
+only way to tell a write from a well-worded message, which is the failure it was written
+for. `npm run smoke:api` drives the
 catch-all against a real database when the deployment shape itself is in question, and
 `npm run smoke:alerts` drives collection through to alert delivery against a local feed
 and a local webhook — the only way to exercise that path without real outbound access,

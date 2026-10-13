@@ -68,6 +68,9 @@ function verifiedValues(analytics: PortfolioAnalytics): Set<number> {
     add(p.reach);
     add(p.impact);
     add(p.reach - p.impact);
+    // Figures the record states rather than ones this layer computed. Reconciling them
+    // is not possible, so flagging them taught people to ignore the validator.
+    for (const n of p.quotedFigures) add(n);
   }
   for (const s of analytics.spend) {
     add(s.budgetMillions);

@@ -1,4 +1,4 @@
-import { analyseProgramme, analysePortfolio, formatCount, formatMillions } from '../analytics/metrics';
+import { analyseProgramme, analysePortfolio, formatCount, formatMillions, isPercentRecorded, percentLabel, utilisedCaption } from '../analytics/metrics';
 import type { Metric } from '../analytics/metrics';
 import type { ReportSection } from '../reportContent';
 import type { CustomField, OrgSettings, Project, ProjectImpact, Report } from '../types';
@@ -201,6 +201,20 @@ function lines(...values: (string | undefined | false)[]): string[] {
 }
 
 /**
+ * A "Label: value" line, dropped when there is no value.
+ *
+ * `lines` only drops a line that is empty altogether, and a label makes it non-empty —
+ * so a programme whose record deliberately leaves SROI blank exported "Estimated SROI:"
+ * with nothing after the colon, in a report going to a board. Where the absence is
+ * itself worth reporting, `whenMissing` says so instead of hiding it.
+ */
+function field(label: string, value: string | undefined, whenMissing?: string): string | false {
+  const v = (value ?? '').trim();
+  if (v !== '') return `${label}: ${v}`;
+  return whenMissing ? `${label}: ${whenMissing}` : false;
+}
+
+/**
  * A single programme, as a report.
  *
  * This replaces a separate hand-written exporter that emitted one fixed page of
@@ -242,7 +256,7 @@ export function buildProgrammeSpec(input: BuildProgrammeSpecInput): ReportSpec {
       value: figures.budgetMillions,
       display: formatMillions(figures.budgetMillions),
       unit: 'currency',
-      provenance: { metric: 'Programme budget', calculation: `${project.utilPct} drawn down to date.` },
+      provenance: { metric: 'Programme budget', calculation: `${percentLabel(project.utilPct, 'An unrecorded share')} drawn down to date.` },
     },
     {
       key: 'conversion',
@@ -264,8 +278,8 @@ export function buildProgrammeSpec(input: BuildProgrammeSpecInput): ReportSpec {
       lines: lines(
         `Pillar: ${project.pillar}`,
         `State: ${project.state}`,
-        `Status: ${project.status} · ${project.progress} complete`,
-        `Budget: ${project.budget}, ${project.utilPct} utilised`,
+        `Status: ${project.status} · ${isPercentRecorded(project.progress) ? `${project.progress} complete` : 'progress not recorded'}`,
+        `Budget: ${project.budget}, ${utilisedCaption(project.utilPct).toLowerCase()}`,
       ),
     },
   ];
@@ -277,10 +291,10 @@ export function buildProgrammeSpec(input: BuildProgrammeSpecInput): ReportSpec {
         kind: 'section',
         heading: 'The impact chain',
         lines: lines(
-          `Inputs — what we invest: ${impact.inputs}`,
-          `Activities — what we do: ${impact.activities}`,
-          `Outputs — what we deliver: ${impact.outputHeadline}`,
-          `Outcomes — what changes: ${impact.outcome}`,
+          field('Inputs — what we invest', impact.inputs),
+          field('Activities — what we do', impact.activities),
+          field('Outputs — what we deliver', impact.outputHeadline),
+          field('Outcomes — what changes', impact.outcome),
         ),
       },
     );
@@ -315,7 +329,11 @@ export function buildProgrammeSpec(input: BuildProgrammeSpecInput): ReportSpec {
     blocks.push({
       kind: 'section',
       heading: 'What it means',
-      lines: lines(impact.impactHeadline, `${impact.impactFigure} ${impact.impactFigureLabel}`, ...impact.impactPoints),
+      lines: lines(
+        impact.impactHeadline,
+        impact.impactFigure.trim() !== '' && `${impact.impactFigure} ${impact.impactFigureLabel}`.trim(),
+        ...impact.impactPoints,
+      ),
     });
 
     if (impact.impactScenarios && impact.impactScenarios.length > 0) {
@@ -337,20 +355,21 @@ export function buildProgrammeSpec(input: BuildProgrammeSpecInput): ReportSpec {
         kind: 'section',
         heading: 'Delivery and cost',
         lines: lines(
-          `Communities impacted: ${impact.communitiesImpacted.join(', ')}`,
-          `Cost per outcome: ${impact.costPerOutcome}`,
-          `Estimated SROI: ${impact.sroi}`,
-          `Programme manager: ${impact.contactPerson}`,
+          field('Communities impacted', impact.communitiesImpacted.join(', ')),
+          field('Cost per outcome', impact.costPerOutcome, 'not calculated — needs recorded spend and a count of people served'),
+          field('Estimated SROI', impact.sroi, 'not calculated — no financial proxy for this outcome has been validated'),
+          field('Programme manager', impact.contactPerson),
+          field('What the team learned', impact.lessons),
         ),
       },
       {
         kind: 'section',
         heading: 'How these figures were arrived at',
         lines: lines(
-          `Metric: ${impact.methodology.metric}`,
-          `Calculation: ${impact.methodology.calculation}`,
-          `Source: ${impact.methodology.source}`,
-          `Note: ${impact.methodology.note}`,
+          field('Metric', impact.methodology.metric),
+          field('Calculation', impact.methodology.calculation),
+          field('Source', impact.methodology.source),
+          field('Note', impact.methodology.note),
         ),
       },
     );

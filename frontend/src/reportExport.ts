@@ -1,4 +1,4 @@
-import { formatCount } from './analytics/metrics';
+import { formatCount, percentLabel, utilisedCaption } from './analytics/metrics';
 import type { ReportSection } from './reportContent';
 import type { CustomField, Project, ProjectImpact, Report } from './types';
 
@@ -125,7 +125,7 @@ export function exportReport(report: Report, format: 'excel' | 'word', sections:
 function projectBodyLines(project: Project, impact: ProjectImpact | undefined, customFields: CustomField[]): string[] {
   const lines = [
     `Pillar: ${project.pillar} · State: ${project.state} · Status: ${project.status}`,
-    `Budget: ${project.budget} (${project.utilPct} utilised) · Progress: ${project.progress}`,
+    `Budget: ${project.budget} · ${utilisedCaption(project.utilPct)} · Progress: ${percentLabel(project.progress, 'not recorded')}`,
     '',
   ];
   if (impact) {
@@ -215,8 +215,8 @@ export function exportProjectReport(project: Project, impact: ProjectImpact | un
       ['State', project.state],
       ['Status', project.status],
       ['Budget', project.budget],
-      ['Utilised', project.utilPct],
-      ['Progress', project.progress],
+      ['Utilised', percentLabel(project.utilPct)],
+      ['Progress', percentLabel(project.progress)],
     ];
     if (impact) {
       rows.push(

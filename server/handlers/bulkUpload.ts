@@ -1,3 +1,4 @@
+import { formatMillions } from '../../frontend/src/analytics/metrics.js';
 import { TEMPLATE_COMMENT, UPLOAD_TEMPLATES, columnsOf } from '../../frontend/src/data/uploadTemplates.js';
 import { parseCsv } from '../lib/csv.js';
 import { prisma } from '../lib/db.js';
@@ -19,6 +20,12 @@ import type { User } from '@prisma/client';
  * does not exist: there is no reviewer, no queue and no screen. A file would be accepted,
  * counted, and its contents discarded, while the message implied somebody would pick it
  * up. An upload that stores nothing has to say so.
+ *
+ * The same rule applies to the fields a file does not carry. A master-data upload does
+ * not know a project's progress or how much of its budget has been drawn down, so it
+ * records neither — an empty string, which the interface shows as "not set". Writing
+ * "0%" there, as it used to, is a measurement, and it put "0% utilised" on a project
+ * whose completion file recorded the entire budget spent.
  */
 
 const PILLARS = ['Education', 'Health', 'Infrastructure', 'Economic Emp.'];
@@ -35,20 +42,24 @@ function digits(value: string): number {
   return Number(String(value).replace(/[^\d.-]/g, ''));
 }
 
-/**
- * Formats naira as the compact string the rest of the system expects.
- *
- * `budgetToMillions` strips every non-digit and reads what is left as millions, so a
- * budget stored as "₦3,443,000" would be charted as ₦3.4 million million. The display
- * string is the storage format here, and it has to stay in that shape.
- */
+/** Exact naira, with separators. For fields that are read, never parsed. */
 function nairaLabel(amount: number): string {
   if (!Number.isFinite(amount) || amount <= 0) return '₦0';
-  const millions = amount / 1_000_000;
-  if (millions >= 1000) return `₦${(millions / 1000).toFixed(2)}B`;
-  if (millions >= 10) return `₦${Math.round(millions)}M`;
-  if (millions >= 1) return `₦${millions.toFixed(1)}M`;
   return `₦${Math.round(amount).toLocaleString('en-NG')}`;
+}
+
+/**
+ * Formats a budget as the compact string the rest of the system stores.
+ *
+ * `budgetToMillions` strips every non-digit and reads what is left as millions, so a
+ * budget stored as "₦3,443,000" would be charted as ₦3.4 million million. Anything
+ * written to `Project.budget` has to carry an M or a B, including amounts under a
+ * million — "₦0.34M" rather than "₦344,300". The exact figure goes to `budgetNgn`, so
+ * nothing downstream has to parse this back.
+ */
+function budgetLabel(amount: number): string {
+  if (!Number.isFinite(amount) || amount <= 0) return '₦0M';
+  return formatMillions(amount / 1_000_000);
 }
 
 /** Splits a semicolon-separated cell. */
@@ -57,19 +68,6 @@ function list(value: string): string[] {
     .split(';')
     .map((v) => v.trim())
     .filter(Boolean);
-}
-
-/**
- * Reads a percentage out of a free-text measure, for the before/after chart.
- *
- * Only an explicit percentage counts. Inferring one from "no participant was keeping
- * laying birds" would be drawing a chart from a guess, and a wrong bar is worse than a
- * flat one — so anything without a stated percentage charts as zero and the written
- * measure carries the meaning.
- */
-function percentIn(text: string): number {
-  const match = /(\d+(?:\.\d+)?)\s*%/.exec(text);
-  return match ? Number(match[1]) : 0;
 }
 
 export async function bulkUploadHandler(
@@ -160,12 +158,16 @@ export async function bulkUploadHandler(
         continue;
       }
 
-      const budget = nairaLabel(digits(rec.budget_naira));
+      const budgetNaira = digits(rec.budget_naira);
       const shared = {
         name: rec.project_name,
         pillar: rec.programme_pillar,
         state: rec.state,
-        budget,
+        budget: budgetLabel(budgetNaira),
+        // Kept exactly as entered, because the completion upload divides recorded spend
+        // by it. A percentage computed against the rounded display string reported 101%
+        // utilised on a project that spent its budget to the naira.
+        budgetNgn: Number.isFinite(budgetNaira) && budgetNaira > 0 ? budgetNaira : null,
         startDate: rec.start_date || null,
         endDate: rec.end_date || null,
         fundingSource: rec.funding_source || null,
@@ -185,9 +187,14 @@ export async function bulkUploadHandler(
           code,
           ...shared,
           output: 'No outputs recorded yet',
-          utilPct: '0%',
-          progress: '0%',
-          progPct: '0%',
+          // Empty, not "0%". The master-data template asks for neither, and a project
+          // created from one claimed "0% utilised" and "0%" progress on the strength of
+          // nothing — on a project whose completion file recorded the whole budget spent.
+          // Utilisation is computed when a completion file arrives; progress is an
+          // editorial call, made under Edit project.
+          utilPct: '',
+          progress: '',
+          progPct: '',
           status: 'On track',
         },
         update: shared,
@@ -198,6 +205,10 @@ export async function bulkUploadHandler(
   }
 
   if (dataType === 'Project completion') {
+    /** Reported back on the upload, so a changed figure is visible without hunting for it. */
+    let utilisation = '';
+    const budgetMissing: string[] = [];
+
     for (const [index, rec] of records.entries()) {
       const project = await prisma.project.findUnique({ where: { code: rec.project_code } });
       if (!project) {
@@ -211,7 +222,11 @@ export async function bulkUploadHandler(
 
       const impact = {
         projectCode: project.code,
-        inputs: spend > 0 ? nairaLabel(spend) : 'Not recorded',
+        // Compact, like every other programme's inputs line ("₦480M invested in …").
+        // The exact figure belongs to the cost-per-outcome rate, where the precision
+        // changes the answer; in a narrative line it only invites a reconciliation
+        // question the analytics layer cannot answer.
+        inputs: spend > 0 ? `${budgetLabel(spend)} recorded as spent on this project` : 'Not recorded',
         activities: rec.what_they_received,
         outputHeadline: rec.what_was_delivered,
         outcome: rec.what_changed_as_a_result,
@@ -234,9 +249,14 @@ export async function bulkUploadHandler(
           source: rec.where_the_figures_come_from,
           note: '',
         },
+        // Written measures, stored without a bar height. A percentage was previously read
+        // out of the text to chart them, which turned "0% mortality" — a good result —
+        // into a zero-height bar, and two floor-height bars said less than the sentences
+        // do. The project page renders a before-and-after statement when no point carries
+        // a chartable percentage.
         baseline: [
-          { label: 'Before', value: rec.measure_before, pct: percentIn(rec.measure_before) },
-          { label: 'After', value: rec.measure_after, pct: percentIn(rec.measure_after) },
+          { label: 'Before', value: rec.measure_before, pct: 0 },
+          { label: 'After', value: rec.measure_after, pct: 0 },
         ],
         baselineCaption: rec.what_was_measured,
         dualLens: [] as unknown[],
@@ -256,17 +276,34 @@ export async function bulkUploadHandler(
         update: impact as never,
       });
 
-      // The headline output belongs on the project itself, where the portfolio reads it.
-      // Status is deliberately left alone: a completion file records what happened, and
-      // whether the project is closed is an editorial call made on the project page.
-      if (rec.what_was_delivered) {
-        await prisma.project.update({ where: { id: project.id }, data: { output: rec.what_was_delivered } });
+      // The headline output belongs on the project itself, where the portfolio reads it,
+      // and so does utilisation: recorded spend against the budget entered with the
+      // master data. Both are facts the file carries. Status and progress are deliberately
+      // left alone — a completion file records what happened, and whether the project is
+      // finished is an editorial call made on the project page.
+      const projectUpdate: { output?: string; utilPct?: string } = {};
+      if (rec.what_was_delivered) projectUpdate.output = rec.what_was_delivered;
+      if (spend > 0 && project.budgetNgn && project.budgetNgn > 0) {
+        const pct = Math.round((spend / project.budgetNgn) * 100);
+        projectUpdate.utilPct = `${pct}%`;
+        if (!utilisation) utilisation = `${pct}%`;
+      } else if (spend > 0) {
+        // The budget was never recorded as a figure, so there is nothing to divide by.
+        // Said out loud rather than left as a blank card nobody can account for.
+        budgetMissing.push(project.code);
+      }
+      if (Object.keys(projectUpdate).length > 0) {
+        await prisma.project.update({ where: { id: project.id }, data: projectUpdate });
       }
       written++;
     }
     status = describe(written, records.length, 'project impact records', skipped);
     if (written > 0 && skipped.length === 0) {
-      status += '. Project status unchanged — set it on the project page if the work is finished.';
+      status += '. Project status and progress unchanged — set them under Edit project if the work is finished';
+      status += utilisation ? `. Utilisation updated to ${utilisation}` : '';
+      status += budgetMissing.length > 0
+        ? `. Utilisation not computed for ${budgetMissing.join(', ')} — re-upload the project master data so the budget is stored as a figure`
+        : '';
     }
   }
 

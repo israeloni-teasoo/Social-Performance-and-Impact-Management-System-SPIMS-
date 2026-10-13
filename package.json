@@ -19,6 +19,7 @@
     "smoke:api": "tsx scripts/smoke-catchall.ts",
     "smoke:alerts": "tsx scripts/smoke-alerts.ts",
     "smoke:templates": "tsx scripts/smoke-templates.ts",
+    "smoke:upload": "tsx scripts/smoke-upload.ts",
     "test:parsers": "tsx server/lib/media/parse.test.ts && tsx server/lib/media/alerts.test.ts"
   },
   "dependencies": {

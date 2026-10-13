@@ -55,6 +55,17 @@ export interface ProgrammeMetrics {
   reach: number;
   impact: number;
   mapped: boolean;
+  /**
+   * Figures the programme's own record states, which a report quotes verbatim — its
+   * cost per outcome, for instance.
+   *
+   * They are not computed here, and the validator cannot reconcile them against
+   * anything, so without this it flagged every programme report: "₦29,268 per student
+   * engaged does not correspond to any figure the analytics layer produced". A
+   * validator that cries wolf on correct content is worse than none, so the figures it
+   * cannot check are declared rather than guessed at.
+   */
+  quotedFigures: number[];
 }
 
 export interface PortfolioAnalytics {
@@ -103,11 +114,60 @@ export function budgetToMillions(budget: string): number {
   return budget.toUpperCase().includes('B') ? n * 1000 : n;
 }
 
+/**
+ * Millions of naira as a compact label.
+ *
+ * Kept to two decimals below ₦10M, because the portfolio now holds projects of a few
+ * million naira as well as programmes of several hundred: rounding to the nearest
+ * million printed "₦3M" at the top of a report whose budget line, two rows below, read
+ * "₦3.44M". The form always carries an M or a B, so `budgetToMillions` reads it back.
+ */
 export function formatMillions(millions: number): string {
-  return millions >= 1000 ? `₦${(millions / 1000).toFixed(2)}B` : `₦${Math.round(millions)}M`;
+  if (millions >= 1000) return `₦${(millions / 1000).toFixed(2)}B`;
+  if (millions >= 10) return `₦${Math.round(millions)}M`;
+  return `₦${Number(millions.toFixed(2))}M`;
+}
+
+/* ------------------------------------------- percentages that may never have been set
+ *
+ * `utilPct`, `progress` and `progPct` are display strings, and an unrecorded one used
+ * to be stored as "0%" — which reads as a measurement rather than as a silence. A
+ * project created from a master-data upload claimed "0% utilised" while its completion
+ * file recorded the entire budget spent, and nobody could tell the two apart.
+ *
+ * An unrecorded value is now an empty string, and these helpers are the only place that
+ * is interpreted. `barWidth` matters most: an empty string is not a valid CSS width, the
+ * browser drops the declaration, and a block-level bar then stretches to its container —
+ * so "not recorded" would have rendered as a full bar.
+ */
+export function isPercentRecorded(value: string | undefined): boolean {
+  return /^\d+(?:\.\d+)?%$/.test((value ?? '').trim());
+}
+
+export function barWidth(value: string | undefined): string {
+  return isPercentRecorded(value) ? (value ?? '').trim() : '0%';
+}
+
+export function percentLabel(value: string | undefined, unrecorded = 'Not recorded'): string {
+  return isPercentRecorded(value) ? (value ?? '').trim() : unrecorded;
+}
+
+/** "72% utilised", or a statement that nobody has recorded it. */
+export function utilisedCaption(value: string | undefined): string {
+  return isPercentRecorded(value) ? `${(value ?? '').trim()} utilised` : 'Utilisation not recorded';
 }
 
 /* --------------------------------------------------------------- the layer */
+
+/** The grouped numbers in a stated figure, e.g. "₦5,136–₦15,409 per child" → two values. */
+function groupedFiguresIn(value: string | undefined): number[] {
+  const found: number[] = [];
+  for (const match of (value ?? '').matchAll(/\b\d{1,3}(?:,\d{3})+\b/g)) {
+    const n = Number(match[0].replace(/,/g, ''));
+    if (Number.isFinite(n)) found.push(n);
+  }
+  return found;
+}
 
 function reachOf(project: Project, impacts: Record<string, ProjectImpact>): ReachProfile | undefined {
   return impacts[project.code]?.reach;
@@ -171,6 +231,7 @@ export function analysePortfolio(projects: Project[], impacts: Record<string, Pr
       reach: profile?.total ?? 0,
       impact: profile?.directBeneficiaries ?? 0,
       mapped: Boolean(profile),
+      quotedFigures: groupedFiguresIn(impacts[p.code]?.costPerOutcome),
     };
   });
   const totalBudgetMillions = spend.reduce((sum, s) => sum + s.budgetMillions, 0);

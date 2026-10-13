@@ -1,3 +1,4 @@
+import { barWidth, percentLabel } from '../analytics/metrics';
 import { Icon } from '../components/Icon';
 import { h1, PILLAR_COLORS, pill, primaryBtn, secondaryBtn, STATUS_COLORS, tableHeaderRow, tableRow } from '../ui';
 import type { Project } from '../types';
@@ -49,9 +50,9 @@ export function MyProjects({ projects, goNewProject, onOpen }: { projects: Proje
               <div style={{ color: 'var(--ink)' }}>{p.state}</div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{ flex: 1, height: 6, background: 'var(--bg)', borderRadius: 4, overflow: 'hidden' }}>
-                  <span style={{ display: 'block', height: '100%', width: p.progPct, background: 'var(--accent)' }} />
+                  <span style={{ display: 'block', height: '100%', width: barWidth(p.progPct), background: 'var(--accent)' }} />
                 </span>
-                <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--muted)' }}>{p.progress}</span>
+                <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--muted)' }}>{percentLabel(p.progress, '—')}</span>
               </div>
               <div>
                 <span style={pill(statusBg, statusFg)}>{p.status}</span>

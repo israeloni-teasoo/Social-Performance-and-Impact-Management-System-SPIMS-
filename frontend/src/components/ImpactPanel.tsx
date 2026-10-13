@@ -59,21 +59,36 @@ export function ImpactPanel({ impact }: { impact: ProjectImpact }) {
         </div>
       ) : (
         <div style={{ marginBottom: 20 }}>
-          <div style={{ fontSize: 32, fontWeight: 800, lineHeight: 1.1 }}>{impact.impactFigure}</div>
-          <div style={{ fontSize: 13, color: '#FFE4E8', marginTop: 4 }}>{impact.impactFigureLabel}</div>
+          {impact.impactFigure.trim() ? (
+            <>
+              <div style={{ fontSize: 32, fontWeight: 800, lineHeight: 1.1 }}>{impact.impactFigure}</div>
+              <div style={{ fontSize: 13, color: '#FFE4E8', marginTop: 4 }}>{impact.impactFigureLabel}</div>
+            </>
+          ) : (
+            <div style={{ fontSize: 14, color: '#FFE4E8', lineHeight: 1.5 }}>
+              No headline figure has been recorded for this project yet.
+            </div>
+          )}
         </div>
       )}
 
-      <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#FFD2D9', marginBottom: 10 }}>
-        Anticipated outcomes
-      </div>
-      <ul style={{ margin: 0, paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 6 }}>
-        {impact.impactPoints.map((p, i) => (
-          <li key={i} style={{ fontSize: 13, lineHeight: 1.45, color: '#FFE4E8' }}>
-            {p}
-          </li>
-        ))}
-      </ul>
+      {/* The heading used to render whatever the list held, including nothing: a
+          completion upload records what happened and carries no anticipated outcomes, so
+          the panel ended in a label with empty space under it. */}
+      {impact.impactPoints.length > 0 && (
+        <>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#FFD2D9', marginBottom: 10 }}>
+            Anticipated outcomes
+          </div>
+          <ul style={{ margin: 0, paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {impact.impactPoints.map((p, i) => (
+              <li key={i} style={{ fontSize: 13, lineHeight: 1.45, color: '#FFE4E8' }}>
+                {p}
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
     </div>
   );
 }

@@ -13,9 +13,16 @@ function optional(value: unknown): string | null {
   return s === '' ? null : s;
 }
 
-/** Accepts "62", "62%" or " 62 % " and returns a canonical "62%". */
-function percent(value: unknown, fallback = '0%'): string {
-  const raw = str(value).replace('%', '');
+/**
+ * Accepts "62", "62%" or " 62 % " and returns a canonical "62%".
+ *
+ * A blank field returns an empty string, which the interface reads as "not recorded"
+ * rather than as 0%. Clearing the box is how someone retracts a figure they are no
+ * longer willing to stand behind, and it used to silently become zero.
+ */
+function percent(value: unknown, fallback = ''): string {
+  const raw = str(value).replace('%', '').trim();
+  if (raw === '') return '';
   const n = Number(raw);
   if (!Number.isFinite(n)) return fallback;
   return `${Math.max(0, Math.min(100, Math.round(n)))}%`;
