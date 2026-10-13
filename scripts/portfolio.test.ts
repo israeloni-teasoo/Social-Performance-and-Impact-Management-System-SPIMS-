@@ -17,7 +17,7 @@
 
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { communitiesFor, deliveryFor, demographicsFor, moneyFor, outcomesFor, sroiFor } from '../frontend/src/analytics/portfolio';
+import { communitiesFor, deliveryFor, demographicsFor, moneyFor, outcomesFor, sroiFor, statesFor } from '../frontend/src/analytics/portfolio';
 import type { Project, ProjectImpact } from '../frontend/src/types';
 
 let failures = 0;
@@ -133,11 +133,13 @@ test('the social return aggregates the programmes that can be estimated', () => 
   assert.equal(sroiFor(projects, {}), null, 'nothing to estimate from must be null, never zero');
 });
 
-test('host communities are de-duplicated across programmes', () => {
-  const projects = [project({ code: 'A' }), project({ code: 'B' })];
+test('host communities are counted once however they are spelled', () => {
+  // The completion file writes "Ehor, Edo" and the project record writes "Ehor". Taking
+  // the union of the raw strings reported four communities for a project working in two.
+  const projects = [project({ code: 'A', community: 'Ehor; Obagie' }), project({ code: 'B' })];
   const impacts = {
     A: impact({ projectCode: 'A', communitiesImpacted: ['Ehor, Edo', 'Obagie, Edo'] }),
-    B: impact({ projectCode: 'B', communitiesImpacted: ['Ehor, Edo'] }),
+    B: impact({ projectCode: 'B', communitiesImpacted: ['ehor, edo'] }),
   };
   assert.deepEqual(communitiesFor(projects, impacts), ['Ehor, Edo', 'Obagie, Edo']);
 });
@@ -154,6 +156,15 @@ test('delivery risk is counted from project status, not invented', () => {
   assert.equal(deliveryFor([]).needingAttention, 0);
 });
 
+test('states are de-duplicated, and a multi-state label is not a state', () => {
+  const states = statesFor([
+    project({ code: 'A', state: 'Edo · Delta' }),
+    project({ code: 'B', state: 'Edo' }),
+    project({ code: 'C', state: 'Multi-state' }),
+  ]);
+  assert.deepEqual(states, ['Delta', 'Edo']);
+});
+
 test('what changed comes from recorded outcomes, largest first', () => {
   const projects = [project({ code: 'A' }), project({ code: 'B' }), project({ code: 'C' })];
   const impacts = {
@@ -162,6 +173,8 @@ test('what changed comes from recorded outcomes, largest first', () => {
     C: impact({ projectCode: 'C' }),
   };
   const outcomes = outcomesFor(projects, impacts);
+  // Every programme that recorded one, not a sample of three: the headline band reports
+  // how many there are, and showing three of forty as "what changed" is an arbitrary pick.
   assert.deepEqual(outcomes.map((o) => o.code), ['B', 'A']);
   assert.equal(outcomesFor(projects, {}).length, 0, 'no record means nothing to show, not a placeholder');
 });

@@ -188,34 +188,60 @@ export function deliveryFor(projects: Project[]): DeliveryStatus {
   return { onTrack: count('On track'), atRisk, delayed, completed: count('Completed'), needingAttention: atRisk + delayed };
 }
 
-/** Every community a programme recorded working in, de-duplicated. */
-export function communitiesFor(projects: Project[], impacts: Record<string, ProjectImpact>): string[] {
+/** Every state a programme records working in, de-duplicated. A multi-state entry splits. */
+export function statesFor(projects: Project[]): string[] {
   const names = new Set<string>();
   for (const p of projects) {
-    for (const c of impacts[p.code]?.communitiesImpacted ?? []) {
-      const name = c.trim();
-      if (name) names.add(name);
-    }
-    for (const c of (p as { community?: string | null }).community?.split(';') ?? []) {
-      const name = c.trim();
-      if (name) names.add(name);
+    for (const part of p.state.split('·')) {
+      const name = part.trim();
+      if (name && name.toLowerCase() !== 'multi-state') names.add(name);
     }
   }
   return [...names].sort();
 }
 
 /**
- * What changed, taken from the programmes that recorded an outcome.
+ * Every community a programme recorded working in, counted once.
+ *
+ * Two places name them and they do not name them the same way: the completion file writes
+ * "Ehor, Edo" — community and state — and the project record writes "Ehor". Taking the
+ * union of the raw strings counted Ehor twice, so a project working in two communities
+ * reported four. They are matched on the community itself, and the fuller spelling is the
+ * one shown.
+ */
+export function communitiesFor(projects: Project[], impacts: Record<string, ProjectImpact>): string[] {
+  const byName = new Map<string, string>();
+  const add = (raw: string) => {
+    const name = raw.trim();
+    if (!name) return;
+    const key = (name.split(',')[0] ?? name).trim().toLowerCase();
+    if (!key) return;
+    const existing = byName.get(key);
+    // "Ehor, Edo" says more than "Ehor", so the longer spelling wins.
+    if (!existing || name.length > existing.length) byName.set(key, name);
+  };
+  for (const p of projects) {
+    for (const c of impacts[p.code]?.communitiesImpacted ?? []) add(c);
+    for (const c of (p as { community?: string | null }).community?.split(';') ?? []) add(c);
+  }
+  return [...byName.values()].sort();
+}
+
+/**
+ * What changed, taken from every programme that recorded an outcome.
  *
  * The band used to hold three written-in deltas — "+12% literacy in STEP-supported
- * schools" — that no project produced and no upload could change.
+ * schools" — that no project produced and no upload could change. It then held one card
+ * per programme, which reads as a portfolio summary when there is one programme and as an
+ * arbitrary pick of three when there are forty. The dashboard now leads with figures that
+ * mean the same thing in every sector and carries these underneath, so the detail is not
+ * lost and the headline is not a sample.
  */
-export function outcomesFor(projects: Project[], impacts: Record<string, ProjectImpact>, limit = 3): RecordedOutcome[] {
+export function outcomesFor(projects: Project[], impacts: Record<string, ProjectImpact>): RecordedOutcome[] {
   return projects
     .map((p) => ({ project: p, impact: impacts[p.code] }))
     .filter((row): row is { project: Project; impact: ProjectImpact } => Boolean(row.impact?.outcome?.trim()))
     .sort((a, b) => (b.impact.reach?.directBeneficiaries ?? 0) - (a.impact.reach?.directBeneficiaries ?? 0))
-    .slice(0, limit)
     .map(({ project, impact }) => ({
       code: project.code,
       name: project.name,

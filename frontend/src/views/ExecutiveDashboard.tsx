@@ -1,7 +1,7 @@
 import { ReachVsImpactTip } from '../components/ReachPanel';
 import { InfoTip } from '../components/Tooltip';
 import { analysePortfolio, formatCompact, formatCount, formatMillions } from '../analytics/metrics';
-import { communitiesFor, deliveryFor, demographicsFor, moneyFor, outcomesFor, sroiFor } from '../analytics/portfolio';
+import { communitiesFor, deliveryFor, demographicsFor, moneyFor, outcomesFor, sroiFor, statesFor } from '../analytics/portfolio';
 import { card, PILLAR_COLORS } from '../ui';
 import type { MoneySlice } from '../analytics/portfolio';
 import type { Project, ProjectImpact, Target } from '../types';
@@ -30,6 +30,17 @@ const COMPLIANCE_COMMITMENTS = [
   { text: 'GRI 403 occupational health', needs: 'site-level safety audit status' },
   { text: 'SDG mapping of active programmes', needs: 'each programme tagged in the indicator library' },
 ];
+
+/** One portfolio-level figure in the headline band. */
+function HeadlineCard({ value, label, detail }: { value: string; label: string; detail: string }) {
+  return (
+    <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 14, padding: '18px 20px' }}>
+      <div style={{ fontSize: 34, fontWeight: 800, color: '#fff', lineHeight: 1.1 }}>{value}</div>
+      <div style={{ fontSize: 13, fontWeight: 700, color: '#E4E6F5', marginTop: 4 }}>{label}</div>
+      <div style={{ fontSize: 12, color: '#9EA1C0', marginTop: 6, lineHeight: 1.5 }}>{detail}</div>
+    </div>
+  );
+}
 
 function MoneyBars({ rows, title, note }: { rows: MoneySlice[]; title: string; note: string }) {
   if (rows.length === 0) {
@@ -81,6 +92,7 @@ export function ExecutiveDashboard({
   const sroi = sroiFor(projects, impacts);
   const delivery = deliveryFor(projects);
   const communities = communitiesFor(projects, impacts);
+  const states = statesFor(projects);
   const outcomes = outcomesFor(projects, impacts);
 
   // The aspiration figure comes from the targets somebody actually set, as the mean of
@@ -129,33 +141,70 @@ export function ExecutiveDashboard({
       <div style={{ background: 'linear-gradient(160deg,#1a2a63,#111c55)', borderRadius: 18, padding: '26px 28px', marginBottom: 22 }}>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
           <div style={{ fontSize: 19, fontWeight: 800, color: '#fff' }}>What changed</div>
-          <div style={{ fontSize: 12.5, color: '#9EA1C0' }}>
-            {outcomes.length > 0 ? 'Outcomes recorded against programmes, largest first' : 'Recorded outcomes appear here'}
-          </div>
+          <div style={{ fontSize: 12.5, color: '#9EA1C0' }}>Across the whole portfolio, from results recorded against programmes</div>
         </div>
+
+        {/* Three figures that mean the same thing whatever the programme is — a borehole,
+            a scholarship, a clinic or a starter kit all serve people, reach communities and
+            record a result. The band used to hold one card per programme, which reads as a
+            summary when there is one programme and as an arbitrary pick of three when there
+            are forty. */}
+        <div className="grid-3" style={{ gap: 16 }}>
+          <HeadlineCard
+            value={formatCount(totals.impact)}
+            label="People served"
+            detail={
+              totals.reach > 0
+                ? `of ${formatCount(totals.reach)} reached · ${totals.conversionPct}% received a delivered intervention`
+                : 'no programme has recorded who it reached yet'
+            }
+          />
+          <HeadlineCard
+            value={String(communities.length)}
+            label={`Communit${communities.length === 1 ? 'y' : 'ies'} reached`}
+            detail={
+              states.length > 0
+                ? `across ${states.length} state${states.length === 1 ? '' : 's'} · ${states.slice(0, 3).join(', ')}${states.length > 3 ? ' …' : ''}`
+                : 'no community recorded against a programme yet'
+            }
+          />
+          <HeadlineCard
+            value={`${outcomes.length}`}
+            label={`Programme${outcomes.length === 1 ? '' : 's'} with a recorded result`}
+            detail={`of ${projects.length} in the portfolio · ${delivery.completed} completed`}
+          />
+        </div>
+
         {outcomes.length === 0 ? (
-          <div style={{ fontSize: 13.5, color: '#C7C9DA', lineHeight: 1.6, maxWidth: 680 }}>
-            No programme has recorded what changed as a result of its work yet. It is the{' '}
+          <div style={{ fontSize: 13, color: '#C7C9DA', lineHeight: 1.6, marginTop: 18, maxWidth: 720 }}>
+            No programme has recorded what changed as a result of its work. It is the{' '}
             <span style={{ fontFamily: 'monospace', fontSize: 12.5 }}>what_changed_as_a_result</span> column of the project completion
-            upload, and until one is filled in there is nothing here to show.
+            upload, and until one is filled in these figures count delivery, not change.
           </div>
         ) : (
-          <div className="grid-3" style={{ gap: 16 }}>
-            {outcomes.map((row) => (
-              <div key={row.code} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 14, padding: '18px 20px' }}>
-                {row.figure && (
-                  <div style={{ fontSize: 34, fontWeight: 800, color: '#fff', lineHeight: 1.1, marginBottom: 2 }}>{row.figure}</div>
-                )}
-                {row.figureLabel && <div style={{ fontSize: 11.5, color: '#9EA1C0', marginBottom: 10 }}>{row.figureLabel}</div>}
-                <div style={{ fontSize: 13.5, color: '#E4E6F5', marginBottom: 12, lineHeight: 1.5 }}>{row.outcome}</div>
-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: 10.5, fontWeight: 700, padding: '3px 9px', borderRadius: 20, background: 'rgba(43,76,155,0.35)', color: '#B9CBEB' }}>{row.pillar}</span>
-                  <span style={{ fontSize: 10.5, fontWeight: 700, padding: '3px 9px', borderRadius: 20, background: 'rgba(255,255,255,0.1)', color: '#C7C9DA' }}>{row.code}</span>
+          <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid rgba(255,255,255,0.12)' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#9EA1C0', marginBottom: 10 }}>
+              In each programme’s own words
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
+              {outcomes.slice(0, 4).map((row) => (
+                <div key={row.code} style={{ display: 'flex', gap: 10, alignItems: 'baseline', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: 10.5, fontWeight: 700, padding: '3px 9px', borderRadius: 20, background: 'rgba(43,76,155,0.35)', color: '#B9CBEB', whiteSpace: 'nowrap' }}>
+                    {row.pillar}
+                  </span>
+                  <span style={{ fontSize: 11.5, fontFamily: 'monospace', color: '#9EA1C0' }}>{row.code}</span>
+                  <span style={{ flex: 1, minWidth: 240, fontSize: 13, color: '#E4E6F5', lineHeight: 1.5 }}>{row.outcome}</span>
                 </div>
-              </div>
-            ))}
+              ))}
+              {outcomes.length > 4 && (
+                <div style={{ fontSize: 12.5, color: '#9EA1C0' }}>
+                  and {outcomes.length - 4} more recorded against other programmes.
+                </div>
+              )}
+            </div>
           </div>
         )}
+
         <div style={{ display: 'flex', gap: 26, marginTop: 20, paddingTop: 18, borderTop: '1px solid rgba(255,255,255,0.12)', flexWrap: 'wrap' }}>
           <div>
             <div style={{ fontSize: 26, fontWeight: 800, color: '#fff', display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -185,8 +234,10 @@ export function ExecutiveDashboard({
             <div style={{ fontSize: 11.5, color: '#9EA1C0' }}>Social value per ₦1 · illustrative</div>
           </div>
           <div>
-            <div style={{ fontSize: 26, fontWeight: 800, color: '#fff' }}>{formatCount(totals.impact)}</div>
-            <div style={{ fontSize: 11.5, color: '#9EA1C0' }}>People served to date</div>
+            <div style={{ fontSize: 26, fontWeight: 800, color: '#fff' }}>
+              {sroi ? formatMillions(sroi.presentValueNgn / 1_000_000) : '—'}
+            </div>
+            <div style={{ fontSize: 11.5, color: '#9EA1C0' }}>Estimated social value created · illustrative</div>
           </div>
           <div>
             <div style={{ fontSize: 26, fontWeight: 800, color: '#fff' }}>{aspirationPct === null ? '—' : `${aspirationPct}%`}</div>
