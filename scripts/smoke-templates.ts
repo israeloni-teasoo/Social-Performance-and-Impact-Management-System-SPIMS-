@@ -21,6 +21,7 @@ import {
   columnsOf,
   exampleOf,
   guidanceRows,
+  withoutTrailingBlanks,
 } from '../frontend/src/data/uploadTemplates';
 import { parseCsv } from '../server/lib/csv';
 
@@ -45,7 +46,9 @@ function buildTemplateCsv(type: (typeof BULK_UPLOAD_DATA_TYPES)[number]): string
 
 /** The header/record logic from bulkUploadHandler, over a parsed file. */
 function readAsUpload(csvText: string, columns: string[]) {
-  const rows = parseCsv(csvText).filter((r) => !(r[0] ?? '').trim().startsWith(TEMPLATE_COMMENT));
+  const rows = parseCsv(csvText)
+    .filter((r) => !(r[0] ?? '').trim().startsWith(TEMPLATE_COMMENT))
+    .map(withoutTrailingBlanks);
   const [header, ...dataRows] = rows;
   const headerOk =
     header!.length === columns.length && columns.every((col, i) => col.toLowerCase() === header![i]?.trim().toLowerCase());
@@ -151,6 +154,22 @@ test('reach and benefit are asked for as separate, differently named columns', (
   assert.ok(columns.includes('people_reached'));
   assert.ok(columns.includes('people_who_benefited'));
   assert.ok(columns.includes('why_the_two_numbers_differ'), 'the gap must be explained in the file, not inferred');
+});
+
+test('a file saved back out of a spreadsheet is still accepted', () => {
+  // A spreadsheet pads the sheet out to column Z and saves the padding with the file, so a
+  // 21-column template comes back with five empty columns after it — shown as "Column 1"
+  // to "Column 5". The upload refused the file and listed 21 column names that were all
+  // present and correct, which is close to the least useful thing it could have said.
+  for (const type of BULK_UPLOAD_DATA_TYPES) {
+    const columns = columnsOf(UPLOAD_TEMPLATES[type]);
+    const padded = [...columns, '', '', '', '', ''];
+    const row = [...columns.map(() => 'x'), '', '', '', '', ''];
+    const csv = [padded, row].map((r) => r.map((c) => `"${c}"`).join(',')).join('\r\n');
+    const { headerOk, records } = readAsUpload(csv, columns);
+    assert.ok(headerOk, `${type} rejects its own columns once a spreadsheet has padded them`);
+    assert.equal(records.length, 1);
+  }
 });
 
 test('the spend template matches the columns the handler writes from', () => {

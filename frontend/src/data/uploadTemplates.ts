@@ -54,6 +54,24 @@ export interface UploadTemplate {
 /** Marks the explanation lines in a downloaded template. The upload ignores them. */
 export const TEMPLATE_COMMENT = '#';
 
+/**
+ * Drops empty cells from the end of a row.
+ *
+ * A spreadsheet pads a sheet out to column Z and saves the padding back into the file, so
+ * a 21-column template returns with five empty columns after it, shown as "Column 1" to
+ * "Column 5". They belong to the spreadsheet, not the template. A file carrying them was
+ * refused with a message listing 21 column names that were all present and correct.
+ *
+ * It lives here because three places need the same answer — the upload handler, the
+ * demo-mode check in the browser, and the test harness — and they had already drifted
+ * once: demo mode rejecting a file the real upload accepts is worse than no check at all.
+ */
+export function withoutTrailingBlanks(row: string[]): string[] {
+  let end = row.length;
+  while (end > 0 && (row[end - 1] ?? '').trim() === '') end -= 1;
+  return row.slice(0, end);
+}
+
 export function columnsOf(template: UploadTemplate): string[] {
   return template.fields.map((f) => f.name);
 }

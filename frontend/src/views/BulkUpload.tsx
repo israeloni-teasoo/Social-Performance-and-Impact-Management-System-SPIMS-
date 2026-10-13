@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { api } from '../api';
 import { isApiAvailable } from '../apiMode';
 import { InfoTip } from '../components/Tooltip';
-import { BULK_UPLOAD_DATA_TYPES, TEMPLATE_COMMENT, UPLOAD_TEMPLATES, columnsOf, exampleOf, guidanceRows } from '../data/uploadTemplates';
+import { BULK_UPLOAD_DATA_TYPES, TEMPLATE_COMMENT, UPLOAD_TEMPLATES, columnsOf, exampleOf, guidanceRows, withoutTrailingBlanks } from '../data/uploadTemplates';
 import { buildCsvFromRows, downloadBlob } from '../reportExport';
 import { formField, h1, input, label, primaryBtn, secondaryBtn, sectionCardTitle, subtitle } from '../ui';
 import type { BulkUploadDataType, UploadTemplate } from '../data/uploadTemplates';
@@ -40,7 +40,9 @@ function validateLocally(csvText: string, dataType: BulkUploadDataType) {
     .filter((l) => l.trim() !== '')
     .filter((l) => !l.trim().replace(/^"/, '').startsWith(TEMPLATE_COMMENT));
   const expected = columnsOf(UPLOAD_TEMPLATES[dataType]);
-  const header = (lines[0] ?? '').split(',').map((c) => c.trim().replace(/^"|"$/g, ''));
+  // The same trim as the server, from the same function: a spreadsheet pads the sheet out
+  // to column Z and saves the empty columns with it.
+  const header = withoutTrailingBlanks((lines[0] ?? '').split(',').map((c) => c.trim().replace(/^"|"$/g, '')));
   const ok = header.length === expected.length && expected.every((c, i) => c.toLowerCase() === header[i]?.toLowerCase());
   if (!ok) {
     throw new Error(`Columns don't match the ${dataType.toLowerCase()} template. Expected: ${expected.join(', ')}.`);

@@ -1,5 +1,5 @@
 import { formatMillions } from '../../frontend/src/analytics/money.js';
-import { TEMPLATE_COMMENT, UPLOAD_TEMPLATES, columnsOf } from '../../frontend/src/data/uploadTemplates.js';
+import { TEMPLATE_COMMENT, UPLOAD_TEMPLATES, columnsOf, withoutTrailingBlanks } from '../../frontend/src/data/uploadTemplates.js';
 import { parseCsv } from '../lib/csv.js';
 import { prisma } from '../lib/db.js';
 import type { HandlerResult } from '../lib/types.js';
@@ -101,7 +101,12 @@ export async function bulkUploadHandler(
   const rows = parseCsv(csvText).filter((r) => !(r[0] ?? '').trim().startsWith(TEMPLATE_COMMENT));
   if (rows.length === 0) return { status: 400, body: { error: 'The file is empty.' } };
 
-  const [header, ...dataRows] = rows;
+  // A spreadsheet pads a sheet out to column Z and saves the padding back into the file,
+  // so a template with 21 columns returns with five empty ones after it, shown as
+  // "Column 1" to "Column 5". They are the spreadsheet's, not the template's, and a file
+  // was being refused for carrying them — with a message listing 21 column names that
+  // were all present and correct, which is close to the least helpful thing it could say.
+  const [header = [], ...dataRows] = rows.map(withoutTrailingBlanks);
   const headerOk =
     header.length === columns.length && columns.every((col, i) => col.toLowerCase() === header[i]?.trim().toLowerCase());
   if (!headerOk) {
