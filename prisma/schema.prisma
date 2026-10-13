@@ -106,6 +106,9 @@ model ProjectImpact {
   baselineCaption     String
   dualLens            Json // DualLensTag[]
   costPerOutcome      String
+  /// What was actually spent, in naira. `inputs` carries only a rounded label, and the
+  /// SROI estimate divides by this, so the figure has to survive as a figure.
+  spentNgn            Float?
   sroi                String
   /// What the team would tell whoever runs this next.
   ///

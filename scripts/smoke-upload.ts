@@ -172,15 +172,24 @@ async function main() {
   });
 
   const afterCompletion = await prisma.project.findUniqueOrThrow({ where: { code: CODE } });
+  const storedImpact = await prisma.projectImpact.findFirstOrThrow({ where: { projectCode: CODE } });
 
   test('utilisation is computed from recorded spend against the exact budget', () => {
     // The whole reason budgetNgn exists: against the rounded label this came out at 101%.
     assert.equal(afterCompletion.utilPct, '100%');
   });
 
-  test('progress and status are left to a person', () => {
-    assert.equal(afterCompletion.progress, '', 'a completion file does not decide a project is finished');
-    assert.equal(afterCompletion.status, 'On track');
+  test('a completion date marks the project complete, at 100%', () => {
+    // The mechanism, stated in the template: filling in date_completed is what closes a
+    // project. Leaving it blank records results so far and changes neither.
+    assert.equal(afterCompletion.status, 'Completed');
+    assert.equal(afterCompletion.progress, '100%');
+    assert.equal(afterCompletion.progPct, '100%');
+    assert.match(String((completionResult.body as { status: string }).status), /Marked complete at 100% from date_completed/);
+  });
+
+  test('the spend survives as a figure, so the social return can be calculated', () => {
+    assert.equal(storedImpact.spentNgn, SPEND);
   });
 
   test('the delivered output reaches the project, where the portfolio reads it', () => {

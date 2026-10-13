@@ -1,4 +1,5 @@
 import { analyseProgramme, analysePortfolio, formatCount, formatMillions, isPercentRecorded, percentLabel, utilisedCaption } from '../analytics/metrics';
+import { isSroiEstimate, projectionFor, sroiForProject } from '../analytics/sroi';
 import type { Metric } from '../analytics/metrics';
 import type { ReportSection } from '../reportContent';
 import type { CustomField, OrgSettings, Project, ProjectImpact, Report } from '../types';
@@ -284,6 +285,9 @@ export function buildProgrammeSpec(input: BuildProgrammeSpecInput): ReportSpec {
     },
   ];
 
+  const sroiResult = sroiForProject(project, impact);
+  const sroiEstimate = isSroiEstimate(sroiResult) ? sroiResult : null;
+
   if (impact) {
     blocks.push(
       { kind: 'chapter', title: 'Our Impact', tone: 'impact' },
@@ -336,15 +340,21 @@ export function buildProgrammeSpec(input: BuildProgrammeSpecInput): ReportSpec {
       ),
     });
 
-    if (impact.impactScenarios && impact.impactScenarios.length > 0) {
+    const storedScenarios = impact.impactScenarios ?? [];
+    // A record with no scenarios of its own still gets this section, projected by the
+    // analytics layer from the programme's own figures and a stated proxy. Without it a
+    // completion file produced a report that stopped at "what was delivered", which is
+    // the shallow impact section this product exists to avoid.
+    const projection = storedScenarios.length === 0 && sroiEstimate ? projectionFor(sroiEstimate) : null;
+    const scenarios = storedScenarios.length > 0 ? storedScenarios : projection?.scenarios ?? [];
+    const basis = storedScenarios.length > 0 ? impact.impactScenarioBasis : projection?.basis;
+    if (scenarios.length > 0) {
       blocks.push({
         kind: 'section',
         heading: 'Translated into figures',
         lines: lines(
-          impact.impactScenarioBasis,
-          ...impact.impactScenarios.map(
-            (s) => `${s.horizon}: ${s.conservative} (conservative) to ${s.highImpact} (high-impact)`,
-          ),
+          basis,
+          ...scenarios.map((s) => `${s.horizon}: ${s.conservative} (conservative) to ${s.highImpact} (high-impact)`),
         ),
       });
     }
@@ -357,7 +367,12 @@ export function buildProgrammeSpec(input: BuildProgrammeSpecInput): ReportSpec {
         lines: lines(
           field('Communities impacted', impact.communitiesImpacted.join(', ')),
           field('Cost per outcome', impact.costPerOutcome, 'not calculated — needs recorded spend and a count of people served'),
-          field('Estimated SROI', impact.sroi, 'not calculated — no financial proxy for this outcome has been validated'),
+          field(
+            sroiEstimate && !impact.sroi.trim() ? 'Estimated social return' : 'Social return',
+            impact.sroi.trim() || (sroiEstimate ? `${sroiEstimate.display} (range ₦${sroiEstimate.low.toFixed(2)}–₦${sroiEstimate.high.toFixed(2)})` : ''),
+            'not calculated — no financial proxy for this outcome has been validated',
+          ),
+          Boolean(sroiEstimate && !impact.sroi.trim()) && `How the social return was arrived at: ${sroiEstimate!.calculation} ${sroiEstimate!.caveat}`,
           field('Programme manager', impact.contactPerson),
           field('What the team learned', impact.lessons),
         ),

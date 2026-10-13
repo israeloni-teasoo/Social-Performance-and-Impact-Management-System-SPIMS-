@@ -16,6 +16,7 @@
  * remembered; `npm run check:esm` runs it.
  */
 
+import { existsSync } from 'node:fs';
 import { readdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -26,8 +27,43 @@ const CHECK_ONLY = process.argv.includes('--check');
 /** Everything that ends up inside the serverless function bundle. */
 const ROOTS = ['server', 'api', 'prisma'];
 
-/** Files outside those trees that the server imports, and which therefore ship with it. */
-const EXTRA_FILES = ['frontend/src/data/uploadTemplates.ts', 'frontend/src/data/vocabulary.ts'];
+/**
+ * Files outside those trees that the server imports, and which therefore ship with it.
+ *
+ * Discovered by following the imports rather than listed by hand. The list was the
+ * weak point: adding one import of a frontend helper to a handler pulled a module —
+ * and everything *it* imported — into the serverless bundle without being added here,
+ * and the function died on its first import with ERR_MODULE_NOT_FOUND. Following the
+ * graph means the rule covers whatever the server actually reaches today.
+ */
+async function reachedOutsideRoots(seedFiles) {
+  const seen = new Set(seedFiles);
+  const queue = [...seedFiles];
+  const outside = new Set();
+  while (queue.length > 0) {
+    const file = queue.pop();
+    let source;
+    try {
+      source = await readFile(file, 'utf8');
+    } catch {
+      continue;
+    }
+    for (const [, , spec] of source.matchAll(RELATIVE)) {
+      const base = path.resolve(path.dirname(file), spec.replace(/\.js$/, ''));
+      // `./thing.js` names the emitted file; the source beside it is `thing.ts`.
+      for (const candidate of [`${base}.ts`, `${base}.tsx`, path.join(base, 'index.ts')]) {
+        if (seen.has(candidate)) break;
+        if (!existsSync(candidate)) continue;
+        seen.add(candidate);
+        queue.push(candidate);
+        const relative = path.relative(ROOT, candidate);
+        if (!ROOTS.some((r) => relative.startsWith(`${r}${path.sep}`))) outside.add(candidate);
+        break;
+      }
+    }
+  }
+  return [...outside];
+}
 
 async function walk(dir) {
   const out = [];
@@ -39,12 +75,12 @@ async function walk(dir) {
   return out;
 }
 
-const files = [];
-for (const r of ROOTS) files.push(...(await walk(path.join(ROOT, r))));
-for (const f of EXTRA_FILES) files.push(path.join(ROOT, f));
-
 // from './x' / from "../y" — and the same inside `import type` and `export … from`.
 const RELATIVE = /(\bfrom\s+['"])(\.[^'"]*?)(['"])/g;
+
+const files = [];
+for (const r of ROOTS) files.push(...(await walk(path.join(ROOT, r))));
+files.push(...(await reachedOutsideRoots([...files])));
 
 let changed = 0;
 const offenders = [];

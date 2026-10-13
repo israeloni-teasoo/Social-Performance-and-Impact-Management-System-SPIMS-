@@ -30,6 +30,9 @@ export interface Project {
   pillar: string;
   state: string;
   budget: string;
+  /** The budget as a figure, in naira. Absent on programmes that predate the intake form. */
+  budgetNgn?: number | null;
+  /** Empty when nobody has recorded it, which is not the same claim as "0%". */
   utilPct: string;
   progress: string;
   progPct: string;
@@ -213,6 +216,10 @@ export interface ProjectImpact {
   baselineCaption: string;
   dualLens: DualLensTag[];
   costPerOutcome: string;
+  /** What was actually spent, as a figure in naira. The SROI estimate divides by it. */
+  spentNgn?: number | null;
+  /** A confirmed ratio, once Seplat's M&E function has one. Empty while the system's own
+   *  estimate — calculated in `analytics/sroi.ts` and labelled illustrative — stands in. */
   sroi: string;
   /** What the team would tell whoever runs this next. Optional: older records have none. */
   lessons?: string;

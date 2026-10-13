@@ -122,7 +122,8 @@ export const UPLOAD_TEMPLATES: Record<BulkUploadDataType, UploadTemplate> = {
       PROJECT_CODE,
       {
         name: 'date_completed',
-        meaning: 'The day the project finished, written as year-month-day.',
+        meaning:
+          'The day the project finished, written as year-month-day. Filling this in is what marks the project complete: SPIMS sets its status to Completed and its progress to 100%. Leave it blank if the work is still running and you are recording results so far — then status and progress are left as they are.',
         example: '2027-06-30',
       },
       {
@@ -142,7 +143,8 @@ export const UPLOAD_TEMPLATES: Record<BulkUploadDataType, UploadTemplate> = {
       },
       {
         name: 'people_reached',
-        meaning: 'Everyone the project interacted with in any way — applicants, attendees, people screened, residents of the area served. Usually much larger than the number who received anything.',
+        meaning:
+          'Everyone the project interacted with in any way — applicants, attendees, people screened, residents of the area served. Usually larger than the number who received anything. It must come from a list you hold: an invitation list, an application register, an attendance sheet. If no such list exists, put the same figure as people_who_benefited rather than an estimate.',
         example: '1640',
       },
       {
@@ -157,7 +159,8 @@ export const UPLOAD_TEMPLATES: Record<BulkUploadDataType, UploadTemplate> = {
       },
       {
         name: 'people_who_benefited',
-        meaning: 'Only those who actually received what the project provided — attended the training, had the surgery, got the connection. Never the same number as people_reached.',
+        meaning:
+          'Only those who actually received what the project provided — attended the training, had the surgery, got the connection. Usually smaller than people_reached. If everyone the project interacted with also received something, put the same number in both and say so in why_the_two_numbers_differ — do not invent a gap to make the figures look different.',
         example: '120',
       },
       {
@@ -167,7 +170,8 @@ export const UPLOAD_TEMPLATES: Record<BulkUploadDataType, UploadTemplate> = {
       },
       {
         name: 'why_the_two_numbers_differ',
-        meaning: 'Explain the gap between people_reached and people_who_benefited in one sentence. This is printed in the report, so a reader is never left to assume the larger number is the achievement.',
+        meaning:
+          'Explain the gap between people_reached and people_who_benefited in one sentence, naming where the larger figure comes from — the invitation list, the application register, the attendance sheet. This is printed in the report, so a reader is never left to assume the larger number is the achievement. If the two numbers are the same, say that everyone reached received the intervention.',
         example: '1,520 applicants were not selected — they were reached, not impacted',
       },
       ...breakdown('people who benefited'),
@@ -319,7 +323,8 @@ export const UPLOAD_TEMPLATES: Record<BulkUploadDataType, UploadTemplate> = {
       },
       {
         name: 'person_responsible',
-        meaning: 'Who owns delivery of this project.',
+        meaning:
+          'The project manager — the named person accountable for delivering this project, who a reader of the report could go to with a question. This is the name SPIMS shows as "Project manager" on the project page and in its report. One person, not a department.',
         example: 'Tunde Bello',
       },
       {

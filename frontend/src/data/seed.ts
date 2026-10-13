@@ -1,4 +1,4 @@
-import type { Approval, Community, CustomField, EvidenceItem, FieldTask, Indicator, Project, ProjectImpact, Report, Stakeholder, Target, TeamMember } from '../types';
+import type { Approval, Community, CustomField, EvidenceItem, FieldTask, Indicator, Project, ProjectImpact, Report, Stakeholder, Target, TeamMember } from '../types.js';
 
 export const PROJECTS: Project[] = [
   { id: 'STEP', code: 'STEP', name: 'Teachers Empowerment (STEP)', output: '623 teachers certified', pillar: 'Education', state: 'Edo · Delta', budget: '₦480M', utilPct: '90%', progress: '90%', progPct: '90%', status: 'On track' },

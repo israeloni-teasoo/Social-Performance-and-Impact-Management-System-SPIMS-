@@ -28,6 +28,7 @@ export async function listProjectImpactsHandler(): Promise<HandlerResult> {
       baselineCaption: imp.baselineCaption,
       dualLens: imp.dualLens,
       costPerOutcome: imp.costPerOutcome,
+      spentNgn: imp.spentNgn ?? undefined,
       sroi: imp.sroi,
       contactPerson: imp.contactPerson,
       communitiesImpacted: imp.communitiesImpacted,

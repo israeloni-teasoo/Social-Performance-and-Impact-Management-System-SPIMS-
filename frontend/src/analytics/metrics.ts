@@ -1,3 +1,5 @@
+import { formatMillions } from './money';
+import { projectedFigures, sroiForProject } from './sroi';
 import type { Project, ProjectImpact, ReachProfile } from '../types';
 
 /**
@@ -88,6 +90,8 @@ export interface PortfolioAnalytics {
 /* ----------------------------------------------------------------- helpers */
 
 /** Thousands separators. Figures are compared against published reports, so no rounding. */
+export { formatMillions };
+
 export function formatCount(n: number): string {
   return n.toLocaleString('en-NG');
 }
@@ -114,26 +118,12 @@ export function budgetToMillions(budget: string): number {
   return budget.toUpperCase().includes('B') ? n * 1000 : n;
 }
 
-/**
- * Millions of naira as a compact label.
- *
- * Kept to two decimals below ₦10M, because the portfolio now holds projects of a few
- * million naira as well as programmes of several hundred: rounding to the nearest
- * million printed "₦3M" at the top of a report whose budget line, two rows below, read
- * "₦3.44M". The form always carries an M or a B, so `budgetToMillions` reads it back.
- */
-export function formatMillions(millions: number): string {
-  if (millions >= 1000) return `₦${(millions / 1000).toFixed(2)}B`;
-  if (millions >= 10) return `₦${Math.round(millions)}M`;
-  return `₦${Number(millions.toFixed(2))}M`;
-}
-
 /* ------------------------------------------- percentages that may never have been set
  *
  * `utilPct`, `progress` and `progPct` are display strings, and an unrecorded one used
  * to be stored as "0%" — which reads as a measurement rather than as a silence. A
- * project created from a master-data upload claimed "0% utilised" while its completion
- * file recorded the entire budget spent, and nobody could tell the two apart.
+ * project created from a master-data upload claimed "0% utilised" and "0%" progress on
+ * the strength of nothing, while its completion file recorded the whole budget spent.
  *
  * An unrecorded value is now an empty string, and these helpers are the only place that
  * is interpreted. `barWidth` matters most: an empty string is not a valid CSS width, the
@@ -158,6 +148,36 @@ export function utilisedCaption(value: string | undefined): string {
 }
 
 /* --------------------------------------------------------------- the layer */
+
+/**
+ * Every grouped number a programme's own record states, which its report quotes verbatim.
+ *
+ * These are data, not narrative: the cost per outcome, the headline figure, the scenario
+ * projections and the bullets under them were entered or uploaded against the programme.
+ * The validator exists to catch a hand-written portfolio section drifting from the
+ * analytics layer, and it cannot reconcile a recorded figure against anything — so
+ * flagging them meant every programme report came back with a page of warnings about its
+ * own contents, which is how a check gets ignored.
+ */
+function statedFiguresOf(impact: ProjectImpact | undefined): number[] {
+  if (!impact) return [];
+  // Every string in the record, walked rather than listed: a field added later would
+  // otherwise start producing warnings about content nobody wrote by hand. What this
+  // still catches is the thing it is for — a figure in a report that appears nowhere in
+  // the record and nowhere in the analytics layer, which is where an invented number
+  // enters a document.
+  const found: number[] = [];
+  const walk = (value: unknown) => {
+    if (typeof value === 'string') found.push(...groupedFiguresIn(value));
+    // Numbers too: a reach channel's count is a figure in the record that the report
+    // prints with thousands separators, which is exactly what the validator reads.
+    else if (typeof value === 'number' && Number.isFinite(value)) found.push(Math.round(value));
+    else if (Array.isArray(value)) value.forEach(walk);
+    else if (value && typeof value === 'object') Object.values(value).forEach(walk);
+  };
+  walk(impact);
+  return found;
+}
 
 /** The grouped numbers in a stated figure, e.g. "₦5,136–₦15,409 per child" → two values. */
 function groupedFiguresIn(value: string | undefined): number[] {
@@ -231,7 +251,12 @@ export function analysePortfolio(projects: Project[], impacts: Record<string, Pr
       reach: profile?.total ?? 0,
       impact: profile?.directBeneficiaries ?? 0,
       mapped: Boolean(profile),
-      quotedFigures: groupedFiguresIn(impacts[p.code]?.costPerOutcome),
+      quotedFigures: [
+        ...statedFiguresOf(impacts[p.code]),
+        // The projection this layer computes for the programme's impact section. It is
+        // produced here, so the validator can and should reconcile it.
+        ...projectedFigures(sroiForProject(p, impacts[p.code])),
+      ],
     };
   });
   const totalBudgetMillions = spend.reduce((sum, s) => sum + s.budgetMillions, 0);

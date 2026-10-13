@@ -1,4 +1,4 @@
-import { formatMillions } from '../../frontend/src/analytics/metrics.js';
+import { formatMillions } from '../../frontend/src/analytics/money.js';
 import { TEMPLATE_COMMENT, UPLOAD_TEMPLATES, columnsOf } from '../../frontend/src/data/uploadTemplates.js';
 import { parseCsv } from '../lib/csv.js';
 import { prisma } from '../lib/db.js';
@@ -37,6 +37,14 @@ const LOGGED_ONLY: Record<string, string> = {
   'Activity logs':
     'Validated and logged only — these rows are not written to project records yet, because how a logged activity should combine with a project total has not been decided.',
 };
+
+/** A year-month-day date, which is what the template asks for and what marks a project complete. */
+function isDate(value: string): boolean {
+  const text = String(value ?? '').trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(text)) return false;
+  const when = new Date(`${text}T00:00:00Z`);
+  return !Number.isNaN(when.getTime()) && when.toISOString().slice(0, 10) === text;
+}
 
 function digits(value: string): number {
   return Number(String(value).replace(/[^\d.-]/g, ''));
@@ -207,6 +215,7 @@ export async function bulkUploadHandler(
   if (dataType === 'Project completion') {
     /** Reported back on the upload, so a changed figure is visible without hunting for it. */
     let utilisation = '';
+    let completed = 0;
     const budgetMissing: string[] = [];
 
     for (const [index, rec] of records.entries()) {
@@ -264,6 +273,7 @@ export async function bulkUploadHandler(
         // financial proxies nobody has validated, and an invented one would be reported
         // as though it meant something.
         costPerOutcome: spend > 0 && benefited > 0 ? `${nairaLabel(spend / benefited)} per person` : '',
+        spentNgn: spend > 0 ? spend : null,
         sroi: '',
         contactPerson: project.owner ?? '',
         communitiesImpacted: list(rec.communities),
@@ -281,8 +291,20 @@ export async function bulkUploadHandler(
       // master data. Both are facts the file carries. Status and progress are deliberately
       // left alone — a completion file records what happened, and whether the project is
       // finished is an editorial call made on the project page.
-      const projectUpdate: { output?: string; utilPct?: string } = {};
+      const projectUpdate: { output?: string; utilPct?: string; status?: string; progress?: string; progPct?: string } = {};
       if (rec.what_was_delivered) projectUpdate.output = rec.what_was_delivered;
+
+      // A completion date is the project saying it is finished, so the project is marked
+      // finished. This used to be left to someone to notice and set by hand, which meant
+      // a closed project sat in the portfolio reading "0%" — and nothing on the screen
+      // said which field would have changed it. A blank date is a project still running
+      // that is recording results so far, and nothing about its status is touched.
+      if (isDate(rec.date_completed)) {
+        projectUpdate.status = 'Completed';
+        projectUpdate.progress = '100%';
+        projectUpdate.progPct = '100%';
+        completed++;
+      }
       if (spend > 0 && project.budgetNgn && project.budgetNgn > 0) {
         const pct = Math.round((spend / project.budgetNgn) * 100);
         projectUpdate.utilPct = `${pct}%`;
@@ -299,7 +321,9 @@ export async function bulkUploadHandler(
     }
     status = describe(written, records.length, 'project impact records', skipped);
     if (written > 0 && skipped.length === 0) {
-      status += '. Project status and progress unchanged — set them under Edit project if the work is finished';
+      status += completed > 0
+        ? `. ${completed === written ? 'Marked' : `${completed} of ${written} marked`} complete at 100% from date_completed`
+        : '. Status and progress unchanged — fill in date_completed to mark a project complete, or set it under Edit project';
       status += utilisation ? `. Utilisation updated to ${utilisation}` : '';
       status += budgetMissing.length > 0
         ? `. Utilisation not computed for ${budgetMissing.join(', ')} — re-upload the project master data so the budget is stored as a figure`

@@ -53,6 +53,17 @@ The other two documents follow the same rule when they are affected:
   declaration, and the bar renders full. The same applies to a blank field on a card —
   `?? '—'` does not fire for `''`, which is how the SROI card came to render a blank space
   under its heading.
+- **SROI is calculated, never stored.** `analytics/sroi.ts` computes it by the Social
+  Value International method from the programme's own spend and beneficiary count;
+  `data/valueProxies.ts` holds the financial proxies and is the single file Seplat's M&E
+  function changes to replace the placeholders. `ProjectImpact.sroi` is an override — a
+  ratio M&E has confirmed — and takes precedence over the estimate when set. Every surface
+  showing the estimate shows the proxy, the deductions and the caveat with it, and marks it
+  ILLUSTRATIVE. A programme missing spend, beneficiaries or a proxy returns `null` with the
+  reason, never a zero.
+- **A completion file's `date_completed` is what marks a project complete** — it sets
+  status to Completed and progress to 100%. Nothing else infers completion, and a blank
+  date means a project still running that is recording results so far.
 - **`Project.budget` is a label; `Project.budgetNgn` is the figure.** Anything written to
   `budget` must carry an M or a B so `budgetToMillions` can read it back. Never derive a
   percentage from the label: against "₦3.4M", a project that spent ₦3,443,000 of its
@@ -70,7 +81,11 @@ Reports flow: **analytics layer → report spec → renderer**. See
   every renderer fails the build rather than shipping a blank page.
 - `frontend/src/report/validate.ts` reconciles narrative figures against analytics
   before export. When it flags something, check the validator's verified set before
-  assuming the report is wrong — a false positive there is worse than no check.
+  assuming the report is wrong — a false positive there is worse than no check. The
+  verified set includes **every figure a programme's own record states**, walked from the
+  record rather than listed: those are data, not narrative, and flagging them meant each
+  programme report came back with a page of warnings about its own contents.
+  `npm run test:validator` asserts it still fails on a figure that appears in neither.
 - Adding an output format means a new renderer of the spec. Never a second pipeline.
 - `frontend/src/report/theme.ts` holds the palette, sampled from Seplat's published
   2025 report. Both renderers draw from it; neither defines a colour of its own.
@@ -118,8 +133,9 @@ database, insert a row that exists nowhere in the seed and confirm it appears.
 
 Before pushing: `npx tsc --noEmit -p tsconfig.json`, `cd frontend && npx tsc -b`,
 `npx oxlint src`, `npm run build`, and exercise both demo and live modes. Also
-`npm run check:routes` (the API is still one catch-all function) and `npm run test:parsers`
-(the media source parsers and the alert matcher). `npm run smoke:upload` needs a scratch
+`npm run check:routes` (the API is still one catch-all function), `npm run test:parsers`
+(the media source parsers and the alert matcher), `npm run test:sroi` (the social-return
+arithmetic, against figures worked out by hand) and `npm run test:validator`. `npm run smoke:upload` needs a scratch
 `DATABASE_URL` and drives both project uploads, then reads the stored records back — the
 only way to tell a write from a well-worded message, which is the failure it was written
 for. `npm run smoke:api` drives the
@@ -150,7 +166,10 @@ same Express app. Things that bite on the serverless side:
   extensionless — and `tsx` resolves them, so this ran locally for months while every
   Vercel invocation died with `ERR_MODULE_NOT_FOUND`, which the platform reports as
   `FUNCTION_INVOCATION_FAILED` and the frontend reads as "no API". `npm run check:esm`
-  enforces it; running the codemod without `--check` fixes it.
+  enforces it, **following the imports** rather than a hand-kept list: a frontend helper
+  imported by a handler drags that module and everything it imports into the function,
+  which is how one `formatMillions` import pulled the analytics layer in and stopped the
+  function starting. Running the codemod without `--check` fixes it.
 - **Run `npm run check:vercel` before deploying.** It runs `vercel build` locally (no
   account needed), replays the real generated route table against every Express route,
   **and imports the built function**. Routing correctly to a function that cannot start

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { CompletenessPanel } from '../components/CompletenessPanel';
 import { CustomFieldsPanel } from '../components/CustomFieldsPanel';
 import { ProjectEditPanel } from '../components/ProjectEditPanel';
 import { ImpactStageCard as StageCard } from '../components/ImpactStageCard';
@@ -7,6 +8,8 @@ import { ImpactPanel } from '../components/ImpactPanel';
 import { ReachPanel, ReachVsImpactTip } from '../components/ReachPanel';
 import { InfoTip } from '../components/Tooltip';
 import { barWidth, formatCount, percentLabel, utilisedCaption } from '../analytics/metrics';
+import { isSroiEstimate, projectionFor, sroiForProject } from '../analytics/sroi';
+import type { SroiResult } from '../analytics/sroi';
 import { exportProjectReport } from '../reportExport';
 import { buildProgrammeSpec } from '../report/buildSpec';
 import { downloadDesignedReport, generatedOnLabel, slugForFile } from '../report/download';
@@ -20,6 +23,63 @@ const FORMATS: { key: 'pdf' | 'powerpoint' | 'excel' | 'word'; label: string }[]
   { key: 'excel', label: 'Excel' },
   { key: 'word', label: 'Word' },
 ];
+
+/**
+ * The whole SROI working, in the tooltip on the card.
+ *
+ * The ratio is an estimate built on an assumption nobody has validated, so the only
+ * responsible way to show it is to show what it was built from: the proxy, where the
+ * proxy came from, each deduction, and the arithmetic as a sentence. A reader who
+ * disagrees should be able to say which number they disagree with.
+ */
+function SroiTip({ estimate, confirmed }: { estimate: SroiResult; confirmed: string }) {
+  if (confirmed) {
+    return (
+      <InfoTip label="How this SROI was arrived at" width={320}>
+        <div>Confirmed figure, recorded against this project. It replaces the system’s own estimate.</div>
+      </InfoTip>
+    );
+  }
+  if (!isSroiEstimate(estimate)) {
+    return (
+      <InfoTip label="Why there is no SROI" width={320}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div>Social value created ÷ amount invested. It needs three things: what was spent, how many people were served, and a value for a year of the outcome.</div>
+          <div>This project has {estimate.missing}.</div>
+        </div>
+      </InfoTip>
+    );
+  }
+  const pct = (n: number) => `${Math.round(n * 100)}%`;
+  return (
+    <InfoTip label="How this SROI was calculated" width={360}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
+        <div>
+          <strong>Method.</strong> Social Value International’s: value the outcome with a financial proxy, deduct what would
+          have happened anyway and what belongs to others, decay it each year, and discount future years to today’s money.
+          Divide by what was spent.
+        </div>
+        <div>
+          <strong>Proxy.</strong> ₦{estimate.proxy.annualValueNgn.toLocaleString('en-NG')} a year per person — {estimate.proxy.basis.toLowerCase()},
+          counted for {estimate.proxy.durationYears} year{estimate.proxy.durationYears === 1 ? '' : 's'}.
+        </div>
+        <div>
+          <strong>Deductions.</strong> {pct(estimate.assumptions.deadweight)} deadweight, {pct(estimate.assumptions.attribution)} attribution,
+          {' '}{pct(estimate.assumptions.dropOff)} drop-off a year, discounted at {(estimate.assumptions.discountRate * 100).toFixed(1)}%.
+        </div>
+        <div>
+          <strong>Working.</strong> {estimate.calculation} Present value ₦{Math.round(estimate.presentValueNgn).toLocaleString('en-NG')}.
+        </div>
+        <div>
+          <strong>Range.</strong> ₦{estimate.low.toFixed(2)}–₦{estimate.high.toFixed(2)} if the proxy is out by
+          {' '}{pct(estimate.assumptions.proxyUncertainty)} either way.
+        </div>
+        <div style={{ color: '#8A5A0B' }}>⚠ {estimate.caveat}</div>
+        <div style={{ color: 'var(--muted)' }}>Source of the proxy: {estimate.proxy.source}</div>
+      </div>
+    </InfoTip>
+  );
+}
 
 /**
  * A summary figure, shown as the silence it is when nothing was recorded.
@@ -92,6 +152,10 @@ export function ProjectDetail({
   const charted = (impact?.baseline ?? []).some((b) => b.pct > 0);
   const manager = (impact?.contactPerson ?? '').trim();
   const communities = (impact?.communitiesImpacted ?? []).join(' · ').trim();
+  /** Calculated here, never stored: a stored ratio would survive a change of method. */
+  const sroi = sroiForProject(project, impact);
+  /** A ratio Seplat's M&E function has confirmed takes precedence over the estimate. */
+  const confirmedSroi = (impact?.sroi ?? '').trim();
 
   const handleFormat = async (format: (typeof FORMATS)[number]['key']) => {
     setFormatOpen(false);
@@ -211,21 +275,30 @@ export function ProjectDetail({
         </div>
         <div style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: 16, padding: '20px 22px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-            Est. SROI
-            <InfoTip label="How SROI is calculated" width={300}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <div>Social value created ÷ amount invested. A financial proxy is assigned to this project's outcome, then adjusted for deadweight, attribution and drop-off.</div>
-                <div style={{ color: '#8A5A0B' }}>⚠ Phase 1 illustrative placeholder — the financial proxy for this outcome hasn't been validated by Seplat's M&amp;E team yet.</div>
-              </div>
-            </InfoTip>
+            {confirmedSroi ? 'SROI' : 'Est. SROI'}
+            <SroiTip estimate={sroi} confirmed={confirmedSroi} />
           </div>
-          <Figure value={impact?.sroi} fallback="Not calculated — needs a validated financial proxy for this outcome" />
+          {confirmedSroi ? (
+            <Figure value={confirmedSroi} fallback="" />
+          ) : isSroiEstimate(sroi) ? (
+            <>
+              <div style={{ fontSize: 26, fontWeight: 800, color: 'var(--navy)', lineHeight: 1.2 }}>{sroi.display}</div>
+              <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>
+                of social value · range ₦{sroi.low.toFixed(2)}–₦{sroi.high.toFixed(2)}
+              </div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#8A5A0B', marginTop: 6, letterSpacing: '0.04em' }}>ILLUSTRATIVE</div>
+            </>
+          ) : (
+            <Figure value="" fallback={`Not calculated — ${sroi?.ratio === null ? sroi.missing : 'nothing recorded to calculate from'}`} />
+          )}
         </div>
         <div style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: 16, padding: '20px 22px' }}>
           <div style={{ fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Cost per outcome</div>
           <Figure value={impact?.costPerOutcome} fallback="Not calculated — needs recorded spend and a count of people served" size={18} />
         </div>
       </div>
+
+      <CompletenessPanel project={project} impact={impact} />
 
       {impact ? (
         <>
@@ -242,7 +315,7 @@ export function ProjectDetail({
 
           <ReachPanel reach={impact.reach} />
 
-          <ImpactPanel impact={impact} />
+          <ImpactPanel impact={impact} projection={isSroiEstimate(sroi) ? projectionFor(sroi) : undefined} />
 
           <CustomFieldsPanel
             projectCode={project.code}
