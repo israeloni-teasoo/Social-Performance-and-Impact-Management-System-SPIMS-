@@ -16,8 +16,8 @@ module.exports = {
     subtitle: 'Social Performance & Impact Management System',
     client: 'Prepared for Seplat Energy Plc',
     author: 'Teasoo Consulting',
-    version: '2.1',
-    date: '13 October 2026',
+    version: '2.2',
+    date: '9 November 2026',
     commit: '3e047a6',
   },
 
@@ -160,6 +160,8 @@ module.exports = {
             'Account administration: an account can be created, given a role, deactivated and reactivated. A deactivated account is refused at sign-in and its existing session stops working on the next request.',
             'The system refuses to deactivate your own account, to change your own role away from Executive, or to remove the last active Executive — the three changes that would lock everyone out.',
             'A signed-in session makes no requests to any external service.',
+            'Sign-in is rate limited. Repeated failures lock the account briefly and the calling address for longer, counted in the database so the limit holds across serverless instances, and applied before the password is checked.',
+            'The demo accounts and their passwords appear only in the demonstration build. A deployment connected to a database shows a plain sign-in form.',
           ],
         },
         {

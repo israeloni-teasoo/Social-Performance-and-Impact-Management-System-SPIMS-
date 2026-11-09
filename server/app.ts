@@ -41,6 +41,22 @@ import { guard } from './lib/guard.js';
 import { requireUser } from './lib/requireAuth.js';
 import { clearSessionCookie, getSessionUserId, setSessionCookie } from './lib/session.js';
 
+/**
+ * The caller's address, for the sign-in throttle.
+ *
+ * `req.ip` would need `trust proxy`, and setting that makes Express believe whatever
+ * `X-Forwarded-For` says, which a caller can set themselves. On Vercel the platform
+ * appends the real address last, so the last entry is the one that cannot be spoofed;
+ * behind the supported nginx config the same holds. A missing address is not fatal —
+ * the per-account counter still applies.
+ */
+function clientIpOf(req: Request): string | null {
+  const header = req.headers['x-forwarded-for'];
+  const raw = Array.isArray(header) ? header.join(',') : header;
+  const last = raw?.split(',').map((p) => p.trim()).filter(Boolean).pop();
+  return last ?? req.socket?.remoteAddress ?? null;
+}
+
 export const app = express();
 app.use(express.json({ limit: '5mb' })); // CSV text rides along in the JSON body for bulk uploads
 
@@ -115,7 +131,7 @@ async function currentUser(req: Request) {
 
 // --- Auth ---
 post('/api/auth/login', async (req, res) => {
-  const result = await loginHandler(req.body ?? {});
+  const result = await loginHandler(req.body ?? {}, clientIpOf(req));
   if (result.status === 200 && result.body.token) setSessionCookie(res, result.body.token);
   const { token: _token, ...body } = result.body;
   res.status(result.status).json(body);

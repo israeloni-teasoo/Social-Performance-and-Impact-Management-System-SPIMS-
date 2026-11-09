@@ -150,7 +150,8 @@ figure moves with the data, and the view file holds none of its own) and
 `npm run test:validator`. `npm run smoke:upload` needs a scratch
 `DATABASE_URL` and drives both project uploads, then reads the stored records back — the
 only way to tell a write from a well-worded message, which is the failure it was written
-for. `npm run smoke:api` drives the
+for. `npm run smoke:signin` makes real sign-in attempts against a scratch database and checks the
+sixth is refused. `npm run smoke:api` drives the
 catch-all against a real database when the deployment shape itself is in question, and
 `npm run smoke:alerts` drives collection through to alert delivery against a local feed
 and a local webhook — the only way to exercise that path without real outbound access,
@@ -267,6 +268,27 @@ platforms need a paid provider and are not built.
   recorded on the channel and shown on screen instead.
 - The queue polls every 45s while it is open and visible, pausing on a hidden tab. That
   interval is a cost decision as much as a freshness one on a per-invocation platform.
+
+## Authentication
+
+- **The demo-account panel renders only when `demoMode` is true.** It lists four invented
+  Seplat staff, their `@seplat.com` addresses and their passwords in plain text, and
+  `prisma/seed.ts` creates those same four accounts — in a public repository. It used to
+  render unconditionally, which published working credentials on the sign-in page of any
+  live deployment. One flag separates a prototype's convenience from that, so it is
+  checked in `Login.tsx` and nowhere else relies on it being handled downstream.
+- **Never run `npm run prisma:seed` against a deployment holding real data.** The upsert
+  resets those four passwords even if somebody has changed them.
+- **The sign-in throttle lives in the database, not in memory.** Serverless requests land
+  in different instances, so an in-process counter resets about as fast as an attacker can
+  trigger it. `server/lib/signInThrottle.ts` counts the address being tried and the
+  address trying, with a short lock on the account and a long one on the caller — so a
+  malicious lockout of a colleague costs five minutes while an attacker is stopped for
+  fifteen. It is checked *before* `comparePassword`, because bcrypt is deliberately slow
+  and that makes sign-in the most expensive route to call repeatedly.
+  `npm run smoke:signin` drives the real attempts against a scratch database.
+- **`OrgSettings.dataStatusNote` is printed on every exported report cover**, and nowhere
+  else — not on the sign-in screen, whatever older comments said.
 
 ## Never commit
 

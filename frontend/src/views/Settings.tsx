@@ -80,7 +80,9 @@ function OrganisationSection({
           disabled={!canEdit}
         />
         <span style={{ fontSize: 11.5, color: 'var(--muted)' }}>
-          Shown wherever figures are presented. Change it once this deployment holds verified data rather than samples.
+          Printed on the cover of every report exported from SPIMS, so a document states what its figures are. It is not
+          shown on the sign-in screen. Change it once this deployment holds verified programme data rather than samples —
+          a report that carries the wrong one of those two claims is the problem this field exists to prevent.
         </span>
       </div>
 

@@ -295,8 +295,8 @@ model OrgSettings {
   financialYear  String   @default("FY 2026")
   currencyLabel  String   @default("\u20a6 Naira")
   targetYear     Int      @default(2030)
-  /// Shown on the sign-in screen and in exports, so a deployment can state whether it
-  /// holds live data or sample data.
+  /// Printed on the cover of every exported report, so a document states whether the
+  /// figures behind it are live or illustrative. It is not shown on the sign-in screen.
   dataStatusNote String   @default("Illustrative data \u2014 replace with verified Seplat figures before external reporting.")
   /// Who this installation is watching for, comma or newline separated.
   ///
@@ -306,6 +306,22 @@ model OrgSettings {
   /// own — GDELT, Google Alerts — are not filtered again.
   mentionTerms   String   @default("Seplat, Seplat Energy")
   updatedAt      DateTime @updatedAt
+}
+
+/// Failed sign-in attempts, so a password cannot be guessed at machine speed.
+///
+/// In a database rather than in memory because the API runs as serverless functions:
+/// consecutive requests land in different instances, so an in-process counter would be
+/// reset by the platform roughly as fast as an attacker could trigger it.
+model SignInAttempt {
+  /// What is being counted: "email:someone@example.com" or "ip:203.0.113.4".
+  key         String    @id
+  failures    Int       @default(0)
+  /// When the current run of failures began. The run is forgotten after the window.
+  firstFailAt DateTime  @default(now())
+  /// Set once the threshold is passed. Null means not locked.
+  lockedUntil DateTime?
+  updatedAt   DateTime  @updatedAt
 }
 
 /// A place SPIMS looks for mentions of Seplat and its programmes.

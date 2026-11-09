@@ -2,7 +2,23 @@ import { useRef, useState } from 'react';
 import { DEMO_ACCOUNTS } from '../data/accounts';
 import { input, primaryBtn } from '../ui';
 
-export function Login({ onLogin }: { onLogin: (email: string, password: string) => Promise<boolean> }) {
+/**
+ * The sign-in screen.
+ *
+ * The demo-account panel is shown **only** when there is no API behind this build. It
+ * used to render unconditionally, which put four invented Seplat staff, their
+ * @seplat.com addresses and their passwords in plain text on the sign-in page of a live
+ * deployment — and those are the same four accounts `prisma/seed.ts` creates, in a public
+ * repository. One flag is all that separates a prototype's convenience from published
+ * credentials, so it is checked here rather than relied upon anywhere downstream.
+ */
+export function Login({
+  onLogin,
+  demoMode,
+}: {
+  onLogin: (email: string, password: string) => Promise<{ ok: boolean; error?: string }>;
+  demoMode: boolean;
+}) {
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
@@ -12,10 +28,16 @@ export function Login({ onLogin }: { onLogin: (email: string, password: string) 
     const e = email ?? emailRef.current?.value ?? '';
     const p = password ?? passwordRef.current?.value ?? '';
     setSubmitting(true);
-    const ok = await onLogin(e, p);
+    const result = await onLogin(e, p);
     setSubmitting(false);
-    if (!ok) {
-      setError('Email or password not recognised. Try one of the demo accounts below.');
+    if (!result.ok) {
+      // The server's own words when it has them: being locked out after too many
+      // attempts is a different problem from a wrong password, and a person who is told
+      // the wrong one of the two keeps typing.
+      setError(
+        result.error ??
+          (demoMode ? 'Email or password not recognised. Try one of the demo accounts below.' : 'Email or password not recognised.'),
+      );
     }
   };
 
@@ -38,7 +60,7 @@ export function Login({ onLogin }: { onLogin: (email: string, password: string) 
         padding: '32px 20px',
       }}
     >
-      <div style={{ width: '100%', maxWidth: 920, display: 'flex', gap: 28, flexWrap: 'wrap' }}>
+      <div style={{ width: '100%', maxWidth: demoMode ? 920 : 440, display: 'flex', gap: 28, flexWrap: 'wrap' }}>
         <div style={{ flex: '1 1 340px', background: '#fff', border: '1px solid var(--line)', borderRadius: 18, padding: '38px 34px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28 }}>
             <div
@@ -94,34 +116,36 @@ export function Login({ onLogin }: { onLogin: (email: string, password: string) 
           </div>
         </div>
 
-        <div style={{ flex: '1 1 300px', background: 'var(--navy)', borderRadius: 18, padding: '30px 30px' }}>
-          <div style={{ fontSize: 15, fontWeight: 700, color: '#fff', marginBottom: 6 }}>Demo accounts</div>
-          <p style={{ fontSize: 12.5, color: '#9EA1C0', margin: '0 0 18px', lineHeight: 1.5 }}>
-            This is a prototype — pick any role below to sign in instantly and see what that persona sees.
-          </p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {DEMO_ACCOUNTS.map((a) => (
-              <button
-                key={a.email}
-                onClick={() => fillAndSubmit(a.email, a.password)}
-                style={{
-                  textAlign: 'left',
-                  fontFamily: 'inherit',
-                  background: 'rgba(255,255,255,0.06)',
-                  border: '1px solid rgba(255,255,255,0.12)',
-                  borderRadius: 12,
-                  padding: '12px 14px',
-                  cursor: 'pointer',
-                  color: '#fff',
-                }}
-              >
-                <div style={{ fontSize: 13.5, fontWeight: 700 }}>{a.name} · {a.roleLabel}</div>
-                <div style={{ fontSize: 11.5, color: '#B9CBEB', marginTop: 3, fontFamily: 'monospace' }}>{a.email}</div>
-                <div style={{ fontSize: 11.5, color: '#B9CBEB', fontFamily: 'monospace' }}>{a.password}</div>
-              </button>
-            ))}
+        {demoMode && (
+          <div style={{ flex: '1 1 300px', background: 'var(--navy)', borderRadius: 18, padding: '30px 30px' }}>
+            <div style={{ fontSize: 15, fontWeight: 700, color: '#fff', marginBottom: 6 }}>Demo accounts</div>
+            <p style={{ fontSize: 12.5, color: '#9EA1C0', margin: '0 0 18px', lineHeight: 1.5 }}>
+              This is a prototype — pick any role below to sign in instantly and see what that persona sees.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {DEMO_ACCOUNTS.map((a) => (
+                <button
+                  key={a.email}
+                  onClick={() => fillAndSubmit(a.email, a.password)}
+                  style={{
+                    textAlign: 'left',
+                    fontFamily: 'inherit',
+                    background: 'rgba(255,255,255,0.06)',
+                    border: '1px solid rgba(255,255,255,0.12)',
+                    borderRadius: 12,
+                    padding: '12px 14px',
+                    cursor: 'pointer',
+                    color: '#fff',
+                  }}
+                >
+                  <div style={{ fontSize: 13.5, fontWeight: 700 }}>{a.name} · {a.roleLabel}</div>
+                  <div style={{ fontSize: 11.5, color: '#B9CBEB', marginTop: 3, fontFamily: 'monospace' }}>{a.email}</div>
+                  <div style={{ fontSize: 11.5, color: '#B9CBEB', fontFamily: 'monospace' }}>{a.password}</div>
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

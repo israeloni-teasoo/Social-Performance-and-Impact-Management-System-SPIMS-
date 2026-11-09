@@ -61,7 +61,7 @@ export default function App() {
     return (
       <>
         {demoMode && <DemoBanner />}
-        <Login onLogin={login} />
+        <Login onLogin={login} demoMode={demoMode} />
       </>
     );
 

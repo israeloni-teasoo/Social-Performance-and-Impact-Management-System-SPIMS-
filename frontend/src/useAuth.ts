@@ -60,7 +60,14 @@ export function useAuth() {
     };
   }, []);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
+  /**
+   * Returns the server's own message on a failure rather than a bare false.
+   *
+   * Being locked out after too many attempts is a different problem from a wrong
+   * password, and a person told the wrong one of the two keeps typing — which, with a
+   * lockout in place, is exactly what keeps them locked out.
+   */
+  const login = async (email: string, password: string): Promise<{ ok: boolean; error?: string }> => {
     if (await isApiAvailable()) {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
@@ -68,16 +75,19 @@ export function useAuth() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
-      if (!res.ok) return false;
+      if (!res.ok) {
+        const data = (await res.json().catch(() => null)) as { error?: string } | null;
+        return { ok: false, error: data?.error };
+      }
       const data = await res.json();
       setUser(data.user);
-      return true;
+      return { ok: true };
     }
     const u = demoLogin(email, password);
-    if (!u) return false;
+    if (!u) return { ok: false };
     saveLocal(DEMO_KEY, u);
     setUser(u);
-    return true;
+    return { ok: true };
   };
 
   const logout = async () => {

@@ -18,6 +18,7 @@
     "check:esm": "node scripts/add-esm-extensions.mjs --check",
     "smoke:api": "tsx scripts/smoke-catchall.ts",
     "smoke:alerts": "tsx scripts/smoke-alerts.ts",
+    "smoke:signin": "tsx scripts/smoke-signin.ts",
     "smoke:templates": "tsx scripts/smoke-templates.ts",
     "smoke:upload": "tsx scripts/smoke-upload.ts",
     "test:portfolio": "tsx scripts/portfolio.test.ts",
